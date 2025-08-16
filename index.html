@@ -5,13 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b72ff">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <title>สรุปออเดอร์ • ผลไม้พร้อมทาน</title>
 <style>
-/* ---- CSS สไตล์แบบ App ---- */
-:root { --brand:#0b72ff; --brand-ink:#fff; --bg:#f6f7f9; --card:#fff; --ink:#101828; --muted:#667085; --line:#e6e8eb; --ok:#0a7f53; }
+:root{--brand:#0b72ff;--brand-ink:#fff;--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#667085;--line:#e6e8eb;--ok:#0a7f53;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
-.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:env(safe-area-inset-top) 16px 10px;border-bottom:1px solid var(--line);}
+html,body{height:100%;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
+.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:env(safe-area-inset-top)16px 10px;border-bottom:1px solid var(--line);}
 .appbar .title{font-size:18px;font-weight:800;}
 .container{padding:12px 16px 120px;max-width:920px;margin:0 auto;}
 .group{margin-bottom:12px;}
@@ -21,62 +23,222 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
 input,textarea{width:100%;border:1px solid #dfe3e6;border-radius:12px;padding:14px 12px;font-size:16px;outline:none;background:#fff;}
 textarea{min-height:88px;resize:vertical;}
+
 .product-list{display:grid;gap:10px;}
 .product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
 .product .name{font-weight:700;}
 .price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
-.step{display:inline-flex;gap:8px;align-items:center;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
-.step button{width:36px;height:36px;border-radius:999px;border:none;font-size:20px;cursor:pointer;background:#eef2f7;}
-.step input{width:56px;border:none;text-align:center;font-size:16px;padding:0;}
-.subtotal{color:#0a7;font-weight:800;min-width:96px;text-align:right;}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+
+.step{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
+.step button{
+  width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;
+  display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;
+}
+.step input{
+  width:56px;height:36px;border:none;text-align:center;font-size:16px;padding:0;
+  -webkit-appearance:none;appearance:none;
+}
+.subtotal{color:#0a7;font-weight:800;min-width:96px;text-align:right;font-variant-numeric:tabular-nums;}
+
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);
+  padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
 .pill{background:#f0f3f6;border:1px solid #e1e6ec;padding:6px 10px;border-radius:999px;font-weight:800;}
 .primary{background:var(--brand);color:var(--brand-ink);border:none;padding:14px 16px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer;min-width:160px;}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:40;}
 .toast.show{opacity:1;}
+
 .modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.3);}
 .modal.open{display:grid;place-items:end center;}
-.modal .panel{width:100%;max-width:920px;background:var(--card);border-radius:16px 16px 0 0;padding:16px;border-top:1px solid var(--line);}
+.modal .panel{
+  width:100%;max-width:920px;background:#fff;border-radius:16px 16px 0 0;
+  padding:16px 16px calc(28px + env(safe-area-inset-bottom)); /* เพิ่มที่ว่างด้านล่างตามที่ขอ */
+  border-top:1px solid #eaecef;
+}
 .panel h2{margin:0 0 8px;font-size:18px;}
 .panel textarea{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Consolas,"SF Mono",monospace;}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .btn{padding:12px 14px;border-radius:12px;border:1px solid #d9dee6;background:#eef2f7;font-weight:700;cursor:pointer;}
 .btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b;}
 </style>
 </head>
 <body>
   <div class="appbar"><div class="title">สรุปออเดอร์</div><div class="muted">Fruit Ready v7</div></div>
+
   <div class="container">
     <div class="group card">
       <div class="grid2">
         <div><div class="label">วันที่</div><input id="date" type="date"></div>
-        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text"></div>
-        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel"></div>
-        <div><div class="label">ค่าส่ง</div><input id="shipping" type="number" min="0" step="1" value="0"></div>
-        <div style="grid-column:1/-1"><div class="label">ที่อยู่</div><textarea id="address"></textarea></div>
+        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="เช่น คุณเอ"></div>
+        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="0812345678"></div>
+        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" value="0"></div>
+        <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือจุดนัดรับ"></textarea></div>
       </div>
     </div>
+
     <div class="group">
       <div class="label">ออเดอร์</div>
       <div class="product-list" id="products"></div>
     </div>
   </div>
+
   <div class="sheet">
     <div class="pill">รวมสุทธิ: <span id="grandTotal">฿0</span></div>
     <button id="buildBtn" class="primary">สรุปออเดอร์</button>
   </div>
+
   <div id="toast" class="toast">คัดลอกแล้ว</div>
-  <div id="modal" class="modal"><div class="panel"><h2>สรุปออเดอร์</h2><textarea id="output" readonly></textarea><div class="actions"><button class="btn" id="copyBtn">คัดลอก</button><button class="btn" id="closeBtn">ปิด</button><button class="btn danger" id="resetBtn">ล้างฟอร์ม</button></div></div></div>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="panel">
+      <h2>สรุปออเดอร์</h2>
+      <textarea id="output" readonly></textarea>
+      <div class="actions">
+        <button class="btn" id="copyBtn">คัดลอก</button>
+        <button class="btn" id="closeBtn">ปิด</button>
+        <button class="btn danger" id="resetBtn">ล้างฟอร์ม</button>
+      </div>
+    </div>
+  </div>
+
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
-  const PRODUCTS=[{name:'ฝรั่งเล็ก',price:39},{name:'ฝรั่งใหญ่',price:69},{name:'กระท้อนทรงเครื่อง',price:69},{name:'กระท้อนน้ำปลาหวาน',price:69},{name:'มะม่วงทรงเครื่อง',price:69},{name:'มะม่วงน้ำปลาหวาน',price:69},{name:'ส้มไต้หวันเล็ก',price:49},{name:'ส้มไต้หวันใหญ่',price:89},{name:'ส้มฮันนี่เล็ก',price:59},{name:'ส้มฮันนี่ใหญ่',price:99}];
-  const productsEl=document.getElementById('products');const grandEl=document.getElementById('grandTotal');const shippingEl=document.getElementById('shipping');const toast=document.getElementById('toast');const modal=document.getElementById('modal');const output=document.getElementById('output');
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+
+  const PRODUCTS=[
+    {name:'ฝรั่งเล็ก',price:39},
+    {name:'ฝรั่งใหญ่',price:69},
+    {name:'กระท้อนทรงเครื่อง',price:69},
+    {name:'กระท้อนน้ำปลาหวาน',price:69},
+    {name:'มะม่วงทรงเครื่อง',price:69},
+    {name:'มะม่วงน้ำปลาหวาน',price:69},
+    {name:'ส้มไต้หวันเล็ก',price:49},
+    {name:'ส้มไต้หวันใหญ่',price:89},   // อัปเดตราคา
+    {name:'ส้มฮันนี่เล็ก',price:59},
+    {name:'ส้มฮันนี่ใหญ่',price:99},
+  ];
+
+  const productsEl=document.getElementById('products');
+  const shippingEl=document.getElementById('shipping');
+  const grandEl=document.getElementById('grandTotal');
+  const toast=document.getElementById('toast');
+  const modal=document.getElementById('modal');
+  const output=document.getElementById('output');
+
   function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
-  function recalc(){let sum=0;document.querySelectorAll('.product').forEach(r=>{let inp=r.querySelector('input');let sub=Number(inp.value||0)*Number(inp.dataset.price);r.querySelector('.subtotal').textContent=formatBaht(sub);sum+=sub;});grandEl.textContent=formatBaht(sum+Number(shippingEl.value||0));}
-  function render(){productsEl.innerHTML='';PRODUCTS.forEach(p=>{let row=document.createElement('div');row.className='product';row.innerHTML=`<div class="name">${p.name} <span class="price">฿${p.price}</span></div><div class="step"><button class="dec">−</button><input type="number" min="0" value="0" data-price="${p.price}" data-name="${p.name}"><button class="inc">+</button></div><div class="subtotal">฿0</div>`;let inp=row.querySelector('input');row.querySelector('.dec').onclick=()=>{inp.value=Math.max(0,inp.value-1);recalc();};row.querySelector('.inc').onclick=()=>{inp.value=Number(inp.value)+1;recalc();};inp.oninput=recalc;productsEl.appendChild(row);});}
-  render();recalc();shippingEl.oninput=recalc;
-  function build(){let date=document.getElementById('date').value;let name=document.getElementById('name').value;let phone=document.getElementById('phone').value;let addr=document.getElementById('address').value;let ship=Number(shippingEl.value||0);let lines=[];let total=0;document.querySelectorAll('#products input').forEach(inp=>{let q=Number(inp.value||0);if(q>0){let sub=q*Number(inp.dataset.price);total+=sub;lines.push(`${inp.dataset.name} (x${q}) - ฿${sub}`);}});if(!lines.length){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1300);return;}let all=total+ship;output.value=`วันที่ ${date}\nORDER ของคุณ ${name}\nเบอร์ติดต่อ ${phone}\n——————————\n${lines.join('\n')}\nค่าส่ง : ฿${ship}\n——————————\n*** รวมทั้งหมด ฿${all} ***\n——————————\n📍ส่งที่ : ${addr}`;modal.classList.add('open');}
-  document.getElementById('buildBtn').onclick=build;document.getElementById('closeBtn').onclick=()=>modal.classList.remove('open');document.getElementById('copyBtn').onclick=()=>{output.select();document.execCommand('copy');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1300);};document.getElementById('resetBtn').onclick=()=>{document.querySelectorAll('input,textarea').forEach(el=>el.value='');render();recalc();modal.classList.remove('open');};
+  function formatThaiDateDD_MMMM_BEEE(iso){
+    if(!iso) return '';
+    const d=new Date(iso+'T00:00:00');
+    const months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    const dd=String(d.getDate()).padStart(2,'0');
+    const mName=months[d.getMonth()];
+    const yyyyBE=d.getFullYear()+543;
+    return `${dd}/${mName}/${yyyyBE}`; // วัน/เดือนไทย/ปี พ.ศ.
+  }
+
+  function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
+
+  function recalc(){
+    let itemsTotal=0;
+    document.querySelectorAll('.product').forEach(row=>{
+      const inp=row.querySelector('input[type="number"]');
+      const qty=Number(inp.value)||0;
+      const price=Number(inp.dataset.price);
+      const sub=qty*price;
+      row.querySelector('.subtotal').textContent=formatBaht(sub);
+      itemsTotal+=sub;
+    });
+    const shipping=Math.max(0,Number(shippingEl.value)||0);
+    grandEl.textContent=formatBaht(itemsTotal+shipping);
+  }
+
+  function renderProducts(){
+    productsEl.innerHTML='';
+    PRODUCTS.forEach(p=>{
+      const row=document.createElement('div');
+      row.className='product';
+      row.innerHTML=`
+        <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
+        <div class="step">
+          <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
+          <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
+          <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
+        </div>
+        <div class="subtotal">฿0</div>`;
+      const dec=row.querySelector('.dec');
+      const inc=row.querySelector('.inc');
+      const inp=row.querySelector('input[type="number"]');
+      dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
+      inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
+      inp.addEventListener('input',recalc,{passive:true});
+      productsEl.appendChild(row);
+    });
+  }
+
+  function openModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
+  function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+
+  function buildSummary(){
+    const date=formatThaiDateDD_MMMM_BEEE(document.getElementById('date').value);
+    const name=(document.getElementById('name').value||'').trim();
+    const phone=(document.getElementById('phone').value||'').trim();
+    const shipping=Math.max(0,Number(shippingEl.value)||0);
+    const address=(document.getElementById('address').value||'').trim();
+
+    const lines=[]; let itemsTotal=0;
+    document.querySelectorAll('#products input[type="number"]').forEach(inp=>{
+      const qty=Number(inp.value)||0;
+      if(qty>0){
+        const nm=inp.dataset.name; const price=Number(inp.dataset.price);
+        const sub=price*qty; itemsTotal+=sub;
+        lines.push(`${nm} (จำนวน x${qty}) - ราคารวม ฿${sub.toLocaleString('th-TH')}`);
+      }
+    });
+    if(!lines.length){ showToast('กรุณาเลือกสินค้า'); return; }
+
+    const total=itemsTotal+shipping;
+    const hr='——————————';
+    const text=[
+      `วันที่ ${date || '-'}`,
+      `ORDER ของคุณ ${name || '-'}`,
+      `เบอร์ติดต่อ ${phone || '-'}`,
+      hr,
+      ...lines,
+      `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
+      hr,
+      `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
+      hr,
+      `📍ส่งที่ : ${address || '-'}`,
+    ].join('\n');
+
+    output.value=text;
+    openModal();
+  }
+
+  // Bind
+  renderProducts(); recalc();
+  shippingEl.addEventListener('input',recalc,{passive:true});
+  document.getElementById('buildBtn').addEventListener('click',buildSummary);
+  document.getElementById('closeBtn').addEventListener('click',closeModal);
+
+  // ปุ่มคัดลอก (รองรับ iPhone/HTTPS)
+  document.getElementById('copyBtn').addEventListener('click', async ()=>{
+    const text=output.value||'';
+    if(!text.trim()) return;
+    try{ await navigator.clipboard.writeText(text); }
+    catch(_){ output.select(); document.execCommand('copy'); window.getSelection().removeAllRanges(); }
+    showToast('คัดลอกแล้ว');
+  });
+
+  // ล้างฟอร์ม
+  document.getElementById('resetBtn').addEventListener('click',()=>{
+    document.querySelectorAll('input[type="text"],input[type="tel"],input[type="date"]').forEach(el=>el.value='');
+    document.getElementById('address').value='';
+    document.querySelectorAll('#products input[type="number"]').forEach(inp=>inp.value=0);
+    shippingEl.value=0; recalc(); closeModal(); showToast('ล้างฟอร์มแล้ว');
+  });
+
+  // ปิดโมดัลเมื่อแตะนอกกระดาน
+  modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
 });
 </script>
 </body>
