@@ -2,649 +2,82 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<title>สรุปออเดอร์ — ผลไม้พร้อมทาน (v10 Mobile)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b72ff">
+<link rel="manifest" href="manifest.webmanifest">
+<title>สรุปออเดอร์ • ผลไม้พร้อมทาน</title>
 <style>
-  :root { 
-    --gap: 12px; 
-    --radius: 12px; 
-    --touch-target: 44px;
-  }
-  * { 
-    box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent;
-  }
-  body { 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans Thai", "Noto Sans", sans-serif; 
-    margin: 0; 
-    background: #f6f7f9; 
-    color: #15202b; 
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-text-size-adjust: 100%;
-  }
-  .wrap { 
-    max-width: 900px; 
-    margin: 16px auto 80px; 
-    padding: 0 12px; 
-  }
-  header { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    margin-bottom: 16px; 
-    flex-wrap: wrap;
-  }
-  h1 { 
-    font-size: 18px; 
-    margin: 0; 
-    line-height: 1.3;
-  }
-  .card { 
-    background: #fff; 
-    border: 1px solid #e6e8eb; 
-    border-radius: var(--radius); 
-    padding: 16px; 
-    box-shadow: 0 1px 2px rgba(0,0,0,.03); 
-  }
-  label { 
-    font-weight: 600; 
-    display: block; 
-    margin-bottom: 8px; 
-    font-size: 16px;
-  }
-  input[type="text"], input[type="date"], input[type="tel"], input[type="number"], textarea {
-    width: 100%; 
-    padding: 14px 16px; 
-    border: 2px solid #dfe3e6; 
-    border-radius: 12px; 
-    background: #fff; 
-    outline: none; 
-    font-size: 16px;
-    min-height: var(--touch-target);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  input:focus, textarea:focus {
-    border-color: #0b72ff;
-    box-shadow: 0 0 0 3px rgba(11, 114, 255, 0.1);
-  }
-  textarea { 
-    min-height: 100px; 
-    resize: vertical; 
-    font-family: inherit;
-  }
-  .items { 
-    border: 2px solid #eef1f4; 
-    border-radius: 12px; 
-    overflow: hidden; 
-    margin: 12px 0;
-  }
-  .item { 
-    display: grid; 
-    grid-template-columns: 1fr auto; 
-    gap: 12px; 
-    align-items: center; 
-    padding: 16px; 
-    border-top: 1px solid #eef1f4; 
-  }
-  .item:first-child { border-top: none; }
-  .item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .name { 
-    font-weight: 600; 
-    font-size: 16px;
-    line-height: 1.3;
-  }
-  .price-display {
-    font-size: 14px;
-    color: #667085;
-  }
-  .item-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
-  }
-  .controls { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-  }
-  .controls button { 
-    width: var(--touch-target); 
-    height: var(--touch-target); 
-    border: 2px solid #dfe3e6; 
-    border-radius: 12px; 
-    background: #fff; 
-    cursor: pointer; 
-    font-size: 20px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  .controls button:active {
-    background: #f0f3f6;
-    transform: scale(0.95);
-  }
-  .controls input { 
-    width: 80px; 
-    text-align: center; 
-    padding: 12px 8px;
-    border: 2px solid #dfe3e6;
-    border-radius: 8px;
-    font-size: 16px;
-  }
-  .subtotal { 
-    font-variant-numeric: tabular-nums; 
-    font-weight: 700; 
-    color: #0a7; 
-    text-align: right;
-    font-size: 16px;
-  }
-  .actions { 
-    display: flex; 
-    flex-direction: column;
-    gap: 12px; 
-    margin-top: 16px; 
-  }
-  button.primary { 
-    background: #0b72ff; 
-    color: #fff; 
-    border: 2px solid #0654c9; 
-    padding: 16px 20px; 
-    border-radius: 12px; 
-    font-weight: 700; 
-    cursor: pointer; 
-    font-size: 16px;
-    min-height: var(--touch-target);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  button.primary:active {
-    background: #0654c9;
-    transform: scale(0.98);
-  }
-  button.secondary { 
-    background: #eef2f7; 
-    color: #223; 
-    border: 2px solid #d9dee6; 
-    padding: 16px 20px; 
-    border-radius: 12px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    font-size: 16px;
-    min-height: var(--touch-target);
-    -webkit-appearance: none;
-    appearance: none;
-  }
-  button.secondary:active {
-    background: #d9dee6;
-    transform: scale(0.98);
-  }
-  .summary { 
-    margin-top: 20px; 
-  }
-  .summary textarea { 
-    width: 100%; 
-    min-height: 250px; 
-    font-family: ui-monospace, Menlo, Consolas, "SF Mono", monospace; 
-    font-size: 14px;
-  }
-  .muted { 
-    color: #667085; 
-    font-size: 14px; 
-  }
-  .error { 
-    color: #b00020; 
-    font-size: 14px; 
-    margin-top: 8px; 
-    padding: 12px;
-    background: #ffeaea;
-    border-radius: 8px;
-    border: 1px solid #ffcdd2;
-  }
-  .totals { 
-    display: flex; 
-    flex-direction: column;
-    gap: 12px; 
-    margin: 16px 0; 
-  }
-  .totals .pill { 
-    background: #f0f3f6; 
-    border: 1px solid #e1e6ec; 
-    padding: 12px 16px; 
-    border-radius: 12px; 
-    font-weight: 700; 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .totals .num { 
-    font-variant-numeric: tabular-nums; 
-  }
-  .shipping-input {
-    border: 2px solid #dfe3e6 !important;
-    background: #fff !important;
-    padding: 8px 12px !important;
-    width: auto !important;
-    text-align: right;
-    font-weight: 700;
-    font-size: 16px;
-    min-height: auto !important;
-    border-radius: 8px !important;
-  }
-  .shipping-input:focus {
-    outline: none;
-    border-color: #0b72ff !important;
-    box-shadow: 0 0 0 3px rgba(11, 114, 255, 0.1);
-  }
-  .form-group {
-    margin-bottom: 20px;
-  }
-  
-  /* iOS specific fixes */
-  @supports (-webkit-touch-callout: none) {
-    input[type="date"] {
-      -webkit-appearance: none;
-      padding: 14px 16px;
-    }
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 480px) {
-    .wrap {
-      padding: 0 8px;
-      margin: 12px auto 60px;
-    }
-    .card {
-      padding: 12px;
-    }
-    h1 {
-      font-size: 16px;
-    }
-    .item {
-      padding: 12px;
-      gap: 8px;
-    }
-    .controls {
-      gap: 4px;
-    }
-    .controls input {
-      width: 70px;
-    }
-    .controls button {
-      width: 40px;
-      height: 40px;
-    }
-  }
+/* ---- CSS สไตล์แบบ App ---- */
+:root { --brand:#0b72ff; --brand-ink:#fff; --bg:#f6f7f9; --card:#fff; --ink:#101828; --muted:#667085; --line:#e6e8eb; --ok:#0a7f53; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
+.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:env(safe-area-inset-top) 16px 10px;border-bottom:1px solid var(--line);}
+.appbar .title{font-size:18px;font-weight:800;}
+.container{padding:12px 16px 120px;max-width:920px;margin:0 auto;}
+.group{margin-bottom:12px;}
+.label{font-size:13px;color:var(--muted);margin:8px 0 6px;font-weight:700;text-transform:uppercase;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+input,textarea{width:100%;border:1px solid #dfe3e6;border-radius:12px;padding:14px 12px;font-size:16px;outline:none;background:#fff;}
+textarea{min-height:88px;resize:vertical;}
+.product-list{display:grid;gap:10px;}
+.product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
+.product .name{font-weight:700;}
+.price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
+.step{display:inline-flex;gap:8px;align-items:center;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
+.step button{width:36px;height:36px;border-radius:999px;border:none;font-size:20px;cursor:pointer;background:#eef2f7;}
+.step input{width:56px;border:none;text-align:center;font-size:16px;padding:0;}
+.subtotal{color:#0a7;font-weight:800;min-width:96px;text-align:right;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+.pill{background:#f0f3f6;border:1px solid #e1e6ec;padding:6px 10px;border-radius:999px;font-weight:800;}
+.primary{background:var(--brand);color:var(--brand-ink);border:none;padding:14px 16px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer;min-width:160px;}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:40;}
+.toast.show{opacity:1;}
+.modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.3);}
+.modal.open{display:grid;place-items:end center;}
+.modal .panel{width:100%;max-width:920px;background:var(--card);border-radius:16px 16px 0 0;padding:16px;border-top:1px solid var(--line);}
+.panel h2{margin:0 0 8px;font-size:18px;}
+.panel textarea{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Consolas,"SF Mono",monospace;}
+.btn{padding:12px 14px;border-radius:12px;border:1px solid #d9dee6;background:#eef2f7;font-weight:700;cursor:pointer;}
+.btn.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b;}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>สรุปออเดอร์ — ผลไม้พร้อมทาน</h1>
-        <div class="muted">กรอกข้อมูล ติ๊กจำนวน แล้วดูยอดแบบเรียลไทม์</div>
-      </div>
-      <div class="muted">v5 Mobile</div>
-    </header>
-
-    <div class="card">
-      <div class="form-group">
-        <label for="date">วันที่</label>
-        <input id="date" type="date">
-      </div>
-
-      <div class="form-group">
-        <label for="name">ชื่อลูกค้า</label>
-        <input id="name" type="text" placeholder="เช่น คุณเอ">
-      </div>
-
-      <div class="form-group">
-        <label for="phone">เบอร์ติดต่อ</label>
-        <input id="phone" type="tel" inputmode="numeric" placeholder="เช่น 0812345678">
-      </div>
-
-      <label>ออเดอร์</label>
-      <div class="items" id="items">
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ฝรั่งเล็ก</div>
-            <div class="price-display">฿39 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ฝรั่งเล็ก" data-price="39">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ฝรั่งใหญ่</div>
-            <div class="price-display">฿69 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ฝรั่งใหญ่" data-price="69">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">กระท้อนทรงเครื่อง</div>
-            <div class="price-display">฿69 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="กระท้อนทรงเครื่อง" data-price="69">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">กระท้อนน้ำปลาหวาน</div>
-            <div class="price-display">฿69 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="กระท้อนน้ำปลาหวาน" data-price="69">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">มะม่วงทรงเครื่อง</div>
-            <div class="price-display">฿69 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="มะม่วงทรงเครื่อง" data-price="69">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">มะม่วงน้ำปลาหวาน</div>
-            <div class="price-display">฿69 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="มะม่วงน้ำปลาหวาน" data-price="69">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ส้มไต้หวันเล็ก</div>
-            <div class="price-display">฿49 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ส้มไต้หวันเล็ก" data-price="49">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ส้มไต้หวันใหญ่</div>
-            <div class="price-display">฿89 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ส้มไต้หวันใหญ่" data-price="89">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ส้มฮันนี่เล็ก</div>
-            <div class="price-display">฿59 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ส้มฮันนี่เล็ก" data-price="59">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-        <div class="item">
-          <div class="item-info">
-            <div class="name">ส้มฮันนี่ใหญ่</div>
-            <div class="price-display">฿99 ต่อหน่วย</div>
-          </div>
-          <div class="item-right">
-            <div class="controls">
-              <button class="dec">−</button>
-              <input type="number" min="0" step="1" value="0" data-name="ส้มฮันนี่ใหญ่" data-price="99">
-              <button class="inc">+</button>
-            </div>
-            <div class="subtotal" data-subtotal>฿0</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="totals">
-        <div class="pill">
-          <span>รวมค่าสินค้า:</span>
-          <span id="itemsTotal" class="num">฿0</span>
-        </div>
-        <div class="pill">
-          <span>ค่าส่ง:</span>
-          <input id="shipping" type="number" min="0" step="1" value="0" class="shipping-input num">
-        </div>
-        <div class="pill">
-          <span>รวมสุทธิ:</span>
-          <span id="grandTotal" class="num">฿0</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="address">สถานที่จัดส่ง</label>
-        <textarea id="address" placeholder="ที่อยู่ หรือจุดนัดรับ"></textarea>
-      </div>
-
-      <div class="actions">
-        <button class="primary" id="btnBuild" type="button">สรุปออเดอร์</button>
-        <button class="secondary" id="btnCopy" type="button">คัดลอกสรุป</button>
-      </div>
-
-      <div id="err" class="error" style="display:none;"></div>
-
-      <div class="summary">
-        <label for="out">ผลลัพธ์สรุปออเดอร์</label>
-        <textarea id="out" readonly placeholder="ผลลัพธ์จะปรากฏที่นี่"></textarea>
+  <div class="appbar"><div class="title">สรุปออเดอร์</div><div class="muted">Fruit Ready v7</div></div>
+  <div class="container">
+    <div class="group card">
+      <div class="grid2">
+        <div><div class="label">วันที่</div><input id="date" type="date"></div>
+        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text"></div>
+        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel"></div>
+        <div><div class="label">ค่าส่ง</div><input id="shipping" type="number" min="0" step="1" value="0"></div>
+        <div style="grid-column:1/-1"><div class="label">ที่อยู่</div><textarea id="address"></textarea></div>
       </div>
     </div>
+    <div class="group">
+      <div class="label">ออเดอร์</div>
+      <div class="product-list" id="products"></div>
+    </div>
   </div>
-
+  <div class="sheet">
+    <div class="pill">รวมสุทธิ: <span id="grandTotal">฿0</span></div>
+    <button id="buildBtn" class="primary">สรุปออเดอร์</button>
+  </div>
+  <div id="toast" class="toast">คัดลอกแล้ว</div>
+  <div id="modal" class="modal"><div class="panel"><h2>สรุปออเดอร์</h2><textarea id="output" readonly></textarea><div class="actions"><button class="btn" id="copyBtn">คัดลอก</button><button class="btn" id="closeBtn">ปิด</button><button class="btn danger" id="resetBtn">ล้างฟอร์ม</button></div></div></div>
 <script>
-(function(){
-  function $(sel){ return document.querySelector(sel); }
-  function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-  function formatBaht(n){ try { return '฿'+Number(n).toLocaleString('th-TH'); } catch { return '฿'+n; } }
-  function ddmmyyyy(dateStr){
-    if(!dateStr) return '';
-    var d = new Date(dateStr + 'T00:00:00');
-    var dd = String(d.getDate()).padStart(2,'0');
-    var monthNames = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 
-                      'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-    var mm = monthNames[d.getMonth()];
-    var yyyy = d.getFullYear();
-    return dd + ' ' + mm + ' ' + yyyy;
-  }
-  function showError(msg){
-    var el = $('#err');
-    el.textContent = msg || '';
-    el.style.display = msg ? 'block' : 'none';
-  }
-  function recalcTotals(){
-    var itemsTotal = 0;
-    $all('#items .item').forEach(function(row){
-      var inp = row.querySelector('input[type="number"]');
-      var qty = Number(inp.value) || 0;
-      var price = Number(inp.getAttribute('data-price'));
-      var sub = qty * price;
-      row.querySelector('[data-subtotal]').textContent = formatBaht(sub);
-      itemsTotal += sub;
-    });
-    $('#itemsTotal').textContent = formatBaht(itemsTotal);
-    var shipping = Math.max(0, Number($('#shipping').value) || 0);
-    $('#grandTotal').textContent = formatBaht(itemsTotal + shipping);
-  }
-  function buildSummary(){
-    showError('');
-    var date = ddmmyyyy($('#date').value);
-    var name = ($('#name').value || '').trim();
-    var phone = ($('#phone').value || '').trim();
-    var shipping = Math.max(0, Number($('#shipping').value) || 0);
-    var address = ($('#address').value || '').trim();
-    var lines = [];
-    var itemsTotal = 0;
-    $all('#items .item').forEach(function(row){
-      var inp = row.querySelector('input[type="number"]');
-      var qty = Number(inp.value) || 0;
-      if(qty>0){
-        var nm = inp.getAttribute('data-name');
-        var pr = Number(inp.getAttribute('data-price'));
-        var sub = pr * qty;
-        itemsTotal += sub;
-        lines.push(nm + ' (จำนวน x' + qty + ') - ราคารวม ฿' + sub.toLocaleString('th-TH'));
-      }
-    });
-    if(lines.length === 0){
-      showError('กรุณาเลือกสินค้าอย่างน้อย 1 รายการ');
-      return;
-    }
-    var total = itemsTotal + shipping;
-    var hr = '——————————';
-    var out = [
-      'วันที่ ' + (date || '-'),
-      'ORDER ของคุณ ' + (name || '-'),
-      'เบอร์ติดต่อ ' + (phone || '-'),
-      hr
-    ].concat(lines).concat([
-      'ค่าส่ง : ฿' + shipping.toLocaleString('th-TH'),
-      hr,
-      '*** รวมทั้งหมด ฿' + total.toLocaleString('th-TH') + ' ***',
-      hr,
-      '📍ส่งที่ : ' + (address || '-')
-    ]).join('\n');
-    $('#out').value = out;
-    $('#out').scrollIntoView({behavior:'smooth', block:'center'});
-  }
-  function copySummary(){
-    var t = $('#out');
-    if(!t.value.trim()){ showError('ยังไม่มีสรุปให้คัดลอก'); return; }
-    t.select();
-    t.setSelectionRange(0, 99999);
-    try {
-      document.execCommand('copy');
-      alert('คัดลอกแล้ว');
-    } catch(e){
-      if(navigator.clipboard){ 
-        navigator.clipboard.writeText(t.value).then(function(){ 
-          alert('คัดลอกแล้ว'); 
-        }).catch(function(){
-          alert('ไม่สามารถคัดลอกได้ กรุณาเลือกและคัดลอกเอง');
-        });
-      } else {
-        alert('ไม่สามารถคัดลอกได้ กรุณาเลือกและคัดลอกเอง');
-      }
-    }
-    window.getSelection().removeAllRanges();
-  }
-
-  /**
-   * REVISED EVENT LISTENER LOGIC
-   * This function handles both touch and click events, preventing them from firing twice on a single tap.
-   */
-  function addTapListener(element, callback) {
-    let isProcessing = false;
-    const action = function(event) {
-      event.preventDefault(); // Prevents default behavior like zoom or navigation
-      event.stopPropagation(); // Stops the event from bubbling up
-      if (isProcessing) return;
-      isProcessing = true;
-      callback();
-      // Set a timeout to prevent the next event (e.g., the 'ghost click' after touchend) from firing
-      setTimeout(function() {
-        isProcessing = false;
-      }, 400); // 400ms is a safe delay to ignore the ghost click
-    };
-    element.addEventListener('touchend', action);
-    element.addEventListener('click', action);
-  }
-
-  // --- Setup Listeners for all buttons using the new robust function ---
-  $all('.item').forEach(function(row){
-    const dec = row.querySelector('.dec');
-    const inc = row.querySelector('.inc');
-    const inp = row.querySelector('input[type="number"]');
-    
-    addTapListener(dec, function() {
-      inp.value = Math.max(0, (Number(inp.value) || 0) - 1);
-      recalcTotals();
-    });
-
-    addTapListener(inc, function() {
-      inp.value = (Number(inp.value) || 0) + 1;
-      recalcTotals();
-    });
-    
-    inp.addEventListener('input', recalcTotals);
-    inp.addEventListener('change', recalcTotals);
-  });
-  
-  $('#shipping').addEventListener('input', recalcTotals);
-  $('#shipping').addEventListener('change', recalcTotals);
-  
-  addTapListener($('#btnBuild'), buildSummary);
-  addTapListener($('#btnCopy'), copySummary);
-  
-  // --- Initialization ---
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, '0');
-  var mm = String(today.getMonth() + 1).padStart(2, '0');
-  var yyyy = today.getFullYear();
-  $('#date').value = yyyy + '-' + mm + '-' + dd;
-  
-  recalcTotals();
-})();
+document.addEventListener('DOMContentLoaded',()=>{
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js');}
+  const PRODUCTS=[{name:'ฝรั่งเล็ก',price:39},{name:'ฝรั่งใหญ่',price:69},{name:'กระท้อนทรงเครื่อง',price:69},{name:'กระท้อนน้ำปลาหวาน',price:69},{name:'มะม่วงทรงเครื่อง',price:69},{name:'มะม่วงน้ำปลาหวาน',price:69},{name:'ส้มไต้หวันเล็ก',price:49},{name:'ส้มไต้หวันใหญ่',price:89},{name:'ส้มฮันนี่เล็ก',price:59},{name:'ส้มฮันนี่ใหญ่',price:99}];
+  const productsEl=document.getElementById('products');const grandEl=document.getElementById('grandTotal');const shippingEl=document.getElementById('shipping');const toast=document.getElementById('toast');const modal=document.getElementById('modal');const output=document.getElementById('output');
+  function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
+  function recalc(){let sum=0;document.querySelectorAll('.product').forEach(r=>{let inp=r.querySelector('input');let sub=Number(inp.value||0)*Number(inp.dataset.price);r.querySelector('.subtotal').textContent=formatBaht(sub);sum+=sub;});grandEl.textContent=formatBaht(sum+Number(shippingEl.value||0));}
+  function render(){productsEl.innerHTML='';PRODUCTS.forEach(p=>{let row=document.createElement('div');row.className='product';row.innerHTML=`<div class="name">${p.name} <span class="price">฿${p.price}</span></div><div class="step"><button class="dec">−</button><input type="number" min="0" value="0" data-price="${p.price}" data-name="${p.name}"><button class="inc">+</button></div><div class="subtotal">฿0</div>`;let inp=row.querySelector('input');row.querySelector('.dec').onclick=()=>{inp.value=Math.max(0,inp.value-1);recalc();};row.querySelector('.inc').onclick=()=>{inp.value=Number(inp.value)+1;recalc();};inp.oninput=recalc;productsEl.appendChild(row);});}
+  render();recalc();shippingEl.oninput=recalc;
+  function build(){let date=document.getElementById('date').value;let name=document.getElementById('name').value;let phone=document.getElementById('phone').value;let addr=document.getElementById('address').value;let ship=Number(shippingEl.value||0);let lines=[];let total=0;document.querySelectorAll('#products input').forEach(inp=>{let q=Number(inp.value||0);if(q>0){let sub=q*Number(inp.dataset.price);total+=sub;lines.push(`${inp.dataset.name} (x${q}) - ฿${sub}`);}});if(!lines.length){toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1300);return;}let all=total+ship;output.value=`วันที่ ${date}\nORDER ของคุณ ${name}\nเบอร์ติดต่อ ${phone}\n——————————\n${lines.join('\n')}\nค่าส่ง : ฿${ship}\n——————————\n*** รวมทั้งหมด ฿${all} ***\n——————————\n📍ส่งที่ : ${addr}`;modal.classList.add('open');}
+  document.getElementById('buildBtn').onclick=build;document.getElementById('closeBtn').onclick=()=>modal.classList.remove('open');document.getElementById('copyBtn').onclick=()=>{output.select();document.execCommand('copy');toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),1300);};document.getElementById('resetBtn').onclick=()=>{document.querySelectorAll('input,textarea').forEach(el=>el.value='');render();recalc();modal.classList.remove('open');};
+});
 </script>
 </body>
 </html>
