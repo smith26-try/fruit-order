@@ -13,7 +13,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
-.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:env(safe-area-inset-top)16px 10px;border-bottom:1px solid var(--line);}
+.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:env(safe-area-inset-top) 16px 10px;border-bottom:1px solid var(--line);}
 .appbar .title{font-size:18px;font-weight:800;}
 .container{padding:12px 16px 120px;max-width:920px;margin:0 auto;}
 .group{margin-bottom:12px;}
@@ -23,37 +23,22 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Bl
 @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
 input,textarea{width:100%;border:1px solid #dfe3e6;border-radius:12px;padding:14px 12px;font-size:16px;outline:none;background:#fff;}
 textarea{min-height:88px;resize:vertical;}
-
 .product-list{display:grid;gap:10px;}
 .product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
 .product .name{font-weight:700;}
 .price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
-
 .step{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
-.step button{
-  width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;
-  display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;
-}
-.step input{
-  width:56px;height:36px;border:none;text-align:center;font-size:16px;padding:0;
-  -webkit-appearance:none;appearance:none;
-}
+.step button{width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;}
+.step input{width:56px;height:36px;border:none;text-align:center;font-size:16px;padding:0;-webkit-appearance:none;appearance:none;}
 .subtotal{color:#0a7;font-weight:800;min-width:96px;text-align:right;font-variant-numeric:tabular-nums;}
-
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);
-  padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
 .pill{background:#f0f3f6;border:1px solid #e1e6ec;padding:6px 10px;border-radius:999px;font-weight:800;}
 .primary{background:var(--brand);color:var(--brand-ink);border:none;padding:14px 16px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer;min-width:160px;}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:40;}
 .toast.show{opacity:1;}
-
 .modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.3);}
 .modal.open{display:grid;place-items:end center;}
-.modal .panel{
-  width:100%;max-width:920px;background:#fff;border-radius:16px 16px 0 0;
-  padding:16px 16px calc(28px + env(safe-area-inset-bottom)); /* เพิ่มที่ว่างด้านล่างตามที่ขอ */
-  border-top:1px solid #eaecef;
-}
+.modal .panel{width:100%;max-width:920px;background:#fff;border-radius:16px 16px 0 0;padding:16px 16px calc(28px + env(safe-area-inset-bottom));border-top:1px solid #eaecef;}
 .panel h2{margin:0 0 8px;font-size:18px;}
 .panel textarea{width:100%;min-height:220px;font-family:ui-monospace,Menlo,Consolas,"SF Mono",monospace;}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
@@ -62,16 +47,16 @@ textarea{min-height:88px;resize:vertical;}
 </style>
 </head>
 <body>
-  <div class="appbar"><div class="title">สรุปออเดอร์</div><div class="muted">Fruit Ready v7</div></div>
+  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง</div><div class="muted">Fruit Ready v9</div></div>
 
   <div class="container">
     <div class="group card">
       <div class="grid2">
         <div><div class="label">วันที่</div><input id="date" type="date"></div>
-        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="เช่น คุณเอ"></div>
+        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="เช่น คุณ ทุง ทุง ทุง ซะฮูร์"></div>
         <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="0812345678"></div>
         <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" value="0"></div>
-        <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือจุดนัดรับ"></textarea></div>
+        <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea></div>
       </div>
     </div>
 
@@ -112,7 +97,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'มะม่วงทรงเครื่อง',price:69},
     {name:'มะม่วงน้ำปลาหวาน',price:69},
     {name:'ส้มไต้หวันเล็ก',price:49},
-    {name:'ส้มไต้หวันใหญ่',price:89},   // อัปเดตราคา
+    {name:'ส้มไต้หวันใหญ่',price:89},
     {name:'ส้มฮันนี่เล็ก',price:59},
     {name:'ส้มฮันนี่ใหญ่',price:99},
   ];
@@ -125,14 +110,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   const output=document.getElementById('output');
 
   function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
-  function formatThaiDateDD_MMMM_BEEE(iso){
+
+  // ➜ ฟังก์ชันฟอร์แมตวันที่แบบ: 17 สิงหาคม พ.ศ. 2568
+  function formatThaiDateLongBE(iso){
     if(!iso) return '';
     const d=new Date(iso+'T00:00:00');
     const months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-    const dd=String(d.getDate()).padStart(2,'0');
-    const mName=months[d.getMonth()];
-    const yyyyBE=d.getFullYear()+543;
-    return `${dd}/${mName}/${yyyyBE}`; // วัน/เดือนไทย/ปี พ.ศ.
+    const day=d.getDate();                  // ไม่เติมศูนย์นำหน้า
+    const monthName=months[d.getMonth()];   // ชื่อเดือนภาษาไทย
+    const yearBE=d.getFullYear()+543;       // แปลงเป็น พ.ศ.
+    return `${day} ${monthName} พ.ศ. ${yearBE}`;
   }
 
   function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
@@ -178,7 +165,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
 
   function buildSummary(){
-    const date=formatThaiDateDD_MMMM_BEEE(document.getElementById('date').value);
+    const date=formatThaiDateLongBE(document.getElementById('date').value); // ใช้รูปแบบที่ต้องการ
     const name=(document.getElementById('name').value||'').trim();
     const phone=(document.getElementById('phone').value||'').trim();
     const shipping=Math.max(0,Number(shippingEl.value)||0);
@@ -220,7 +207,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('buildBtn').addEventListener('click',buildSummary);
   document.getElementById('closeBtn').addEventListener('click',closeModal);
 
-  // ปุ่มคัดลอก (รองรับ iPhone/HTTPS)
+  // ปุ่มคัดลอก
   document.getElementById('copyBtn').addEventListener('click', async ()=>{
     const text=output.value||'';
     if(!text.trim()) return;
