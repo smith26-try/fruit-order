@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>สรุปออเดอร์ • ผลไม้พร้อมทาน</title>
 <style>
-:root{--brand:#0b72ff;--brand-ink:#fff;--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#667085;--line:#e1e6eb;--ok:#0a7f53;}
+:root{--brand:#0b72ff;--brand-ink:#fff;--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#667085;--line:#e6e8eb;--ok:#0a7f53;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
@@ -26,12 +26,6 @@ textarea{min-height:88px;resize:vertical;}
 .product-list{display:grid;gap:10px;}
 .product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
 .product .name{font-weight:700;}
-.product .option{margin-top:6px;max-width:220px}
-/* เพิ่มสไตล์สำหรับตัวเลือกแบบตัวเลขย่อย */
-.option-group{margin-top:6px;display:grid;gap:6px;max-width:260px}
-.option-item{display:flex;align-items:center;gap:8px}
-.option-item label{min-width:72px;font-size:14px;color:#334155}
-.option-item input[type="number"]{width:80px;padding:10px 8px;border-radius:10px;text-align:center}
 .price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
 .step{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
 .step button{width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;}
@@ -61,7 +55,8 @@ textarea{min-height:88px;resize:vertical;}
         <div><div class="label">วันที่</div><input id="date" type="date"></div>
         <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="(ไม่ต้องใส่คุณ)"></div>
         <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="XXXX"></div>
-        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" placeholder="เช่น 20"></div>
+        <!-- ค่าส่ง: รับเฉพาะตัวเลข -->
+        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" inputmode="numeric" pattern="[0-9]*" placeholder="เช่น 20"></div>
         <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea></div>
       </div>
     </div>
@@ -101,7 +96,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'กระท้อนทรงเครื่อง',price:69},
     {name:'กระท้อนน้ำปลาหวาน',price:69},
     {name:'มะม่วงทรงเครื่อง',price:69},
-    {name:'มะม่วงน้ำปลาหวาน',price:69}, // ← มีตัวเลือกย่อย
+    {name:'มะม่วงน้ำปลาหวาน',price:69},
+    // เพิ่มเมนูใหม่ตามลำดับที่ขอ
+    {name:'มะม่วง',price:40},
+    {name:'น้ำปลาหวาน (กุ้งแห้ง)',price:29},
+    {name:'น้ำปลาหวาน (ปลาป่น)',price:29},
+    {name:'น้ำแข็ง',price:5},
+    // ต่อรายการเดิม
     {name:'ส้มไต้หวันเล็ก',price:49},
     {name:'ส้มไต้หวันใหญ่',price:89},
     {name:'ส้มฮันนี่เล็ก',price:59},
@@ -129,29 +130,22 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
 
+  // ป้องกันค่าส่งรับเฉพาะตัวเลข
+  shippingEl.addEventListener('input',()=>{
+    shippingEl.value = (shippingEl.value||'').replace(/[^\d]/g,'');
+    recalc();
+  }, {passive:true});
+
   function recalc(){
     let itemsTotal=0;
     document.querySelectorAll('.product').forEach(row=>{
-      // รวมยอดย่อยของแถวนี้ (รองรับทั้งแบบปกติและแบบมี option-group)
-      let subRow = 0;
-
-      // จำนวนแบบปกติ (มีปุ่ม +/-)
-      const mainInp=row.querySelector('input[data-price][data-name]:not([data-opt])');
-      if(mainInp){
-        const qty=Number(mainInp.value)||0;
-        subRow += qty * Number(mainInp.dataset.price);
-      }
-
-      // จำนวนของ option ย่อย (กุ้งแห้ง / ปลาป่น)
-      row.querySelectorAll('input[data-opt]').forEach(optInp=>{
-        const qty=Number(optInp.value)||0;
-        subRow += qty * Number(optInp.dataset.price);
-      });
-
-      row.querySelector('.subtotal').textContent = formatBaht(subRow);
-      itemsTotal += subRow;
+      const inp=row.querySelector('input[data-price][data-name]');
+      const qty=Number(inp.value)||0;
+      const price=Number(inp.dataset.price);
+      const sub=qty*price;
+      row.querySelector('.subtotal').textContent=formatBaht(sub);
+      itemsTotal+=sub;
     });
-
     const shipping=Math.max(0,Number(shippingEl.value)||0);
     grandEl.textContent=formatBaht(itemsTotal+shipping);
   }
@@ -161,49 +155,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     PRODUCTS.forEach(p=>{
       const row=document.createElement('div');
       row.className='product';
-
-      // ถ้าเป็น "มะม่วงน้ำปลาหวาน" → ใช้ 2 ช่องตัวเลขย่อย
-      if(p.name==='มะม่วงน้ำปลาหวาน'){
-        row.innerHTML=`
-          <div class="name">
-            ${p.name} <span class="price">฿${p.price}</span>
-            <div class="option-group">
-              <div class="option-item">
-                <label>กุ้งแห้ง</label>
-                <input type="number" min="0" step="1" value="0"
-                       data-price="${p.price}" data-name="${p.name}" data-opt="กุ้งแห้ง">
-              </div>
-              <div class="option-item">
-                <label>ปลาป่น</label>
-                <input type="number" min="0" step="1" value="0"
-                       data-price="${p.price}" data-name="${p.name}" data-opt="ปลาป่น">
-              </div>
-            </div>
-          </div>
-          <div></div>
-          <div class="subtotal">฿0</div>`;
-        // bind input
-        row.querySelectorAll('input[type="number"]').forEach(inp=>{
-          inp.addEventListener('input', recalc, {passive:true});
-        });
-      }else{
-        // สินค้าอื่น ๆ ใช้รูปแบบเดิม
-        row.innerHTML=`
-          <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
-          <div class="step">
-            <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
-            <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
-            <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
-          </div>
-          <div class="subtotal">฿0</div>`;
-        const dec=row.querySelector('.dec');
-        const inc=row.querySelector('.inc');
-        const inp=row.querySelector('input[type="number"]');
-        dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
-        inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
-        inp.addEventListener('input',recalc,{passive:true});
-      }
-
+      row.innerHTML=`
+        <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
+        <div class="step">
+          <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
+          <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
+          <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
+        </div>
+        <div class="subtotal">฿0</div>`;
+      const dec=row.querySelector('.dec');
+      const inc=row.querySelector('.inc');
+      const inp=row.querySelector('input[type="number"]');
+      dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
+      inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
+      inp.addEventListener('input',recalc,{passive:true});
       productsEl.appendChild(row);
     });
   }
@@ -220,16 +185,13 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     const lines=[]; let itemsTotal=0;
 
-    // ดึงทุก input ที่มี data-price (ทั้งหลักและ option ย่อย)
     document.querySelectorAll('#products input[data-price]').forEach(inp=>{
       const qty=Number(inp.value)||0;
       if(qty>0){
-        const nm   = inp.dataset.name;
-        const opt  = inp.dataset.opt ? ` (${inp.dataset.opt})` : '';
-        const price= Number(inp.dataset.price);
-        const sub  = price * qty;
-        itemsTotal += sub;
-        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
+        const nm=inp.dataset.name;
+        const price=Number(inp.dataset.price);
+        const sub=price*qty; itemsTotal+=sub;
+        lines.push(`- ${nm} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
 
@@ -238,12 +200,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     const total=itemsTotal+shipping;
     const text=[
       `${date || '-'}`,
-      `ORDER คุณ${name || '-'}`,
+      `ORDER คุณ ${name || '-'}`,
       `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      `*** ยอดรวม ฿${total.toLocaleString('th-TH')} ***`,
-      `📍${address || '-'}`,
+      `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
+      `📍ส่งที่ : ${address || '-'}`,
     ].join('\n');
 
     output.value=text;
@@ -252,7 +214,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // Bind
   renderProducts(); recalc();
-  shippingEl.addEventListener('input',recalc,{passive:true});
   document.getElementById('buildBtn').addEventListener('click',buildSummary);
   document.getElementById('closeBtn').addEventListener('click',closeModal);
 
