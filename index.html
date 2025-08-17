@@ -53,8 +53,8 @@ textarea{min-height:88px;resize:vertical;}
     <div class="group card">
       <div class="grid2">
         <div><div class="label">วันที่</div><input id="date" type="date"></div>
-        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="เช่น คุณ ทุง ทุง ทุง ซะฮูร์"></div>
-        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="0812345678"></div>
+        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="(ไม่ต้องใส่คุณ)"></div>
+        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="XXXX"></div>
         <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" placeholder="เช่น 20"></div>
         <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea></div>
       </div>
@@ -111,15 +111,14 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
 
-  // ➜ ฟังก์ชันฟอร์แมตวันที่แบบ: 17 สิงหาคม พ.ศ. 2568
-  function formatThaiDateLongBE(iso){
+  // วันที่แบบ ว/ด/ป (พ.ศ.) เช่น 17/08/2568
+  function formatThaiDateShortBE(iso){
     if(!iso) return '';
     const d=new Date(iso+'T00:00:00');
-    const months=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
-    const day=d.getDate();                  // ไม่เติมศูนย์นำหน้า
-    const monthName=months[d.getMonth()];   // ชื่อเดือนภาษาไทย
-    const yearBE=d.getFullYear()+543;       // แปลงเป็น พ.ศ.
-    return `${day} ${monthName} พ.ศ. ${yearBE}`;
+    const dd=String(d.getDate()).padStart(2,'0');
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const yyyyBE=d.getFullYear()+543;
+    return `${dd}/${mm}/${yyyyBE}`;
   }
 
   function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
@@ -165,7 +164,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
 
   function buildSummary(){
-    const date=formatThaiDateLongBE(document.getElementById('date').value); // ใช้รูปแบบที่ต้องการ
+    const date=formatThaiDateShortBE(document.getElementById('date').value);
     const name=(document.getElementById('name').value||'').trim();
     const phone=(document.getElementById('phone').value||'').trim();
     const shipping=Math.max(0,Number(shippingEl.value)||0);
@@ -177,23 +176,19 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(qty>0){
         const nm=inp.dataset.name; const price=Number(inp.dataset.price);
         const sub=price*qty; itemsTotal+=sub;
-        lines.push(`${nm} (จำนวน x${qty}) - ราคารวม ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`- ${nm} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
     if(!lines.length){ showToast('กรุณาเลือกสินค้า'); return; }
 
     const total=itemsTotal+shipping;
-    const hr='——————————';
     const text=[
-      `วันที่ ${date || '-'}`,
-      `ORDER ของคุณ ${name || '-'}`,
-      `เบอร์ติดต่อ ${phone || '-'}`,
-      hr,
+      `${date || '-'}`,
+      `ORDER คุณ ${name || '-'}`,
+      `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      hr,
       `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
-      hr,
       `📍ส่งที่ : ${address || '-'}`,
     ].join('\n');
 
@@ -209,28 +204,19 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // ปุ่มคัดลอก
   document.getElementById('copyBtn').addEventListener('click', async ()=>{
-  const text = output.value || '';
-  if (!text.trim()) return;
-
-  // โชว์ทันที (ไม่รอระบบคัดลอก)
-  showToast('คัดลอกแล้ว');
-
-  // ค่อยพยายามคัดลอกตามหลัง
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (_) {
-    output.select();
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
-  }
-});
+    const text = output.value || '';
+    if (!text.trim()) return;
+    showToast('คัดลอกแล้ว');
+    try { await navigator.clipboard.writeText(text); }
+    catch(_) { output.select(); document.execCommand('copy'); window.getSelection().removeAllRanges(); }
+  });
 
   // ล้างฟอร์ม
   document.getElementById('resetBtn').addEventListener('click',()=>{
     document.querySelectorAll('input[type="text"],input[type="tel"],input[type="date"]').forEach(el=>el.value='');
     document.getElementById('address').value='';
     document.querySelectorAll('#products input[type="number"]').forEach(inp=>inp.value=0);
-    shippingEl.value=0; recalc(); closeModal(); showToast('ล้างฟอร์มแล้ว');
+    shippingEl.value=''; recalc(); closeModal(); showToast('ล้างฟอร์มแล้ว');
   });
 
   // ปิดโมดัลเมื่อแตะนอกกระดาน
