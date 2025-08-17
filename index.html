@@ -39,9 +39,18 @@ textarea{min-height:88px;resize:vertical;}
 
 /* ===== Section เรทพิเศษ (พับ/ขยายได้) ===== */
 .special-toggle{
-  background:#fff7d6;border:2px solid #f59e0b;border-radius:12px;
-  padding:10px 12px;margin-top:18px;font-weight:900;color:#8a4b00;
-  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+  background:#fff7d6;
+  border:2px solid #f59e0b;
+  border-radius:12px;
+  padding:10px 12px;
+  margin-top:18px;
+  font-size:16px;        /* เท่า product .name */
+  font-weight:700;
+  color:#8a4b00;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  cursor:pointer;
 }
 .special-toggle .title{letter-spacing:.02em}
 .special-toggle .chev{transition:transform .2s; font-size:18px; line-height:1}
@@ -67,15 +76,15 @@ textarea{min-height:88px;resize:vertical;}
 </style>
 </head>
 <body>
-  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈</div><div class="muted">Version 1.2</div></div>
+  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 1.5</div></div>
 
   <div class="container">
     <div class="group card">
       <div class="grid2">
         <div><div class="label">วันที่</div><input id="date" type="date"></div>
-        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="(ไม่ต้องใส่คุณ)"></div>
-        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="XXXX"></div>
-        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" placeholder="เช่น 20"></div>
+        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="ไม่ต้องใส่คำว่า คุณ"></div>
+        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="095-XXX-XXXX"></div>
+        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" placeholder="ใส่ตัวเลข ไม่ต้องใส่ ฿"></div>
         <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea></div>
       </div>
     </div>
@@ -134,9 +143,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'น้ำแข็ง', price:5},
     // Section marker + รายการเรทพิเศษ
     {section:'เรทพิเศษ'},
-    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:30, special:true},
-    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:33, special:true},
-    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:35, special:true},
+    {name:'ฝรั่งเล็ก', price:30, special:true},
+    {name:'ฝรั่งเล็ก', price:33, special:true},
+    {name:'ฝรั่งเล็ก', price:35, special:true},
   ];
 
   function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
@@ -198,7 +207,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         specialHeader.className='special-toggle special-collapsed';
         specialHeader.setAttribute('aria-expanded','false');
         specialHeader.setAttribute('aria-controls','special-wrap');
-        specialHeader.innerHTML=`<span class="title">เรทพิเศษ</span><span class="chev">▾</span>`;
+        specialHeader.innerHTML=`<span class="title">🚚 เรทพิเศษสำหรับรับหิ้ว</span><span class="chev">▾</span>`;
         productsEl.appendChild(specialHeader);
 
         specialWrap=document.createElement('div');
@@ -286,7 +295,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const total=itemsTotal+shipping;
     const text=[
       `${date || '-'}`,
-      `ORDER คุณ ${name || '-'}`,
+      `ออเดอร์คุณ ${name || '-'}`,
       `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
