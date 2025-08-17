@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(qty>0){
         const nm=inp.dataset.name; const price=Number(inp.dataset.price);
         const sub=price*qty; itemsTotal+=sub;
-        lines.push(`- ${nm} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`▪ ${nm} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
     if(!lines.length){ showToast('กรุณาเลือกสินค้า'); return; }
@@ -184,12 +184,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     const total=itemsTotal+shipping;
     const text=[
       `${date || '-'}`,
-      `ORDER คุณ ${name || '-'}`,
+      `ORDER คุณ${name || '-'}`,
       `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
-      `📍ส่งที่ : ${address || '-'}`,
+      `*** ยอดรวม ฿${total.toLocaleString('th-TH')} ***`,
+      `📍${address || '-'}`,
     ].join('\n');
 
     output.value=text;
