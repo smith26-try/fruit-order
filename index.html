@@ -27,6 +27,11 @@ textarea{min-height:88px;resize:vertical;}
 .product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
 .product .name{font-weight:700;}
 .product .option{margin-top:6px;max-width:220px}
+/* เพิ่มสไตล์สำหรับตัวเลือกแบบตัวเลขย่อย */
+.option-group{margin-top:6px;display:grid;gap:6px;max-width:260px}
+.option-item{display:flex;align-items:center;gap:8px}
+.option-item label{min-width:72px;font-size:14px;color:#334155}
+.option-item input[type="number"]{width:80px;padding:10px 8px;border-radius:10px;text-align:center}
 .price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
 .step{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
 .step button{width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;}
@@ -96,7 +101,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'กระท้อนทรงเครื่อง',price:69},
     {name:'กระท้อนน้ำปลาหวาน',price:69},
     {name:'มะม่วงทรงเครื่อง',price:69},
-    {name:'มะม่วงน้ำปลาหวาน',price:69}, // << จะมีตัวเลือก กุ้งแห้ง/ปลาป่น
+    {name:'มะม่วงน้ำปลาหวาน',price:69}, // ← มีตัวเลือกย่อย
     {name:'ส้มไต้หวันเล็ก',price:49},
     {name:'ส้มไต้หวันใหญ่',price:89},
     {name:'ส้มฮันนี่เล็ก',price:59},
@@ -127,13 +132,26 @@ document.addEventListener('DOMContentLoaded',()=>{
   function recalc(){
     let itemsTotal=0;
     document.querySelectorAll('.product').forEach(row=>{
-      const inp=row.querySelector('input[type="number"]');
-      const qty=Number(inp.value)||0;
-      const price=Number(inp.dataset.price);
-      const sub=qty*price;
-      row.querySelector('.subtotal').textContent=formatBaht(sub);
-      itemsTotal+=sub;
+      // รวมยอดย่อยของแถวนี้ (รองรับทั้งแบบปกติและแบบมี option-group)
+      let subRow = 0;
+
+      // จำนวนแบบปกติ (มีปุ่ม +/-)
+      const mainInp=row.querySelector('input[data-price][data-name]:not([data-opt])');
+      if(mainInp){
+        const qty=Number(mainInp.value)||0;
+        subRow += qty * Number(mainInp.dataset.price);
+      }
+
+      // จำนวนของ option ย่อย (กุ้งแห้ง / ปลาป่น)
+      row.querySelectorAll('input[data-opt]').forEach(optInp=>{
+        const qty=Number(optInp.value)||0;
+        subRow += qty * Number(optInp.dataset.price);
+      });
+
+      row.querySelector('.subtotal').textContent = formatBaht(subRow);
+      itemsTotal += subRow;
     });
+
     const shipping=Math.max(0,Number(shippingEl.value)||0);
     grandEl.textContent=formatBaht(itemsTotal+shipping);
   }
@@ -144,40 +162,47 @@ document.addEventListener('DOMContentLoaded',()=>{
       const row=document.createElement('div');
       row.className='product';
 
-      // ถ้าเป็น "มะม่วงน้ำปลาหวาน" → ใส่ select ให้เลือก กุ้งแห้ง / ปลาป่น
-      let optionHTML='';
+      // ถ้าเป็น "มะม่วงน้ำปลาหวาน" → ใช้ 2 ช่องตัวเลขย่อย
       if(p.name==='มะม่วงน้ำปลาหวาน'){
-        optionHTML = `
-          <div class="option">
-            <select data-option>
-              <option value="กุ้งแห้ง">กุ้งแห้ง</option>
-              <option value="ปลาป่น">ปลาป่น</option>
-            </select>
-          </div>`;
+        row.innerHTML=`
+          <div class="name">
+            ${p.name} <span class="price">฿${p.price}</span>
+            <div class="option-group">
+              <div class="option-item">
+                <label>กุ้งแห้ง</label>
+                <input type="number" min="0" step="1" value="0"
+                       data-price="${p.price}" data-name="${p.name}" data-opt="กุ้งแห้ง">
+              </div>
+              <div class="option-item">
+                <label>ปลาป่น</label>
+                <input type="number" min="0" step="1" value="0"
+                       data-price="${p.price}" data-name="${p.name}" data-opt="ปลาป่น">
+              </div>
+            </div>
+          </div>
+          <div></div>
+          <div class="subtotal">฿0</div>`;
+        // bind input
+        row.querySelectorAll('input[type="number"]').forEach(inp=>{
+          inp.addEventListener('input', recalc, {passive:true});
+        });
+      }else{
+        // สินค้าอื่น ๆ ใช้รูปแบบเดิม
+        row.innerHTML=`
+          <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
+          <div class="step">
+            <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
+            <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
+            <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
+          </div>
+          <div class="subtotal">฿0</div>`;
+        const dec=row.querySelector('.dec');
+        const inc=row.querySelector('.inc');
+        const inp=row.querySelector('input[type="number"]');
+        dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
+        inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
+        inp.addEventListener('input',recalc,{passive:true});
       }
-
-      row.innerHTML=`
-        <div class="name">
-          ${p.name} <span class="price">฿${p.price}</span>
-          ${optionHTML}
-        </div>
-        <div class="step">
-          <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
-          <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
-          <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
-        </div>
-        <div class="subtotal">฿0</div>`;
-
-      const dec=row.querySelector('.dec');
-      const inc=row.querySelector('.inc');
-      const inp=row.querySelector('input[type="number"]');
-      dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
-      inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
-      inp.addEventListener('input',recalc,{passive:true});
-
-      // เปลี่ยน option แล้วก็ให้รวมราคาใหม่ (เผื่ออนาคตมีราคาต่าง)
-      const optEl=row.querySelector('select[data-option]');
-      if(optEl){ optEl.addEventListener('change',()=>recalc(),{passive:true}); }
 
       productsEl.appendChild(row);
     });
@@ -194,18 +219,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     const address=(document.getElementById('address').value||'').trim();
 
     const lines=[]; let itemsTotal=0;
-    document.querySelectorAll('#products .product').forEach(row=>{
-      const inp=row.querySelector('input[type="number"]');
+
+    // ดึงทุก input ที่มี data-price (ทั้งหลักและ option ย่อย)
+    document.querySelectorAll('#products input[data-price]').forEach(inp=>{
       const qty=Number(inp.value)||0;
       if(qty>0){
-        const nm=inp.dataset.name; 
-        const price=Number(inp.dataset.price);
-        const optEl=row.querySelector('select[data-option]');
-        const optTxt = optEl ? ` (${optEl.value})` : '';  // << ต่อท้ายชื่อด้วย (กุ้งแห้ง)/(ปลาป่น)
-        const sub=price*qty; itemsTotal+=sub;
-        lines.push(`▪ ${nm}${optTxt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
+        const nm   = inp.dataset.name;
+        const opt  = inp.dataset.opt ? ` (${inp.dataset.opt})` : '';
+        const price= Number(inp.dataset.price);
+        const sub  = price * qty;
+        itemsTotal += sub;
+        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
+
     if(!lines.length){ showToast('กรุณาเลือกสินค้า'); return; }
 
     const total=itemsTotal+shipping;
