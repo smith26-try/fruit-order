@@ -31,15 +31,30 @@ textarea{min-height:88px;resize:vertical;}
 .step button{width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;}
 .step input{width:56px;height:36px;border:none;text-align:center;font-size:16px;padding:0;-webkit-appearance:none;appearance:none;}
 .subtotal{color:#0a7;font-weight:800;min-width:96px;text-align:right;font-variant-numeric:tabular-nums;}
-/* ตัวเลือกย่อยภายในแถว (กุ้งแห้ง/ปลาป่น) */
+/* ตัวเลือกย่อยภายในแถว */
 .option-group{margin-top:8px;display:grid;gap:6px;max-width:280px}
 .option-item{display:flex;align-items:center;gap:8px}
 .option-item label{min-width:92px;font-size:14px;color:#334155}
 .option-item .step input{width:64px}
+
+/* ===== Section เรทพิเศษ (พับ/ขยายได้) ===== */
+.special-toggle{
+  background:#fff7d6;border:2px solid #f59e0b;border-radius:12px;
+  padding:10px 12px;margin-top:18px;font-weight:900;color:#8a4b00;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;
+}
+.special-toggle .title{letter-spacing:.02em}
+.special-toggle .chev{transition:transform .2s; font-size:18px; line-height:1}
+.special-collapsed .chev{transform:rotate(-90deg)}
+.special-wrap{display:none; margin-top:8px}
+.product.special{background:#fffaf0;border-color:#f7c66b;}
+.product.special .name{font-weight:800;}
+/* =========================================== */
+
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:10px 16px calc(14px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;}
 .pill{background:#f0f3f6;border:1px solid #e1e6ec;padding:6px 10px;border-radius:999px;font-weight:800;}
 .primary{background:var(--brand);color:var(--brand-ink);border:none;padding:14px 16px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer;min-width:160px;}
-.toast{position:fixed; left:50%; transform:translateX(-50%);bottom:70px; background:#111; color:#fff;padding:10px 14px; border-radius:999px; font-size:14px;opacity:0; transition:.2s; z-index:99999;pointer-events:none;}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:#111;color:#fff;padding:10px 14px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:99999;pointer-events:none;}
 .toast.show{opacity:1;}
 .modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.3);}
 .modal.open{display:grid;place-items:end center;}
@@ -101,18 +116,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   const modal=document.getElementById('modal');
   const output=document.getElementById('output');
 
-  // จัดเรียงตามที่สั่ง: "มะม่วงน้ำปลาหวาน" มี opts (กุ้งแห้ง/ปลาป่น),
-  // เมนูแยกส่วนเป็นรายการเดี่ยว ๆ และ "น้ำแข็ง" อยู่หลัง "ส้มฮันนี่ใหญ่"
+  // สินค้าปกติ + น้ำแข็ง + Section เรทพิเศษ (พับได้)
   const PRODUCTS=[
     {name:'ฝรั่งเล็ก',price:39},
     {name:'ฝรั่งใหญ่',price:69},
     {name:'กระท้อนทรงเครื่อง',price:69},
     {name:'กระท้อนน้ำปลาหวาน',price:69},
     {name:'มะม่วงทรงเครื่อง',price:69},
-    {
-      name:'มะม่วงน้ำปลาหวาน',price:69,
-      opts:[ {label:'กุ้งแห้ง', price:69}, {label:'ปลาป่น', price:69} ]
-    },
+    {name:'มะม่วงน้ำปลาหวาน',price:69, opts:[{label:'กุ้งแห้ง',price:69},{label:'ปลาป่น',price:69}]},
     {name:'มะม่วง', price:40},
     {name:'น้ำปลาหวาน (กุ้งแห้ง)', price:29},
     {name:'น้ำปลาหวาน (ปลาป่น)', price:29},
@@ -120,12 +131,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'ส้มไต้หวันใหญ่',price:89},
     {name:'ส้มฮันนี่เล็ก',price:59},
     {name:'ส้มฮันนี่ใหญ่',price:99},
-    {name:'น้ำแข็ง', price:5},            // ← ย้ายมาไว้หลังส้มฮันนี่ใหญ่
+    {name:'น้ำแข็ง', price:5},
+    // Section marker + รายการเรทพิเศษ
+    {section:'เรทพิเศษ'},
+    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:30, special:true},
+    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:33, special:true},
+    {name:'ฝรั่งเล็ก (เรทพิเศษ)', price:35, special:true},
   ];
 
   function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
-
-  // วันที่ ว/ด/ป (พ.ศ.) เช่น 17/08/2568
   function formatThaiDateShortBE(iso){
     if(!iso) return '';
     const d=new Date(iso+'T00:00:00');
@@ -134,27 +148,20 @@ document.addEventListener('DOMContentLoaded',()=>{
     const yyyyBE=d.getFullYear()+543;
     return `${dd}/${mm}/${yyyyBE}`;
   }
-
   function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
 
   function recalc(){
     let itemsTotal=0;
     document.querySelectorAll('.product').forEach(row=>{
       let subRow=0;
-
-      // จำนวนของสินค้าในแถวนั้น
       const main=row.querySelector('input[data-price][data-name]:not([data-opt])');
       if(main){ subRow += (Number(main.value)||0) * Number(main.dataset.price); }
-
-      // จำนวนของตัวเลือกย่อย (กุ้งแห้ง/ปลาป่น)
       row.querySelectorAll('input[data-opt]').forEach(inp=>{
         subRow += (Number(inp.value)||0) * Number(inp.dataset.price);
       });
-
       row.querySelector('.subtotal').textContent=formatBaht(subRow);
       itemsTotal+=subRow;
     });
-
     const shipping=Math.max(0,Number(shippingEl.value)||0);
     grandEl.textContent=formatBaht(itemsTotal+shipping);
   }
@@ -168,7 +175,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
       </div>`;
   }
-
   function bindStep(container){
     const dec=container.querySelector('.dec');
     const inc=container.querySelector('.inc');
@@ -180,9 +186,39 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   function renderProducts(){
     productsEl.innerHTML='';
+
+    let specialWrap=null; // container สำหรับเรทพิเศษ (พับ/ขยาย)
+    let specialHeader=null;
+
     PRODUCTS.forEach(p=>{
+      // ทำหัวข้อเรทพิเศษแบบพับ/ขยาย
+      if(p.section){
+        specialHeader=document.createElement('button');
+        specialHeader.type='button';
+        specialHeader.className='special-toggle special-collapsed';
+        specialHeader.setAttribute('aria-expanded','false');
+        specialHeader.setAttribute('aria-controls','special-wrap');
+        specialHeader.innerHTML=`<span class="title">เรทพิเศษ</span><span class="chev">▾</span>`;
+        productsEl.appendChild(specialHeader);
+
+        specialWrap=document.createElement('div');
+        specialWrap.id='special-wrap';
+        specialWrap.className='special-wrap';
+        productsEl.appendChild(specialWrap);
+
+        // คลิกเพื่อพับ/ขยาย
+        specialHeader.addEventListener('click',()=>{
+          const open = specialHeader.getAttribute('aria-expanded')==='true';
+          specialHeader.setAttribute('aria-expanded', String(!open));
+          specialHeader.classList.toggle('special-collapsed', open);
+          specialWrap.style.display = open ? 'none' : 'grid';
+        });
+        return;
+      }
+
+      // สร้างแถวสินค้า (ปกติ/เรทพิเศษ)
       const row=document.createElement('div');
-      row.className='product';
+      row.className='product' + (p.special ? ' special' : '');
 
       if(p.opts){ // มีตัวเลือกย่อย
         const optsHTML = p.opts.map(o=>`
@@ -191,19 +227,15 @@ document.addEventListener('DOMContentLoaded',()=>{
             ${makeStepInput({price:o.price,name:p.name,opt:o.label})}
           </div>
         `).join('');
-
         row.innerHTML=`
           <div class="name">
             ${p.name} <span class="price">฿${p.price}</span>
-            <div class="option-group">
-              ${optsHTML}
-            </div>
+            <div class="option-group">${optsHTML}</div>
           </div>
           <div></div>
           <div class="subtotal">฿0</div>`;
         row.querySelectorAll('.option-item .step').forEach(bindStep);
-
-      }else{ // เมนูปกติ
+      }else{
         row.innerHTML=`
           <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
           ${makeStepInput({price:p.price,name:p.name})}
@@ -211,8 +243,19 @@ document.addEventListener('DOMContentLoaded',()=>{
         bindStep(row);
       }
 
-      productsEl.appendChild(row);
+      // ถ้าเป็นเรทพิเศษให้ใส่ใน specialWrap; ถ้าไม่ใช่ ให้ใส่ใน productsEl
+      if(p.special && specialWrap){
+        specialWrap.appendChild(row);
+      }else{
+        productsEl.appendChild(row);
+      }
     });
+
+    // ตั้งค่า layout ของ specialWrap ให้เหมือนรายการหลักเมื่อแสดง
+    if(specialWrap){
+      specialWrap.style.gridTemplateColumns='unset';
+      specialWrap.style.gap='10px';
+    }
   }
 
   function openModal(){ modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
@@ -226,8 +269,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const address=(document.getElementById('address').value||'').trim();
 
     const lines=[]; let itemsTotal=0;
-
-    // รวมทุกรายการทั้งหลักและตัวเลือกย่อย
     document.querySelectorAll('#products input[data-price]').forEach(inp=>{
       const qty=Number(inp.value)||0;
       if(qty>0){
@@ -236,7 +277,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         const price= Number(inp.dataset.price);
         const sub  = price * qty;
         itemsTotal += sub;
-        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`- ${nm}${opt} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
 
@@ -249,8 +290,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      `*** ยอดรวม ฿${total.toLocaleString('th-TH')} ***`,
-      `📍${address || '-'}`,
+      `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
+      `📍ส่งที่ : ${address || '-'}`,
     ].join('\n');
 
     output.value=text;
