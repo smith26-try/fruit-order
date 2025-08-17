@@ -9,7 +9,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <title>สรุปออเดอร์ • ผลไม้พร้อมทาน</title>
 <style>
-:root{--brand:#0b72ff;--brand-ink:#fff;--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#667085;--line:#e6e8eb;--ok:#0a7f53;}
+:root{--brand:#0b72ff;--brand-ink:#fff;--bg:#f6f7f9;--card:#fff;--ink:#101828;--muted:#667085;--line:#e1e6eb;--ok:#0a7f53;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans Thai",sans-serif;}
@@ -21,11 +21,12 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,Bl
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.03);}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
-input,textarea{width:100%;border:1px solid #dfe3e6;border-radius:12px;padding:14px 12px;font-size:16px;outline:none;background:#fff;}
+input,textarea,select{width:100%;border:1px solid #dfe3e6;border-radius:12px;padding:14px 12px;font-size:16px;outline:none;background:#fff;}
 textarea{min-height:88px;resize:vertical;}
 .product-list{display:grid;gap:10px;}
 .product{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef1f4;border-radius:14px;background:#fff;}
 .product .name{font-weight:700;}
+.product .option{margin-top:6px;max-width:220px}
 .price{color:var(--ok);font-weight:800;min-width:64px;text-align:right;}
 .step{display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #e1e6ec;border-radius:999px;padding:4px;background:#fff;}
 .step button{width:36px;height:36px;border-radius:999px;border:none;cursor:pointer;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;padding:0;}
@@ -95,7 +96,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'กระท้อนทรงเครื่อง',price:69},
     {name:'กระท้อนน้ำปลาหวาน',price:69},
     {name:'มะม่วงทรงเครื่อง',price:69},
-    {name:'มะม่วงน้ำปลาหวาน',price:69},
+    {name:'มะม่วงน้ำปลาหวาน',price:69}, // << จะมีตัวเลือก กุ้งแห้ง/ปลาป่น
     {name:'ส้มไต้หวันเล็ก',price:49},
     {name:'ส้มไต้หวันใหญ่',price:89},
     {name:'ส้มฮันนี่เล็ก',price:59},
@@ -142,20 +143,42 @@ document.addEventListener('DOMContentLoaded',()=>{
     PRODUCTS.forEach(p=>{
       const row=document.createElement('div');
       row.className='product';
+
+      // ถ้าเป็น "มะม่วงน้ำปลาหวาน" → ใส่ select ให้เลือก กุ้งแห้ง / ปลาป่น
+      let optionHTML='';
+      if(p.name==='มะม่วงน้ำปลาหวาน'){
+        optionHTML = `
+          <div class="option">
+            <select data-option>
+              <option value="กุ้งแห้ง">กุ้งแห้ง</option>
+              <option value="ปลาป่น">ปลาป่น</option>
+            </select>
+          </div>`;
+      }
+
       row.innerHTML=`
-        <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
+        <div class="name">
+          ${p.name} <span class="price">฿${p.price}</span>
+          ${optionHTML}
+        </div>
         <div class="step">
           <button type="button" class="dec" aria-label="ลดจำนวน">−</button>
           <input type="number" min="0" step="1" value="0" data-price="${p.price}" data-name="${p.name}">
           <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
         </div>
         <div class="subtotal">฿0</div>`;
+
       const dec=row.querySelector('.dec');
       const inc=row.querySelector('.inc');
       const inp=row.querySelector('input[type="number"]');
       dec.addEventListener('click',()=>{inp.value=Math.max(0,(Number(inp.value)||0)-1);recalc();});
       inc.addEventListener('click',()=>{inp.value=(Number(inp.value)||0)+1;recalc();});
       inp.addEventListener('input',recalc,{passive:true});
+
+      // เปลี่ยน option แล้วก็ให้รวมราคาใหม่ (เผื่ออนาคตมีราคาต่าง)
+      const optEl=row.querySelector('select[data-option]');
+      if(optEl){ optEl.addEventListener('change',()=>recalc(),{passive:true}); }
+
       productsEl.appendChild(row);
     });
   }
@@ -171,12 +194,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     const address=(document.getElementById('address').value||'').trim();
 
     const lines=[]; let itemsTotal=0;
-    document.querySelectorAll('#products input[type="number"]').forEach(inp=>{
+    document.querySelectorAll('#products .product').forEach(row=>{
+      const inp=row.querySelector('input[type="number"]');
       const qty=Number(inp.value)||0;
       if(qty>0){
-        const nm=inp.dataset.name; const price=Number(inp.dataset.price);
+        const nm=inp.dataset.name; 
+        const price=Number(inp.dataset.price);
+        const optEl=row.querySelector('select[data-option]');
+        const optTxt = optEl ? ` (${optEl.value})` : '';  // << ต่อท้ายชื่อด้วย (กุ้งแห้ง)/(ปลาป่น)
         const sub=price*qty; itemsTotal+=sub;
-        lines.push(`▪ ${nm} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`▪ ${nm}${optTxt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
     if(!lines.length){ showToast('กรุณาเลือกสินค้า'); return; }
