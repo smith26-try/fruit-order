@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         const price= Number(inp.dataset.price);
         const sub  = price * qty;
         itemsTotal += sub;
-        lines.push(`▪ ${nm}${opt} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
 
