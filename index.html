@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         const price= Number(inp.dataset.price);
         const sub  = price * qty;
         itemsTotal += sub;
-        lines.push(`- ${nm}${opt} (จำนวน x${qty}) = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
       }
     });
 
@@ -290,8 +290,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       `(${phone || '-'})`,
       ...lines,
       `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      `*** รวมทั้งหมด ฿${total.toLocaleString('th-TH')} ***`,
-      `📍ส่งที่ : ${address || '-'}`,
+      `*** ยอดรวม ฿${total.toLocaleString('th-TH')} ***`,
+      `📍${address || '-'}`,
     ].join('\n');
 
     output.value=text;
