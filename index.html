@@ -44,7 +44,7 @@ textarea{min-height:88px;resize:vertical;}
   border-radius:12px;
   padding:10px 12px;
   margin-top:18px;
-  font-size:16px;        /* เท่า product .name */
+  font-size:16px;
   font-weight:700;
   color:#8a4b00;
   display:flex;
@@ -96,7 +96,7 @@ textarea{min-height:88px;resize:vertical;}
   </div>
 
   <div class="sheet">
-    <div class="pill">รวมสุทธิ: <span id="grandTotal">฿0</span></div>
+    <div class="pill">รวมสุทธิ: <span id="grandTotal">0฿</span></div>
     <button id="buildBtn" class="primary">สรุปออเดอร์</button>
   </div>
 
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const modal=document.getElementById('modal');
   const output=document.getElementById('output');
 
-  // สินค้าปกติ + น้ำแข็ง + Section เรทพิเศษ (พับได้)
+  // รายการสินค้า + เรทพิเศษ (พับได้)
   const PRODUCTS=[
     {name:'ฝรั่งเล็ก',price:39},
     {name:'ฝรั่งใหญ่',price:69},
@@ -141,14 +141,18 @@ document.addEventListener('DOMContentLoaded',()=>{
     {name:'ส้มฮันนี่เล็ก',price:59},
     {name:'ส้มฮันนี่ใหญ่',price:99},
     {name:'น้ำแข็ง', price:5},
-    // Section marker + รายการเรทพิเศษ
+
+    // ===== เรทพิเศษ =====
     {section:'เรทพิเศษ'},
-    {name:'ฝรั่งเล็ก', price:30, special:true},
     {name:'ฝรั่งเล็ก', price:33, special:true},
     {name:'ฝรั่งเล็ก', price:35, special:true},
+    {name:'ฝรั่งใหญ่', price:65, special:true},  // เพิ่มตามคำขอ
   ];
 
-  function formatBaht(n){return '฿'+Number(n).toLocaleString('th-TH');}
+  // รูปแบบตัวเลขตามด้วย ฿
+  const baht = n => `${Number(n).toLocaleString('th-TH')}฿`;
+
+  // วันที่ ว/ด/ป (พ.ศ.)
   function formatThaiDateShortBE(iso){
     if(!iso) return '';
     const d=new Date(iso+'T00:00:00');
@@ -157,6 +161,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const yyyyBE=d.getFullYear()+543;
     return `${dd}/${mm}/${yyyyBE}`;
   }
+
   function showToast(msg){ if(msg) toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
 
   function recalc(){
@@ -168,11 +173,11 @@ document.addEventListener('DOMContentLoaded',()=>{
       row.querySelectorAll('input[data-opt]').forEach(inp=>{
         subRow += (Number(inp.value)||0) * Number(inp.dataset.price);
       });
-      row.querySelector('.subtotal').textContent=formatBaht(subRow);
+      row.querySelector('.subtotal').textContent=baht(subRow);
       itemsTotal+=subRow;
     });
     const shipping=Math.max(0,Number(shippingEl.value)||0);
-    grandEl.textContent=formatBaht(itemsTotal+shipping);
+    grandEl.textContent=baht(itemsTotal+shipping);
   }
 
   function makeStepInput(attrs){
@@ -184,6 +189,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         <button type="button" class="inc" aria-label="เพิ่มจำนวน">+</button>
       </div>`;
   }
+
   function bindStep(container){
     const dec=container.querySelector('.dec');
     const inc=container.querySelector('.inc');
@@ -196,11 +202,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   function renderProducts(){
     productsEl.innerHTML='';
 
-    let specialWrap=null; // container สำหรับเรทพิเศษ (พับ/ขยาย)
+    let specialWrap=null; // container เรทพิเศษ
     let specialHeader=null;
 
     PRODUCTS.forEach(p=>{
-      // ทำหัวข้อเรทพิเศษแบบพับ/ขยาย
+      // หัวข้อเรทพิเศษแบบพับ/ขยาย
       if(p.section){
         specialHeader=document.createElement('button');
         specialHeader.type='button';
@@ -215,7 +221,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         specialWrap.className='special-wrap';
         productsEl.appendChild(specialWrap);
 
-        // คลิกเพื่อพับ/ขยาย
+        // พับ/ขยาย
         specialHeader.addEventListener('click',()=>{
           const open = specialHeader.getAttribute('aria-expanded')==='true';
           specialHeader.setAttribute('aria-expanded', String(!open));
@@ -225,11 +231,11 @@ document.addEventListener('DOMContentLoaded',()=>{
         return;
       }
 
-      // สร้างแถวสินค้า (ปกติ/เรทพิเศษ)
+      // แถวสินค้า
       const row=document.createElement('div');
       row.className='product' + (p.special ? ' special' : '');
 
-      if(p.opts){ // มีตัวเลือกย่อย
+      if(p.opts){ // มีตัวเลือกย่อยในแถว
         const optsHTML = p.opts.map(o=>`
           <div class="option-item">
             <label>${o.label}</label>
@@ -238,21 +244,21 @@ document.addEventListener('DOMContentLoaded',()=>{
         `).join('');
         row.innerHTML=`
           <div class="name">
-            ${p.name} <span class="price">฿${p.price}</span>
+            ${p.name} <span class="price">${baht(p.price)}</span>
             <div class="option-group">${optsHTML}</div>
           </div>
           <div></div>
-          <div class="subtotal">฿0</div>`;
+          <div class="subtotal">${baht(0)}</div>`;
         row.querySelectorAll('.option-item .step').forEach(bindStep);
       }else{
         row.innerHTML=`
-          <div class="name">${p.name} <span class="price">฿${p.price}</span></div>
+          <div class="name">${p.name} <span class="price">${baht(p.price)}</span></div>
           ${makeStepInput({price:p.price,name:p.name})}
-          <div class="subtotal">฿0</div>`;
+          <div class="subtotal">${baht(0)}</div>`;
         bindStep(row);
       }
 
-      // ถ้าเป็นเรทพิเศษให้ใส่ใน specialWrap; ถ้าไม่ใช่ ให้ใส่ใน productsEl
+      // ใส่ตำแหน่ง
       if(p.special && specialWrap){
         specialWrap.appendChild(row);
       }else{
@@ -260,7 +266,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       }
     });
 
-    // ตั้งค่า layout ของ specialWrap ให้เหมือนรายการหลักเมื่อแสดง
     if(specialWrap){
       specialWrap.style.gridTemplateColumns='unset';
       specialWrap.style.gap='10px';
@@ -278,6 +283,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const address=(document.getElementById('address').value||'').trim();
 
     const lines=[]; let itemsTotal=0;
+
     document.querySelectorAll('#products input[data-price]').forEach(inp=>{
       const qty=Number(inp.value)||0;
       if(qty>0){
@@ -286,7 +292,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         const price= Number(inp.dataset.price);
         const sub  = price * qty;
         itemsTotal += sub;
-        lines.push(`▪ ${nm}${opt} x${qty} = ฿${sub.toLocaleString('th-TH')}`);
+        lines.push(`▪ ${nm}${opt} x${qty} = ${baht(sub)}`);
       }
     });
 
@@ -298,8 +304,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       `ออเดอร์คุณ ${name || '-'}`,
       `(${phone || '-'})`,
       ...lines,
-      `ค่าส่ง : ฿${shipping.toLocaleString('th-TH')}`,
-      `*** ยอดรวม ฿${total.toLocaleString('th-TH')} ***`,
+      `ค่าส่ง : ${baht(shipping)}`,
+      `*** ยอดรวม ${baht(total)} ***`,
       `📍${address || '-'}`,
     ].join('\n');
 
@@ -326,7 +332,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.querySelectorAll('input[type="text"],input[type="tel"],input[type="date"]').forEach(el=>{ el.value=''; });
     document.getElementById('address').value='';
     document.querySelectorAll('#products input[type="number"]').forEach(inp=>{ inp.value=0; });
-    shippingEl.value=''; recalc(); closeModal(); showToast('ล้างฟอร์มแล้ว');
+    shippingEl.value='';
+    recalc(); closeModal(); showToast('ล้างฟอร์มแล้ว');
   });
 
   // ปิดโมดัลเมื่อแตะนอกกระดาน
