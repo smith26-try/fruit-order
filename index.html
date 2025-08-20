@@ -76,7 +76,7 @@ textarea{min-height:88px;resize:vertical;}
 </style>
 </head>
 <body>
-  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 1.5</div></div>
+  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 1.9</div></div>
 
   <div class="container">
     <div class="group card">
@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         const price= Number(inp.dataset.price);
         const sub  = price * qty;
         itemsTotal += sub;
-        lines.push(`▪ ${nm}${opt} x${qty} = ${baht(sub)}`);
+        lines.push(`   • ${nm}${opt} x${qty} (${baht(sub)})`);
       }
     });
 
