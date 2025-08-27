@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<title>เลือกอุปกรณ์แพ็ก • ผลไม้พร้อมทาน</title>
+<style>
+:root {
+  --brand:#007aff;         /* iOS blue */
+  --bg:#f2f2f7;            /* iOS background */
+  --card:#fff;
+  --ink:#000;
+  --muted:#6e6e73;
+  --line:#d2d2d7;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+
+.appbar{position:sticky;top:0;z-index:10;background:var(--card);padding:14px 20px;font-size:18px;font-weight:700;text-align:center;border-bottom:1px solid var(--line);}
+.container{
+  padding:12px 16px;
+  max-width:920px;
+  margin:0 auto;
+  padding-bottom:calc(120px + env(safe-area-inset-bottom)); /* ✅ เพิ่มกันทับ */
+}
+.group{margin-bottom:20px;}
+.group-title{font-weight:700;font-size:17px;color:var(--ink);margin-bottom:10px;}
+
+.card{background:var(--card);border-radius:18px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,.06);}
+.list{display:grid;gap:12px;}
+.row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:14px;background:#fafafa;transition:.2s;}
+.row:active{background:#f0f0f5;}
+.name{font-size:16px;font-weight:500;color:var(--ink);}
+
+/* Stepper */
+.step{display:flex;align-items:center;gap:6px;}
+.step button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px;font-weight:600;color:var(--brand);display:flex;align-items:center;justify-content:center;transition:.2s;}
+.step button:active{background:var(--brand);color:#fff;}
+.step input{width:46px;height:30px;text-align:center;border:none;background:transparent;font-size:16px;}
+
+/* Bottom Sheet */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(14px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;}
+.pill{font-size:15px;color:var(--muted);}
+.primary{background:var(--brand);color:#fff;border:none;padding:12px 22px;border-radius:12px;font-weight:600;font-size:16px;cursor:pointer;transition:.2s;}
+.primary:active{opacity:.8;}
+
+/* Toast */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:80px;background:rgba(0,0,0,.8);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:99999;pointer-events:none;}
+.toast.show{opacity:1;}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:50;display:none;background:rgba(0,0,0,.4);backdrop-filter:blur(2px);}
+.modal.open{display:grid;place-items:end center;}
+.modal .panel{width:100%;max-width:920px;background:#fff;border-radius:20px 20px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));}
+.panel h2{margin:0 0 12px;font-size:18px;font-weight:700;text-align:center;}
+.panel textarea{width:100%;min-height:220px;border:none;resize:none;font-size:15px;color:var(--ink);background:#f9f9f9;border-radius:12px;padding:12px;font-family:-apple-system,monospace;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.btn{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#f2f2f7;font-weight:600;cursor:pointer;text-align:center;}
+.btn.danger{background:#fff0f0;color:#d00;}
+</style>
+</head>
+<body>
+  <div class="appbar">เลือก SUPPLY ที่ต้องการ 📦</div>
+
+  <div class="container" id="container"></div>
+
+  <div class="sheet">
+    <div class="pill">เลือกแล้ว <span id="countTotal">0</span> ชิ้น</div>
+    <button id="buildBtn" class="primary">สรุป</button>
+  </div>
+
+  <div id="toast" class="toast">คัดลอกแล้ว</div>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="panel">
+      <h2>สรุปออเดอร์</h2>
+      <textarea id="output" readonly></textarea>
+      <div class="actions">
+        <button class="btn" id="copyBtn">คัดลอก</button>
+        <button class="btn" id="closeBtn">ปิด</button>
+        <button class="btn danger" id="resetBtn">ล้างจำนวน</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const container = document.getElementById('container');
+  const countEl = document.getElementById('countTotal');
+  const toast = document.getElementById('toast');
+  const modal = document.getElementById('modal');
+  const output = document.getElementById('output');
+
+  const GROUPS = [
+    { title: 'กล่อง', items: ['กล่อง 650ml','กล่อง 750ml','กล่อง 1000ml','กล่อง 1200ml']},
+    { title: 'ถ้วย', items: ['ถ้วยน้ำจิ้ม 1oz.','ถ้วยน้ำจิ้ม 2oz.','ถ้วยกลม 4oz.','ฝา 75mm']},
+    { title: 'ถุง', items: ['ถุงใสไฮโซ 8*16','ถุงใสไฮโซ 9*18','ถุงใสไฮโซ 12*20']},
+    { title: 'อื่น ๆ', items: ['ช้อนส้อม + ทิชชู่ (สีดำ)','ช้อนส้อม + ทิชชู่ (สีขาว)','ไม้จิ้มผลไม้','บ๊วยเค็ม']},
+  ];
+
+  function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),1200); }
+
+  function recalcCount(){
+    let total=0;
+    document.querySelectorAll('input[data-name]').forEach(el=> total+=Number(el.value)||0);
+    countEl.textContent=total;
+  }
+
+  function makeStep(name){
+    const wrap=document.createElement('div');
+    wrap.className='row';
+    wrap.innerHTML=`
+      <div class="name">${name}</div>
+      <div class="step">
+        <button type="button" class="dec">−</button>
+        <input type="number" min="0" step="1" value="0" data-name="${name}">
+        <button type="button" class="inc">+</button>
+      </div>`;
+    const dec=wrap.querySelector('.dec');
+    const inc=wrap.querySelector('.inc');
+    const inp=wrap.querySelector('input');
+    dec.addEventListener('click',()=>{inp.value=Math.max(0,(+inp.value||0)-1);recalcCount();});
+    inc.addEventListener('click',()=>{inp.value=(+inp.value||0)+1;recalcCount();});
+    inp.addEventListener('input',recalcCount,{passive:true});
+    return wrap;
+  }
+
+  function render(){
+    container.innerHTML='';
+    GROUPS.forEach(g=>{
+      const block=document.createElement('div');
+      block.className='group';
+      block.innerHTML=`<div class="group-title">${g.title}</div><div class="card"><div class="list"></div></div>`;
+      const list=block.querySelector('.list');
+      g.items.forEach(name=> list.appendChild(makeStep(name)));
+      container.appendChild(block);
+    });
+  }
+
+  function openModal(){modal.classList.add('open');modal.setAttribute('aria-hidden','false');}
+  function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
+
+  function buildSummary(){
+    const lines=[];
+    document.querySelectorAll('input[data-name]').forEach(inp=>{
+      const qty=+inp.value||0;
+      if(qty>0) lines.push(`   • ${inp.dataset.name} x${qty}`);
+    });
+    if(!lines.length){showToast('กรุณาเลือกอย่างน้อย 1 รายการ');return;}
+    output.value=lines.join('\n');
+    openModal();
+  }
+
+  render();
+  document.getElementById('buildBtn').addEventListener('click',buildSummary);
+  document.getElementById('closeBtn').addEventListener('click',closeModal);
+  document.getElementById('copyBtn').addEventListener('click',async ()=>{
+    const text=output.value||'';if(!text.trim())return;
+    showToast('คัดลอกแล้ว');try{await navigator.clipboard.writeText(text);}catch(_){output.select();document.execCommand('copy');}
+  });
+  document.getElementById('resetBtn').addEventListener('click',()=>{
+    document.querySelectorAll('input[data-name]').forEach(inp=> inp.value=0);
+    recalcCount();closeModal();showToast('รีเซ็ตแล้ว');
+  });
+  modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
+});
+</script>
+</body>
+</html>
