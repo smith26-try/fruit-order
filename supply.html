@@ -21,7 +21,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
   padding:12px 16px;
   max-width:920px;
   margin:0 auto;
-  padding-bottom:calc(120px + env(safe-area-inset-bottom)); /* ✅ เพิ่มกันทับ */
+  padding-bottom:calc(120px + env(safe-area-inset-bottom)); /* กันทับกับแถบล่าง */
 }
 .group{margin-bottom:20px;}
 .group-title{font-weight:700;font-size:17px;color:var(--ink);margin-bottom:10px;}
@@ -33,10 +33,29 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family
 .name{font-size:16px;font-weight:500;color:var(--ink);}
 
 /* Stepper */
-.step{display:flex;align-items:center;gap:6px;}
-.step button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:18px;font-weight:600;color:var(--brand);display:flex;align-items:center;justify-content:center;transition:.2s;}
+.step{
+  display:flex;
+  align-items:center;      /* จัดทุกอย่างกึ่งกลางแนวตั้ง */
+  gap:6px;
+}
+.step button{
+  width:30px;height:30px;border-radius:50%;
+  border:1px solid var(--line);background:#fff;cursor:pointer;
+  font-size:18px;font-weight:600;color:var(--brand);
+  display:flex;align-items:center;justify-content:center;transition:.2s;
+}
 .step button:active{background:var(--brand);color:#fff;}
-.step input{width:46px;height:30px;text-align:center;border:none;background:transparent;font-size:16px;}
+.step input{
+  width:46px;height:30px;
+  text-align:center;border:none;background:transparent;font-size:16px;
+  line-height:30px;          /* ✅ ให้ตัวเลขอยู่กลางช่องพอดี */
+  margin:0;padding:0;
+  font-variant-numeric: tabular-nums;
+}
+/* ตัดปุ่มลูกศรของ number ให้ดูนิ่ง และไม่ดันตำแหน่งตัวเลข */
+.step input::-webkit-outer-spin-button,
+.step input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.step input[type=number]{ -moz-appearance:textfield; }
 
 /* Bottom Sheet */
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:12px 16px calc(14px + env(safe-area-inset-bottom));display:flex;justify-content:space-between;align-items:center;}
