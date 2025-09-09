@@ -78,16 +78,40 @@ textarea{min-height:88px;resize:vertical;}
 <body>
   <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 1.9</div></div>
 
-  <div class="container">
-    <div class="group card">
-      <div class="grid2">
-        <div><div class="label">วันที่</div><input id="date" type="date"></div>
-        <div><div class="label">ชื่อลูกค้า</div><input id="name" type="text" placeholder="ไม่ต้องใส่คำว่า คุณ"></div>
-        <div><div class="label">เบอร์ติดต่อ</div><input id="phone" type="tel" inputmode="numeric" placeholder="095-XXX-XXXX"></div>
-        <div><div class="label">ค่าส่ง (บาท)</div><input id="shipping" type="number" min="0" step="1" placeholder="ใส่ตัวเลข ไม่ต้องใส่ ฿"></div>
-        <div style="grid-column:1/-1"><div class="label">สถานที่จัดส่ง</div><textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea></div>
-      </div>
+<div class="grid2">
+  <div>
+    <div class="label">วันที่</div>
+    <input id="date" type="date">
+  </div>
+
+  <div>
+    <div class="label">ชื่อลูกค้า</div>
+    <input id="name" type="text" placeholder="ไม่ต้องใส่คำว่า คุณ">
+  </div>
+
+  <div>
+    <div class="label">เบอร์ติดต่อ</div>
+    <div style="position:relative">
+      <input id="phone" type="tel" inputmode="numeric" placeholder="095-XXX-XXXX">
+      <!-- กล่อง dropdown suggestions -->
+      <div id="phone-suggestions" style="
+        position:absolute;top:100%;left:0;right:0;
+        background:#fff;border:1px solid #ccc;
+        border-radius:8px;max-height:180px;overflow-y:auto;
+        display:none;z-index:1000;"></div>
     </div>
+  </div>
+
+  <div>
+    <div class="label">ค่าส่ง (บาท)</div>
+    <input id="shipping" type="number" min="0" step="1" placeholder="ใส่ตัวเลข ไม่ต้องใส่ ฿">
+  </div>
+
+  <div style="grid-column:1/-1">
+    <div class="label">สถานที่จัดส่ง</div>
+    <textarea id="address" placeholder="ที่อยู่ หรือ จุดนัดรับ"></textarea>
+  </div>
+</div>
 
     <div class="group">
       <div class="label">ออเดอร์</div>
@@ -339,16 +363,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   // ปิดโมดัลเมื่อแตะนอกกระดาน
   modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
   
-  // ===== Autofill Customer from Google Sheet API =====
+// ===== Autofill Customer from Google Sheet API (Dropdown Version) =====
 const phoneEl = document.getElementById('phone');
 const nameEl  = document.getElementById('name');
 const addrEl  = document.getElementById('address');
+const suggestBox = document.getElementById('phone-suggestions');
 
 // วาง URL Web App ที่ได้จาก Apps Script (ลงท้าย /exec)
 const API_URL = 'https://script.google.com/macros/s/AKfycbzUS_chJeI9ysyWQFQpdsAaFrPI5qNVrZX9DBrRvqQ-JsFcAI1X6DbJc1fzHE3d7G7lUw/exec';
 
 const digitsOnly = s => (s || '').replace(/\D/g, '');
-function normalizeThaiPhoneLocal(s) {
+function normalizePhoneLocal(s) {
   let d = digitsOnly(s);
   if (d.startsWith('66')) d = '0' + d.slice(2);
   if (d.length > 10) d = d.slice(-10);
@@ -356,29 +381,52 @@ function normalizeThaiPhoneLocal(s) {
 }
 function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
 
-async function fetchCustomer(phoneRaw){
-  const phone = normalizeThaiPhoneLocal(phoneRaw);
-  if (phone.length < 9) return;                 // รอให้พิมพ์อย่างน้อย 9 ตัว
-  const res = await fetch(`${API_URL}?phone=${encodeURIComponent(phone)}`, { cache:'no-store' })
-                     .catch(()=>null);
+async function fetchCustomerCandidates(phoneRaw){
+  const phone = normalizePhoneLocal(phoneRaw);
+  if (phone.length < 3) { // ต้องกรอกอย่างน้อย 3 หลักก่อนถึงจะค้น
+    suggestBox.style.display='none';
+    return;
+  }
+
+  const res = await fetch(`${API_URL}?phone=${encodeURIComponent(phone)}`, { cache:'no-store' }).catch(()=>null);
   if (!res || !res.ok) return;
   const data = await res.json().catch(()=>null);
-  if (data && data.ok && data.match) {
-    if (!nameEl.value) nameEl.value = data.match.name || '';
-    if (!addrEl.value) addrEl.value = data.match.address || '';
-    if (typeof showToast === 'function') showToast('ดึงข้อมูลลูกค้าแล้ว');
+
+  suggestBox.innerHTML='';
+  if (data && data.ok && data.suggestions && data.suggestions.length) {
+    data.suggestions.forEach(c=>{
+      const item=document.createElement('div');
+      item.textContent=`${c.name} (${c.phone})`;
+      item.style.padding='8px 12px';
+      item.style.cursor='pointer';
+      item.addEventListener('click',()=>{
+        phoneEl.value=c.phone;
+        nameEl.value=c.name;
+        addrEl.value=c.address;
+        suggestBox.style.display='none';
+        if (typeof showToast==='function') showToast('เลือกข้อมูลลูกค้าแล้ว');
+      });
+      suggestBox.appendChild(item);
+    });
+    suggestBox.style.display='block';
+  } else {
+    suggestBox.style.display='none';
   }
 }
 
-const onPhoneInput = debounce(()=>fetchCustomer(phoneEl.value), 300);
+const onPhoneInput = debounce(()=>fetchCustomerCandidates(phoneEl.value), 300);
 
-// ทำให้ช่องเบอร์รับเฉพาะตัวเลข และค้นหาอัตโนมัติ
-phoneEl.addEventListener('input', (e)=>{
-  const cur = e.target.selectionStart;
-  const before = e.target.value;
-  e.target.value = digitsOnly(before); // ลบขีด/ช่องว่างออกทันที
+phoneEl.addEventListener('input', e=>{
+  e.target.value = digitsOnly(e.target.value);
   onPhoneInput();
-}, { passive:true });
+}, {passive:true});
+
+// ปิด dropdown ถ้าคลิกนอกกรอบ
+document.addEventListener('click',e=>{
+  if(!suggestBox.contains(e.target) && e.target!==phoneEl){
+    suggestBox.style.display='none';
+  }
+});
 // ===== End =====
   
 });
