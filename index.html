@@ -76,7 +76,7 @@ textarea{min-height:88px;resize:vertical;}
 </style>
 </head>
 <body>
-  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 1.9</div></div>
+  <div class="appbar"><div class="title">สรุปออเดอร์ฝรั่ง 🍈👩🍊</div><div class="muted">Version 2.0</div></div>
 
   <div class="container">
     <div class="group card">
@@ -365,70 +365,112 @@ document.addEventListener('DOMContentLoaded',()=>{
   // ปิดโมดัลเมื่อแตะนอกกระดาน
   modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
 
-  // ===== ค้นหาลูกค้าจาก Google Sheet แบบ Dropdown =====
-  const phoneEl = document.getElementById('phone');
-  const nameEl  = document.getElementById('name');
-  const addrEl  = document.getElementById('address');
-  const suggestBox = document.getElementById('phone-suggestions');
+// ===== Customer Search (Preload once, then local filter) =====
+const phoneEl = document.getElementById('phone');
+const nameEl  = document.getElementById('name');
+const addrEl  = document.getElementById('address');
+const suggestBox = document.getElementById('phone-suggestions');
 
-  // ใช้ URL Web App ของคุณ (ลงท้าย /exec)
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzUS_chJeI9ysyWQFQpdsAaFrPI5qNVrZX9DBrRvqQ-JsFcAI1X6DbJc1fzHE3d7G7lUw/exec';
+// ใช้ URL Web App ของคุณ (ลงท้าย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbzUS_chJeI9ysyWQFQpdsAaFrPI5qNVrZX9DBrRvqQ-JsFcAI1X6DbJc1fzHE3d7G7lUw/exec';
 
-  const digitsOnly = s => (s || '').replace(/\D/g, '');
-  function normalizePhoneLocal(s){
-    let d = digitsOnly(s);
-    if (d.startsWith('66')) d = '0' + d.slice(2);
-    if (d.length > 10) d = d.slice(-10);
-    return d;
-  }
-  function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+const digitsOnly = s => (s || '').replace(/\D/g, '');
+function normalizePhoneLocal(s){
+  let d = digitsOnly(s);
+  if (d.startsWith('66')) d = '0' + d.slice(2);
+  if (d.length > 10) d = d.slice(-10);
+  return d;
+}
 
-  async function fetchCustomerCandidates(phoneRaw){
-    const phone = normalizePhoneLocal(phoneRaw);
-    if (phone.length < 3){ suggestBox.style.display='none'; return; }
+// --- preload ---
+let CUSTOMER_DATA = null; // [{name,phone,address}, ...]
+let preloadPromise = null;
 
-    const res = await fetch(`${API_URL}?phone=${encodeURIComponent(phone)}`, { cache:'no-store' }).catch(()=>null);
-    if (!res || !res.ok) return;
-    const data = await res.json().catch(()=>null);
+async function ensureCustomersLoaded() {
+  if (CUSTOMER_DATA) return CUSTOMER_DATA;
+  if (preloadPromise) return preloadPromise;
 
-    suggestBox.innerHTML='';
-    if (data && data.ok && data.suggestions && data.suggestions.length){
-      data.suggestions.forEach(c=>{
-        const item=document.createElement('div');
-        item.textContent=`${c.name} (${c.phone})`;
-        item.style.padding='8px 12px';
-        item.style.cursor='pointer';
-        item.style.borderBottom='1px solid #eee';
-        item.addEventListener('mouseenter',()=>{ item.style.background='#f5f7fa'; });
-        item.addEventListener('mouseleave',()=>{ item.style.background='transparent'; });
-        item.addEventListener('click',()=>{
-          phoneEl.value=c.phone;
-          nameEl.value=c.name;
-          addrEl.value=c.address;
-          suggestBox.style.display='none';
-          showToast('เลือกข้อมูลลูกค้าแล้ว');
-        });
-        suggestBox.appendChild(item);
-      });
-      suggestBox.style.display='block';
-    }else{
-      suggestBox.style.display='none';
+  // ลองใช้ localStorage เพื่อลดความหน่วงรอบต่อไป (optional)
+  try {
+    const cached = localStorage.getItem('customers_cache_v2');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length) {
+        CUSTOMER_DATA = parsed;
+        return CUSTOMER_DATA;
+      }
     }
-  }
+  } catch(_) {}
 
-  const onPhoneInput = debounce(()=>fetchCustomerCandidates(phoneEl.value), 50);
+  preloadPromise = fetch(`${API_URL}?all=1`, { cache:'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (j && j.ok && Array.isArray(j.data)) {
+        // normalize phone ล่วงหน้าเพื่อค้นหาเร็ว
+        CUSTOMER_DATA = j.data.map(x => ({...x, phone: normalizePhoneLocal(x.phone) }));
+        try { localStorage.setItem('customers_cache_v2', JSON.stringify(CUSTOMER_DATA)); } catch(_) {}
+        return CUSTOMER_DATA;
+      }
+      return [];
+    })
+    .catch(()=>[])
+    .finally(()=>{ preloadPromise = null; });
+  return preloadPromise;
+}
 
-  phoneEl.addEventListener('input', e=>{
-    e.target.value = digitsOnly(e.target.value);
-    onPhoneInput();
-  }, {passive:true});
-
-  // ปิด dropdown เมื่อคลิกนอกกรอบ
-  document.addEventListener('click',e=>{
-    if(!suggestBox.contains(e.target) && e.target!==phoneEl){
+// --- render dropdown ---
+function renderSuggestions(list){
+  suggestBox.innerHTML = '';
+  if (!list.length) { suggestBox.style.display='none'; return; }
+  list.slice(0,30).forEach(c=>{
+    const item=document.createElement('div');
+    item.textContent=`${c.name} (${c.phone})`;
+    item.style.padding='8px 12px';
+    item.style.cursor='pointer';
+    item.style.borderBottom='1px solid #eee';
+    item.addEventListener('mouseenter',()=>{ item.style.background='#f5f7fa'; });
+    item.addEventListener('mouseleave',()=>{ item.style.background='transparent'; });
+    item.addEventListener('click',()=>{
+      phoneEl.value=c.phone;
+      nameEl.value=c.name;
+      addrEl.value=c.address;
       suggestBox.style.display='none';
-    }
+      if (typeof showToast==='function') showToast('เลือกข้อมูลลูกค้าแล้ว');
+    });
+    suggestBox.appendChild(item);
   });
+  suggestBox.style.display='block';
+}
+
+// --- search local ---
+async function onPhoneChanged(){
+  const q = normalizePhoneLocal(phoneEl.value);
+  if (q.length < 3) { suggestBox.style.display='none'; return; }
+
+  const rows = await ensureCustomersLoaded();
+  if (!rows || !rows.length) { suggestBox.style.display='none'; return; }
+
+  // ค้นหาแบบ includes (หรือ startsWith ถ้าต้องการ)
+  const matches = rows.filter(r => r.phone.includes(q));
+  renderSuggestions(matches);
+}
+
+// input handler
+phoneEl.addEventListener('input', e=>{
+  e.target.value = digitsOnly(e.target.value);
+  // ยิงทันที (local filter เร็วมาก) — ถ้ายังอยากกันสั่น ใส่ debounce 50–100ms ได้
+  onPhoneChanged();
+}, { passive:true });
+
+// โหลดข้อมูลตั้งแต่ตอน focus ช่องเบอร์ เพื่อซ่อนดีเลย์ครั้งแรก
+phoneEl.addEventListener('focus', () => { ensureCustomersLoaded(); });
+
+// ปิด dropdown เมื่อคลิกนอกกรอบ
+document.addEventListener('click',e=>{
+  if(!suggestBox.contains(e.target) && e.target!==phoneEl){
+    suggestBox.style.display='none';
+  }
+});
 });
 </script>
 </body>
