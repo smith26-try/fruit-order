@@ -338,6 +338,49 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   // ปิดโมดัลเมื่อแตะนอกกระดาน
   modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+  
+  // ===== Autofill Customer from Google Sheet API =====
+const phoneEl = document.getElementById('phone');
+const nameEl  = document.getElementById('name');
+const addrEl  = document.getElementById('address');
+
+// วาง URL Web App ที่ได้จาก Apps Script (ลงท้าย /exec)
+const API_URL = 'https://script.google.com/macros/s/AKfycbzUS_chJeI9ysyWQFQpdsAaFrPI5qNVrZX9DBrRvqQ-JsFcAI1X6DbJc1fzHE3d7G7lUw/exec';
+
+const digitsOnly = s => (s || '').replace(/\D/g, '');
+function normalizeThaiPhoneLocal(s) {
+  let d = digitsOnly(s);
+  if (d.startsWith('66')) d = '0' + d.slice(2);
+  if (d.length > 10) d = d.slice(-10);
+  return d;
+}
+function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+async function fetchCustomer(phoneRaw){
+  const phone = normalizeThaiPhoneLocal(phoneRaw);
+  if (phone.length < 9) return;                 // รอให้พิมพ์อย่างน้อย 9 ตัว
+  const res = await fetch(`${API_URL}?phone=${encodeURIComponent(phone)}`, { cache:'no-store' })
+                     .catch(()=>null);
+  if (!res || !res.ok) return;
+  const data = await res.json().catch(()=>null);
+  if (data && data.ok && data.match) {
+    if (!nameEl.value) nameEl.value = data.match.name || '';
+    if (!addrEl.value) addrEl.value = data.match.address || '';
+    if (typeof showToast === 'function') showToast('ดึงข้อมูลลูกค้าแล้ว');
+  }
+}
+
+const onPhoneInput = debounce(()=>fetchCustomer(phoneEl.value), 300);
+
+// ทำให้ช่องเบอร์รับเฉพาะตัวเลข และค้นหาอัตโนมัติ
+phoneEl.addEventListener('input', (e)=>{
+  const cur = e.target.selectionStart;
+  const before = e.target.value;
+  e.target.value = digitsOnly(before); // ลบขีด/ช่องว่างออกทันที
+  onPhoneInput();
+}, { passive:true });
+// ===== End =====
+  
 });
 </script>
 </body>
