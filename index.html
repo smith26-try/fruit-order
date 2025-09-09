@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   }
 
-  const onPhoneInput = debounce(()=>fetchCustomerCandidates(phoneEl.value), 300);
+  const onPhoneInput = debounce(()=>fetchCustomerCandidates(phoneEl.value), 50);
 
   phoneEl.addEventListener('input', e=>{
     e.target.value = digitsOnly(e.target.value);
