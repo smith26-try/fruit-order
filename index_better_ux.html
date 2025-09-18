@@ -471,17 +471,16 @@ function summarize(){
 
   const txt =
 `${d}
-ออเดอร์คุณ : ${nameEl.value||'-'}
-โทร : ${phone.value||'-'}
+ออเดอร์คุณ ${nameEl.value||'-'}
+(${phone.value||'-'})
 
 รายการคำสั่งซื้อ
-${lines.length?lines.join('\\n'):'・(ยังไม่มีรายการ)'}
+${lines.length?lines.join('\n'):'・(ยังไม่มีรายการ)'}
 
-ค่าส่ง : ${shippingVal}฿
-รวมทั้งหมด : ${grand}฿
+ค่าส่ง ${shippingVal}฿
+รวมทั้งหมด ${grand}฿
 
-📍${address.value||'-'}
-‼️${note.value||''}`;
+📍 ${address.value||'-'}`;
 
   summaryText.textContent = txt;
   modalWrap.style.display='flex';
