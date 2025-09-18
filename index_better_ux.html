@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fruit Order App</title>
+  <style>
+    :root{
+      --green:#1b7f46;
+      --green2:#67b57f;
+      --bg:#f3f4f6;
+      --card:#79a88c;
+      --ink:#14221a;
+    }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);margin:0;padding:16px 16px 96px}
+    h1{margin:0 0 10px;font-size:20px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .box{background:#e3f0e7;border-radius:14px;padding:14px}
+    .input{width:100%;padding:12px 14px;border:1px solid #cfe1d6;border-radius:12px;font-size:16px;background:#fff}
+    .pill{padding:12px 16px;border-radius:999px;background:var(--green);color:#fff;font-weight:700;text-align:center;display:inline-block;border:none;cursor:pointer}
+    .suggest{position:relative}
+    .suggest-list{position:absolute;z-index:20;top:100%;left:0;right:0;background:#fff;border:1px solid #d1d5db;border-radius:10px;max-height:220px;overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+    .suggest-item{padding:10px 12px;cursor:pointer}
+    .suggest-item:hover{background:#f3f4f6}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:18px 0}
+    .card{background:var(--card);border-radius:22px;padding:22px;text-align:center;font-size:22px;color:var(--ink);font-weight:800;cursor:pointer;user-select:none}
+    .footer{position:fixed;left:0;right:0;bottom:0;background:#e5e5e5;padding:14px 16px;display:flex;gap:14px;justify-content:center;box-shadow:0 -6px 16px rgba(0,0,0,.08)}
+    .btn{border:none;border-radius:18px;padding:14px 20px;font-size:18px;font-weight:700;cursor:pointer}
+    .btn-primary{background:var(--green2);color:#0b381f}
+    .btn-danger{background:#e45a52;color:#fff}
+    .hint{color:#9ca3af}
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{background:#fff;border-radius:16px;max-width:680px;width:94%;padding:16px 16px 12px}
+    .modal pre{white-space:pre-wrap;background:#f7f7f7;border:1px solid #e5e7eb;border-radius:10px;padding:10px;max-height:50vh;overflow:auto}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+    .menu-grid{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+    @media (max-width:760px){ .grid{grid-template-columns:repeat(2,1fr)} }
+    .badge{position:fixed;top:8px;right:12px;font-size:14px;font-weight:bold;color:#555}
+  </style>
+</head>
+<body>
+  <div class="badge">Version Better UI 1.8</div>
+  <h1>Fruit Order</h1>
+  <!-- วันที่ -->
+  <div style="margin-bottom:14px">
+    <button id="btnDate" class="pill">วันที่</button>
+    <input id="dateHidden" type="date" style="display:none" />
+    <span id="dateText" style="margin-left:12px;font-weight:700"></span>
+  </div>
+
+  <!-- กล่องข้อมูลลูกค้า -->
+  <div class="box">
+    <div class="row">
+      <div class="suggest">
+        <input id="name" class="input" placeholder="ชื่อ" autocomplete="off" />
+        <div id="nameList" class="suggest-list" style="display:none"></div>
+      </div>
+      <div class="suggest">
+        <!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
+        <input id="phone" class="input" type="text" placeholder="เบอร์โทร" autocomplete="off" maxlength="10" />
+        <div id="phoneList" class="suggest-list" style="display:none"></div>
+      </div>
+    </div>
+    <div class="row">
+      <input id="address" class="input" placeholder="สถานที่จัดส่ง" />
+      <!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
+      <input id="shipping" class="input" type="text" placeholder="ค่าส่ง" autocomplete="off" maxlength="6" />
+    </div>
+    <div class="row">
+      <input id="note" class="input" placeholder="หมายเหตุ" />
+      <div></div>
+    </div>
+  </div>
+
+  <!-- ปุ่มเมนูสินค้า -->
+  <div class="grid">
+    <div class="card" onclick="openMenu('ฝรั่ง')">ฝรั่ง</div>
+    <div class="card" onclick="openMenu('มะม่วง')">มะม่วง</div>
+    <div class="card" onclick="openMenu('ส้ม')">ส้ม</div>
+    <div class="card" onclick="openMenu('กระท้อน')">กระท้อน</div>
+    <div class="card" onclick="openMenu('ผลไม้รวม')">ผลไม้รวม</div>
+    <div class="card" onclick="openMenu('เรทส่ง')">เรทส่ง</div>
+    <div class="card" style="grid-column:2/3" onclick="openMenu('อื่น ๆ')">อื่น ๆ</div>
+  </div>
+
+  <div class="footer">
+    <button class="btn btn-primary" onclick="summarize()">สรุปออเดอร์</button>
+    <button class="btn btn-danger" onclick="clearAll()">ล้างรายการ</button>
+  </div>
+
+  <!-- Modal Summary -->
+  <div id="modalWrap" class="modal-backdrop">
+    <div class="modal">
+      <h3 style="margin:0 0 8px">สรุปออเดอร์</h3>
+      <pre id="summaryText"></pre>
+      <div class="modal-actions">
+        <button class="btn" onclick="copySummary()">คัดลอก</button>
+        <button class="btn btn-primary" onclick="printSummary()">พิมพ์</button>
+        <button class="btn btn-danger" onclick="closeModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Menu (เลือกสินค้า) -->
+  <div id="menuWrap" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="menuTitle" style="margin:0 0 8px">เลือกสินค้า</h3>
+      <div id="menuBody" class="menu-grid"></div>
+      <div class="modal-actions" style="margin-top:12px">
+        <button class="btn" id="btnMenuBack">กลับ</button>
+        <button class="btn btn-danger" id="btnMenuDelete">ลบ</button>
+        <button class="btn btn-primary" id="btnMenuConfirm">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/*** ตั้งค่า URL ของ Apps Script Web App ***/
+const GAS_BASE = 'https://script.google.com/macros/s/AKfycbx0UDI3YS2xRExAAEaBpOm8M1SkbWC_2q84f4HLlEX8k4gW_yy5EQGVq1e2v2lN4oAJAA/exec';
+const GAS_SEARCH = (q) => `${GAS_BASE}?q=${encodeURIComponent(q)}`;  // รองรับคีย์ ?q= ชื่อ/เบอร์
+
+/* ====== วันที่ (DD/MM/YYYY) ====== */
+const btnDate = document.getElementById('btnDate');
+const dateHidden = document.getElementById('dateHidden');
+const dateText = document.getElementById('dateText');
+const toDDMMYYYY = d => {
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+};
+(function setToday(){ const d=new Date(); dateHidden.valueAsDate=d; dateText.textContent=toDDMMYYYY(d);}());
+btnDate.addEventListener('click', ()=> dateHidden.showPicker ? dateHidden.showPicker() : dateHidden.focus());
+dateHidden.addEventListener('change', ()=> dateText.textContent = toDDMMYYYY(new Date(dateHidden.value)));
+
+/* ====== อ้างอิง DOM อินพุต ====== */
+const nameEl = document.getElementById('name');
+const phone = document.getElementById('phone');
+const shipping = document.getElementById('shipping');
+const nameList = document.getElementById('nameList');
+const phoneList = document.getElementById('phoneList');
+const address = document.getElementById('address');
+const note = document.getElementById('note');
+
+/* ====== ระบบค้นหา (แบบ v1.3 ปรับให้เสถียร + cache) ====== */
+let debounceT;
+const debounce = (fn,ms)=> (...a)=>{ clearTimeout(debounceT); debounceT=setTimeout(()=>fn(...a),ms); };
+
+const suggestCache = new Map(); // ลดการยิง API
+async function fetchSuggest(q){
+  if(!q || q.length < 2) return [];
+  if(suggestCache.has(q)) return suggestCache.get(q);
+  try{
+    const res = await fetch(GAS_SEARCH(q));
+    if(!res.ok) return [];
+    const js = await res.json();
+    if(js && js.ok && Array.isArray(js.suggestions)) {
+      suggestCache.set(q, js.suggestions);
+      return js.suggestions;
+    }
+    if(Array.isArray(js)) return js; // เผื่อโหมดเก่า
+    return [];
+  }catch(err){
+    console.error('fetchSuggest error', err);
+    return [];
+  }
+}
+
+function showList(anchor,list,data,fill){
+  if(!data.length){
+    list.innerHTML = `
+      <div class="suggest-item" style="color:#666">ไม่พบข้อมูล</div>
+      <div class="suggest-item" style="color:#0b381f;font-weight:700">➕ เพิ่มลูกค้าใหม่</div>`;
+    list.style.display='block';
+    list.onclick = (e)=>{
+      if(e.target.closest('.suggest-item') && e.target.textContent.includes('เพิ่มลูกค้า')) addCustomerPrompt();
+    };
+    document.addEventListener('click', (e)=>{ if(!anchor.contains(e.target)) list.style.display='none'; }, {once:true});
+    return;
+  }
+  list.innerHTML = data.map((x,i)=>`<div class="suggest-item" data-i="${i}">
+      <div><b>${x.name||'-'}</b> · ${x.phone||''}</div>
+      <div class="hint">${x.address||''}</div>
+    </div>`).join('');
+  list.style.display='block';
+  list.onclick = (e)=>{
+    const item = e.target.closest('.suggest-item'); if(!item) return;
+    const o = data[+item.dataset.i]; fill(o); list.style.display='none';
+  };
+  document.addEventListener('click', (e)=>{ if(!anchor.contains(e.target)) list.style.display='none'; }, {once:true});
+}
+
+const searchByName = debounce(async()=>{
+  const data = await fetchSuggest(nameEl.value.trim());
+  showList(nameEl.parentElement, nameList, data, o=>{
+    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\\D+/g,'');
+    address.value=o.address||''; note.value=o.note||'';
+  });
+}, 100);
+
+const searchByPhone = debounce(async()=>{
+  const data = await fetchSuggest(phone.value.trim());
+  showList(phone.parentElement, phoneList, data, o=>{
+    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\\D+/g,'');
+    address.value=o.address||''; note.value=o.note||'';
+  });
+}, 100);
+
+nameEl.addEventListener('input', searchByName);
+phone.addEventListener('input', searchByPhone);
+
+/* ====== เพิ่มลูกค้าใหม่ (POST ไปที่ Apps Script) ====== */
+async function addCustomerPrompt(){
+  const newCust = {
+    name: nameEl.value.trim(),
+    phone: phone.value.replace(/\\D+/g,'').trim(),
+    address: address.value.trim(),
+    note: note.value.trim()
+  };
+  if(!newCust.name || !newCust.phone){
+    alert("กรุณาใส่ชื่อและเบอร์ก่อนเพิ่มลูกค้าใหม่"); return;
+  }
+  if(!confirm(`เพิ่มลูกค้าใหม่?\\n\\nชื่อ: ${newCust.name}\\nเบอร์: ${newCust.phone}`)) return;
+  try{
+    const res = await fetch(GAS_BASE, { method: 'POST', body: JSON.stringify({ action:'add', customer:newCust }) });
+    const r = await res.json();
+    alert(r.ok ? 'เพิ่มลูกค้าเรียบร้อย' : ('เพิ่มไม่สำเร็จ: '+(r.message||'Unknown')));
+  }catch(err){
+    alert('เพิ่มไม่สำเร็จ: ' + err.message);
+  }
+}
+
+/* =========================
+   คลังสินค้า + ตะกร้า (state) + เมนู
+   ========================= */
+const cart = new Map(); // key = item.id, value = { id,name,unit,qty,subtotal,category }
+
+const catalog = {
+  'ฝรั่ง': [
+    { id:'guava_s', name:'ฝรั่งเล็ก',  unit:39 },
+    { id:'guava_l', name:'ฝรั่งใหญ่', unit:69 },
+  ],
+  'มะม่วง': [
+    { id:'mango',       name:'มะม่วง',                     unit:40 },
+    { id:'nm_shrimp',   name:'น้ำปลาหวานกุ้งแห้ง',       unit:29 },
+    { id:'nm_fish',     name:'น้ำปลาหวานปลาป่น',         unit:29 },
+    { id:'set_m_shr',   name:'มะม่วง + น้ำปลาหวานกุ้งแห้ง', unit:69 },
+    { id:'set_m_fish',  name:'มะม่วง + น้ำปลาหวานปลาป่น',   unit:69 },
+  ],
+  'ส้ม': [
+    { id:'or_tw_s', name:'— ส้มไต้หวัน —', sep:true },
+    { id:'or_tw_s_p', name:'ส้มไต้หวันเล็ก',  unit:49 },
+    { id:'or_tw_l_p', name:'ส้มไต้หวันใหญ่', unit:89 },
+
+    { id:'or_au_s', name:'— ส้มออสเตรเลีย —', sep:true },
+    { id:'or_au_s_p', name:'ส้มออสเตรเลียเล็ก',  unit:59 },
+    { id:'or_au_l_p', name:'ส้มออสเตรเลียใหญ่', unit:99 },
+
+    { id:'or_ch_s', name:'— ส้มเช้ง —', sep:true },
+    { id:'or_ch_s_p', name:'ส้มเช้งเล็ก',  unit:49 },
+    { id:'or_ch_l_p', name:'ส้มเช้งใหญ่', unit:89 },
+  ],
+  'กระท้อน': [
+    { id:'santorn_mix', name:'กระท้อนทรงเครื่อง', unit:69 },
+    { id:'santorn_nm',  name:'กระท้อนน้ำปลาหวาน', unit:69 },
+  ],
+  // ผลไม้รวม: โปร 3 กล่อง = 100, กลุ่มละ 3 = 100, ที่เหลือ * 35
+  'ผลไม้รวม': [
+    { id:'mixbox', name:'ผลไม้รวม', unit:35, special:'mixRule' }
+  ],
+  'เรทส่ง': [
+    { id:'ws_guava_s_33', name:'ฝรั่งเล็ก',  unit:33 },
+    { id:'ws_guava_s_35', name:'ฝรั่งเล็ก (อีกไซส์)',  unit:35 },
+    { id:'ws_guava_l_65', name:'ฝรั่งใหญ่', unit:65 },
+    { id:'ws_custom', name:'— อื่น ๆ (กำหนดเอง) —', custom:true }
+  ],
+  'อื่น ๆ': [
+    { id:'misc_custom', name:'— กำหนดเอง —', custom:true }
+  ]
+};
+
+// กฎราคา "ผลไม้รวม"
+function priceMix(q){ // 3=100 / กลุ่มละ 3 = 100
+  if(!q) return 0;
+  const groups = Math.floor(q/3);
+  const rest   = q%3;
+  return groups*100 + rest*35;
+}
+
+/* ====== Modal เมนูสินค้า ====== */
+const menuWrap = document.getElementById('menuWrap');
+const menuTitle = document.getElementById('menuTitle');
+const menuBody  = document.getElementById('menuBody');
+const btnMenuBack = document.getElementById('btnMenuBack');
+const btnMenuDelete = document.getElementById('btnMenuDelete');
+const btnMenuConfirm = document.getElementById('btnMenuConfirm');
+
+let currentCategory = null;
+
+function openMenu(category){
+  currentCategory = category;
+  menuTitle.textContent = category;
+  renderMenu(category);
+  menuWrap.style.display = 'flex';
+}
+
+function closeMenu(){
+  menuWrap.style.display = 'none';
+  currentCategory = null;
+}
+
+function renderMenu(category){
+  const items = catalog[category] || [];
+  menuBody.innerHTML = '';
+
+  items.forEach(it=>{
+    if(it.sep){
+      const sep = document.createElement('div');
+      sep.textContent = it.name;
+      sep.style.gridColumn = '1 / -1';
+      sep.style.color = '#6b7280';
+      sep.style.fontWeight = '700';
+      sep.style.margin = '8px 0 4px';
+      menuBody.appendChild(sep);
+      return;
+    }
+
+    // ชื่อสินค้า
+    const nameEl = document.createElement('div');
+    nameEl.textContent = it.name + (it.unit ? ` (${it.unit}฿)` : '');
+    nameEl.style.fontWeight = '600';
+
+    // ช่องจำนวน
+    const qtyEl = document.createElement('input');
+    qtyEl.type = 'number';
+    qtyEl.min = '0';
+    qtyEl.placeholder = 'จำนวน';
+    qtyEl.className = 'input';
+    qtyEl.style.width = '100px';
+
+    // ยอดรวมแสดงผล
+    const sumEl = document.createElement('div');
+    sumEl.style.textAlign = 'right';
+    sumEl.style.fontWeight = '700';
+
+    // โหลด qty จาก cart ถ้ามี
+    const saved = cart.get(it.id);
+    if(saved) qtyEl.value = saved.qty;
+
+    // อัปเดตยอดรวมเมื่อกรอก
+    function updateSum(){
+      const q = parseInt(qtyEl.value||'0',10);
+      let subtotal = 0;
+      if(it.special === 'mixRule'){
+        subtotal = priceMix(q);
+      }else if(it.custom){
+        // subtotal คำนวณตอน confirm (ต้องมีราคา)
+      }else{
+        subtotal = q * (it.unit||0);
+      }
+      sumEl.textContent = q>0 ? `${subtotal}฿` : '';
+    }
+    qtyEl.addEventListener('input', updateSum);
+    updateSum();
+
+    // ถ้า custom ให้เพิ่ม input ชื่อ/ราคา
+    if(it.custom){
+      const nameInput = document.createElement('input');
+      nameInput.className = 'input';
+      nameInput.placeholder = 'ชื่อเมนู (ระบุเอง)';
+      nameInput.style.gridColumn = '1 / span 1';
+
+      const priceInput = document.createElement('input');
+      priceInput.className = 'input';
+      priceInput.placeholder = 'ราคา/หน่วย';
+      priceInput.inputMode = 'numeric';
+      priceInput.pattern = '\\\\d*';
+      priceInput.style.width = '120px';
+
+      // โหลด state
+      if(saved){
+        nameInput.value = saved.name || '';
+        priceInput.value = saved.unit || '';
+      }
+
+      // ปรับคอลัมน์: ชื่อ | ราคา | จำนวน | รวม
+      nameEl.textContent = ''; // ไม่ใช้ชื่อคงที่
+      menuBody.appendChild(nameInput);
+      menuBody.appendChild(priceInput);
+      menuBody.appendChild(qtyEl);
+      menuBody.appendChild(sumEl);
+
+      // บันทึก accessor สำหรับ confirm
+      qtyEl._custom = { nameInput, priceInput, item: it, sumEl, updater: updateSum };
+      priceInput.addEventListener('input', updateSum);
+      nameInput.addEventListener('input', updateSum);
+      return;
+    }
+
+    // ปกติ: ชื่อ | จำนวน | รวม
+    menuBody.appendChild(nameEl);
+    menuBody.appendChild(qtyEl);
+    menuBody.appendChild(sumEl);
+
+    // เก็บไว้ใช้ตอน confirm
+    qtyEl._item = it;
+  });
+}
+
+function saveCategory(){
+  const nodes = menuBody.querySelectorAll('input[type=number]');
+  nodes.forEach(qtyEl=>{
+    let it = qtyEl._item || (qtyEl._custom && qtyEl._custom.item);
+    if(!it) return;
+    const q = parseInt(qtyEl.value||'0',10);
+
+    if(it.custom){
+      const { nameInput, priceInput } = qtyEl._custom;
+      const unit = parseInt((priceInput.value||'0').replace(/[^\\d]/g,''),10) || 0;
+      const name = (nameInput.value||'').trim() || 'รายการกำหนดเอง';
+      const subtotal = unit * q;
+      if(q>0){
+        cart.set(it.id, { id: it.id, name, unit, qty: q, subtotal, category: currentCategory });
+      }else{
+        cart.delete(it.id);
+      }
+      return;
+    }
+
+    if(it.special === 'mixRule'){
+      if(q>0){
+        cart.set(it.id, { id: it.id, name: it.name, unit: it.unit, qty: q, subtotal: priceMix(q), category: currentCategory });
+      }else{
+        cart.delete(it.id);
+      }
+      return;
+    }
+
+    // ปกติ
+    if(q>0){
+      cart.set(it.id, { id: it.id, name: it.name, unit: it.unit, qty: q, subtotal: q*it.unit, category: currentCategory });
+    }else{
+      cart.delete(it.id);
+    }
+  });
+}
+
+btnMenuConfirm.onclick = ()=>{ saveCategory(); closeMenu(); };
+btnMenuBack.onclick    = ()=>{ saveCategory(); closeMenu(); };
+btnMenuDelete.onclick  = ()=>{
+  for(const [k,v] of cart.entries()){
+    if(v.category === currentCategory) cart.delete(k);
+  }
+  closeMenu();
+};
+
+/* ====== SUMMARY ====== */
+const modalWrap = document.getElementById('modalWrap');
+const summaryText = document.getElementById('summaryText');
+
+function summarize(){
+  const d = dateText.textContent || toDDMMYYYY(new Date());
+  let lines = [];
+  let sum = 0;
+  for(const v of cart.values()){
+    lines.push(`・${v.name} × ${v.qty} (${v.subtotal}฿)`);
+    sum += v.subtotal;
+  }
+  const shippingVal = parseInt((shipping.value||'0').replace(/[^\\d]/g,''),10) || 0;
+  const grand = sum + shippingVal;
+
+  const txt =
+`${d}
+ออเดอร์คุณ : ${nameEl.value||'-'}
+โทร : ${phone.value||'-'}
+
+รายการคำสั่งซื้อ
+${lines.length?lines.join('\\n'):'・(ยังไม่มีรายการ)'}
+
+ค่าส่ง : ${shippingVal}฿
+รวมทั้งหมด : ${grand}฿
+
+📍${address.value||'-'}
+‼️${note.value||''}`;
+
+  summaryText.textContent = txt;
+  modalWrap.style.display='flex';
+}
+
+function closeModal(){ modalWrap.style.display='none'; }
+
+async function copySummary(){
+  try{
+    await navigator.clipboard.writeText(summaryText.textContent||'');
+    alert('คัดลอกแล้ว');
+  }catch{ alert('คัดลอกไม่ได้บนเบราว์เซอร์นี้'); }
+}
+
+function printSummary(){
+  const w = window.open('','_blank');
+  w.document.write(`<pre style="font-family:system-ui;white-space:pre-wrap">${summaryText.textContent}</pre>`);
+  w.document.close(); w.focus(); w.print();
+}
+
+function clearAll(){
+  nameEl.value=''; phone.value=''; address.value=''; shipping.value=''; note.value='';
+  cart.clear();
+}
+</script>
+</body>
+</html>
