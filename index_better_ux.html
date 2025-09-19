@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fruit Order App</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Fruit Order App</title>
+<style>
     :root{
       --green:#1b7f46;
       --green2:#67b57f;
@@ -39,83 +40,513 @@
     @media (max-width:760px){ .grid{grid-template-columns:repeat(2,1fr)} }
     .badge{position:fixed;top:8px;right:12px;font-size:14px;font-weight:bold;color:#555}
   </style>
+<!-- iOS UI fix v1.9.1 -->
+<style>
+  /* iOS-like clean spacing and readable controls */
+  :root{
+    --ios-bg:#f5f5f7;
+    --ios-border:#E5E7EB;
+    --ios-fg:#111827;
+    --ios-muted:#6B7280;
+    --ios-radius:14px;
+  }
+  /* Page background stays subtle */
+  body{ background: var(--ios-bg); }
+  /* Group wrappers: stack label chip above input */
+  .date-group, .date-row, .date-section{
+    display:flex; flex-direction:column; gap:8px;
+  }
+
+  /* Force any 'วันที่' badge/button to stop overlapping */
+  .label-chip, .chip, .badge, .tag, #btnDate, .btn-date{
+    position: static !important;
+    display:inline-flex;
+    align-items:center;
+    height:28px;
+    padding:0 12px;
+    background:#16a34a;
+    color:#fff;
+    font-weight:600;
+    border-radius:9999px;
+    width: fit-content;
+    box-shadow: none;
+    margin: 0 0 4px 0;
+  }
+
+  /* Make native date input look consistent with iOS fields */
+  input[type="date"].input, #dateHidden.input, input[type="date"]#dateHidden{
+    width:100%;
+    height:48px;
+    border:1px solid var(--ios-border);
+    border-radius: var(--ios-radius);
+    padding: 10px 14px;
+    background:#fff;
+    color: var(--ios-fg);
+    font-size:16px;
+    line-height:1.2;
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+  }
+
+  /* Calendar icon alignment (Safari/iOS) */
+  input[type="date"]::-webkit-date-and-time-value { min-height: 28px; }
+  input[type="date"]::-webkit-datetime-edit { padding: 4px 0; }
+  input[type="date"]::-webkit-calendar-picker-indicator { margin-right: 6px; }
+
+  /* The formatted date text below the input */
+  #dateText, .date-text{
+    margin-top:6px;
+    color: var(--ios-fg);
+    font-weight:600;
+    letter-spacing: .2px;
+  }
+
+  /* Prevent any absolute layout from previous styles in the date row */
+  .date-row * { top:auto !important; left:auto !important; right:auto !important; }
+
+  /* Container breathing room if there is a narrow header bar */
+  .container, .wrap, .content { padding-top: 16px; }
+
+  /* Keep input focus neat (iOS style) */
+  input[type="date"].input:focus, #dateHidden.input:focus{
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.25);
+    border-color: #93C5FD;
+  }
+
+  /* Reduce oversized border radii from previous styles */
+  .input{ border-radius: var(--ios-radius) !important; }
+</style>
+<style>
+  /* Extra spacing for date section */
+  .date-group, .date-row, .date-section{
+    gap:14px !important;
+    margin-bottom: 16px;
+  }
+  #dateText{ margin-top:10px !important; }
+  /* Placeholder for date input */
+  
+</style>
+
+<!-- iOS Green Theming Overrides v1.9.1 -->
+<style>
+  :root{
+    --g0:#0E7C44;           /* primary green (dark) */
+    --g1:#11A05A;           /* primary green */
+    --g2:#B9E7CE;           /* mint highlight */
+    --ink:#111827;          /* text */
+    --muted:#6B7280;        /* secondary text */
+    --bg:#F5F7F6;           /* app bg */
+    --card:#FFFFFF;         /* surfaces */
+    --radius-lg: 22px;
+    --radius-md: 14px;
+  }
+  html,body{background:var(--bg); color:var(--ink)}
+  body{padding:20px 16px 110px;}
+
+  /* Header title like iOS */
+  h1{
+    font-size:28px;
+    font-weight:800;
+    letter-spacing:.2px;
+    margin:4px 0 16px;
+  }
+
+  /* Date row */
+  #btnDate{
+    background:linear-gradient(180deg, var(--g1), var(--g0));
+    padding:10px 14px;
+    border-radius:999px;
+    box-shadow: 0 2px 8px rgba(16,120,70,.28);
+  }
+  #dateHidden.input{
+    height:52px;
+    border-radius:16px;
+    border:1px solid #E5E7EB;
+    background:#fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+  }
+
+  /* Customer box as soft card */
+  .box{
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    padding:18px;
+    border:1px solid #E6EBE8;
+    box-shadow: 0 6px 24px rgba(15, 58, 34, 0.06);
+  }
+  .row{ gap:14px; margin-bottom:14px; grid-template-columns: 1fr 1fr; }
+  .input{
+    height:48px;
+    border-radius: 14px;
+    border:1px solid #E5E7EB;
+    background:#fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+    font-size:16px;
+  }
+  .input::placeholder{ color:#9CA3AF; }
+
+  /* Category grid cards */
+  .grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap:14px;
+    margin:18px 0 20px;
+  }
+  @media (min-width:760px){
+    .grid{ grid-template-columns: repeat(3, 1fr); }
+  }
+  .card{
+    background: radial-gradient(120% 140% at 0% 0%, var(--g2) 0%, #FFFFFF 55%);
+    border-radius: 20px;
+    padding:18px;
+    font-size:18px;
+    color:#0b381f;
+    font-weight:800;
+    border:1px solid #E6EBE8;
+    box-shadow: 0 10px 24px rgba(28,105,69,.08);
+    transition: transform .08s ease, box-shadow .2s ease;
+  }
+  .card:active{ transform: scale(.98); }
+  .card:hover{ box-shadow: 0 12px 28px rgba(28,105,69,.12); }
+
+  /* Footer actions (bottom bar) */
+  .footer{
+    background: rgba(255,255,255,.8);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-top: 1px solid #E6EBE8;
+    padding: 12px 16px;
+    gap:12px;
+  }
+  .btn{
+    border-radius: 14px;
+    padding: 12px 18px;
+    font-size:16px;
+    font-weight:700;
+  }
+  .btn-primary{
+    background: linear-gradient(180deg, var(--g1), var(--g0));
+    color:#fff;
+    box-shadow: 0 6px 18px rgba(16,120,70,.25);
+  }
+  .btn-danger{
+    background:#ef4444;
+    color:#fff;
+  }
+
+  /* Modal sheet */
+  .modal-backdrop{ background: rgba(0,0,0,.35); }
+  .modal{
+    border-radius: 22px;
+    border:1px solid #E6EBE8;
+    box-shadow: 0 18px 40px rgba(0,0,0,.18);
+    padding: 16px 16px 14px;
+  }
+  .modal h3{
+    font-size:18px;
+    font-weight:800;
+  }
+  .modal pre{
+    background:#FBFBFC;
+    border:1px solid #E8ECE9;
+    border-radius:14px;
+  }
+  .modal-actions .btn{ min-width: 96px; }
+
+  /* Menu panel grid: name | qty | sum */
+  .menu-grid{
+    grid-template-columns: 1fr 96px 80px;
+    gap:10px;
+  }
+  .menu-grid .input{ height:40px; }
+
+  /* Version badge to thin gray */
+  .badge{
+    background: transparent;
+    color:#9CA3AF;
+    font-weight:600;
+    right: 14px;
+  }
+</style>
+
+
+<!-- Button prominence adjustments v1.9.2 -->
+<style>
+  .btn{
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size:17px;
+    font-weight:700;
+    transition: transform .08s ease, box-shadow .18s ease;
+  }
+  .btn:active{ transform: scale(.97); }
+
+  .btn-primary{
+    background: linear-gradient(180deg, #22c55e, #166534);
+    color:#fff;
+    box-shadow: 0 4px 14px rgba(22,101,52,.35);
+    border:none;
+  }
+  .btn-primary:hover{
+    box-shadow: 0 6px 18px rgba(22,101,52,.4);
+  }
+
+  .btn-danger{
+    background: linear-gradient(180deg, #ef4444, #b91c1c);
+    color:#fff;
+    box-shadow: 0 4px 14px rgba(185,28,28,.35);
+  }
+  .btn-danger:hover{
+    box-shadow: 0 6px 18px rgba(185,28,28,.4);
+  }
+
+  .btn-secondary{
+    background:#fff;
+    border:1px solid #d1d5db;
+    color:#374151;
+  }
+</style>
+
+
+<!-- Fresh Green UI pass v1.9.3 -->
+<style>
+  :root{
+    --ff-g1:#34d399;   /* mint */
+    --ff-g2:#10b981;   /* green */
+    --ff-g3:#059669;   /* deep green */
+    --ff-ink:#0b1f16;
+    --ff-muted:#6b7280;
+    --ff-border:#e5e7eb;
+    --ff-bg:#0a1e16;   /* deep background to make gradient pop */
+  }
+  html,body{ color:var(--ff-ink); }
+  body{
+    background: linear-gradient(180deg, rgba(10,30,22,0.28), rgba(10,30,22,0.12)) no-repeat fixed, #f5f7f6;
+  }
+  /* Top gradient header band */
+  body::before{
+    content:"";
+    position:fixed;
+    top:0;left:0;right:0;height:260px;
+    background: linear-gradient(180deg, var(--ff-g1), var(--ff-g2) 48%, var(--ff-g3));
+    z-index:-1;
+  }
+  /* Title on gradient */
+  h1{
+    color:#ffffff;
+    text-shadow: 0 2px 10px rgba(0,0,0,.18);
+    margin:6px 0 12px;
+    font-size:28px;font-weight:800;
+  }
+  /* Date pills on gradient */
+  #btnDate{
+    background:#ffffff;
+    color:#065f46;
+    box-shadow: 0 6px 22px rgba(0,0,0,.12);
+  }
+  #dateHidden.input{
+    border:1px solid rgba(255,255,255,.7);
+    background: #ffffff;
+    box-shadow: 0 8px 26px rgba(0,0,0,.10);
+  }
+
+  /* Soft white cards like reference */
+  .box{
+    background:#ffffff;
+    border:1px solid var(--ff-border);
+    border-radius:22px;
+    padding:18px;
+    box-shadow: 0 14px 30px rgba(6,95,70,.10);
+    margin-top:8px;
+  }
+  .row{ gap:12px; }
+  .input{
+    background:#ffffff;
+    border:1px solid var(--ff-border);
+    border-radius:14px;
+    height:48px;
+  }
+  .input::placeholder{ color:#9ca3af; }
+
+  /* Category cards: light gradient tiles with icon bubble */
+  .grid{
+    grid-template-columns: repeat(2, 1fr);
+    gap:14px;
+    margin:16px 0 18px;
+  }
+  @media (min-width:760px){ .grid{ grid-template-columns: repeat(3, 1fr);} }
+  .card{
+    position:relative;
+    background: linear-gradient(180deg, #ffffff, #f1fff8 55%);
+    border:1px solid var(--ff-border);
+    color:#0b381f;
+    border-radius:20px;
+    padding:18px 18px 16px;
+    font-weight:800;
+    font-size:18px;
+    box-shadow: 0 12px 26px rgba(6,95,70,.10);
+    overflow:hidden;
+  }
+  .card::after{
+    /* subtle blob */
+    content:"";
+    position:absolute; right:-18px; bottom:-18px; width:98px; height:98px;
+    background: radial-gradient(ellipse at center, rgba(16,185,129,.25), rgba(16,185,129,0));
+    border-radius:50%;
+  }
+
+  /* Bottom action bar more obvious */
+  .footer{
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(10px);
+    border-top:1px solid var(--ff-border);
+    box-shadow: 0 -12px 24px rgba(0,0,0,.06);
+    padding:12px 16px;
+    gap:12px;
+  }
+  .btn{
+    border-radius:16px;
+    padding:14px 20px;
+    font-size:17px;font-weight:800;
+    transition:transform .08s ease, box-shadow .2s ease;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{
+    background: linear-gradient(180deg, var(--ff-g2), var(--ff-g3));
+    color:#fff;
+    box-shadow: 0 8px 22px rgba(5,150,105,.35);
+    border:none;
+  }
+  .btn-danger{
+    background: linear-gradient(180deg, #f87171, #dc2626);
+    color:#fff;
+    box-shadow: 0 8px 22px rgba(220,38,38,.28);
+  }
+  .btn:not(.btn-primary):not(.btn-danger){
+    background:#ffffff;
+    color:#374151;
+    border:1px solid #d1d5db;
+  }
+
+  /* Modal sheet */
+  .modal{
+    border-radius:22px;
+    border:1px solid var(--ff-border);
+    box-shadow: 0 24px 56px rgba(0,0,0,.22);
+  }
+  .modal h3{ font-weight:800; }
+  .modal pre{
+    background:#fbfbfd;border:1px solid #e5e7eb;border-radius:14px;
+  }
+
+  /* Menu grid: clearer columns */
+  .menu-grid{ grid-template-columns: 1fr 100px 90px; gap:10px; }
+  .menu-grid .input{ height:40px; }
+  .menu-grid div[style*="font-weight: 700"]{ color:#065f46; }
+  /* Version badge */
+  .badge{ color:#E5E7EB; }
+</style>
+
+
+<style>
+  body{
+    background: #064e3b;
+  }
+  body::before{display:none!important;}
+  .box, .card, .footer, .modal{background:#ffffff;}
+</style>
+
+
+<style>
+  #modalWrap .modal{
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.4);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  }
+</style>
+
+
+<style>
+  /* Rounded top corners for the bottom action bar */
+  .footer{
+    border-top-left-radius: 24px !important;
+    border-top-right-radius: 24px !important;
+    overflow: hidden;
+  }
+</style>
+
 </head>
 <body>
-  <div class="badge">Version Better UI 1.9</div>
-  <h1>Fruit Order</h1>
-  <!-- วันที่ -->
-  <div style="margin-bottom:14px">
-    <button id="btnDate" class="pill">วันที่</button>
-    <input id="dateHidden" type="date" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;" />
-    <span id="dateText" style="margin-left:12px;font-weight:700"></span>
-  </div>
+<div class="badge">Version Better UI 1.9.3</div>
+<h1>Fruit Order</h1>
+<!-- วันที่ -->
+<div style="margin-bottom:14px">
+<button class="pill" id="btnDate">วันที่</button>
+<input class="input" id="dateHidden" placeholder="DD/MM/YYYY" type="date"/>
+</div>
+<!-- กล่องข้อมูลลูกค้า -->
+<div class="box">
+<div class="row">
+<div class="suggest">
+<input autocomplete="off" class="input" id="name" placeholder="ชื่อ">
+<div class="suggest-list" id="nameList" style="display:none"></div>
+</input></div>
+<div class="suggest">
+<!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
+<input autocomplete="off" class="input" id="phone" maxlength="10" placeholder="เบอร์โทร" type="text"/>
+<div class="suggest-list" id="phoneList" style="display:none"></div>
+</div>
+</div>
+<div class="row">
+<input class="input" id="address" placeholder="สถานที่จัดส่ง"/>
+<!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
+<input autocomplete="off" class="input" id="shipping" maxlength="6" placeholder="ค่าส่ง" type="text"/>
+</div>
+<div class="row">
+<input class="input" id="note" placeholder="หมายเหตุ"/>
+<div></div>
+</div>
+</div>
+<!-- ปุ่มเมนูสินค้า -->
+<div class="grid">
+<div class="card" onclick="openMenu('ฝรั่ง')">ฝรั่ง</div>
+<div class="card" onclick="openMenu('มะม่วง')">มะม่วง</div>
+<div class="card" onclick="openMenu('ส้ม')">ส้ม</div>
+<div class="card" onclick="openMenu('กระท้อน')">กระท้อน</div>
+<div class="card" onclick="openMenu('ผลไม้รวม')">ผลไม้รวม</div>
 
-  <!-- กล่องข้อมูลลูกค้า -->
-  <div class="box">
-    <div class="row">
-      <div class="suggest">
-        <input id="name" class="input" placeholder="ชื่อ" autocomplete="off" />
-        <div id="nameList" class="suggest-list" style="display:none"></div>
-      </div>
-      <div class="suggest">
-        <!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
-        <input id="phone" class="input" type="text" placeholder="เบอร์โทร" autocomplete="off" maxlength="10" />
-        <div id="phoneList" class="suggest-list" style="display:none"></div>
-      </div>
-    </div>
-    <div class="row">
-      <input id="address" class="input" placeholder="สถานที่จัดส่ง" />
-      <!-- แบบ permissive: ไม่บล็อกตอนพิมพ์ -->
-      <input id="shipping" class="input" type="text" placeholder="ค่าส่ง" autocomplete="off" maxlength="6" />
-    </div>
-    <div class="row">
-      <input id="note" class="input" placeholder="หมายเหตุ" />
-      <div></div>
-    </div>
-  </div>
-
-  <!-- ปุ่มเมนูสินค้า -->
-  <div class="grid">
-    <div class="card" onclick="openMenu('ฝรั่ง')">ฝรั่ง</div>
-    <div class="card" onclick="openMenu('มะม่วง')">มะม่วง</div>
-    <div class="card" onclick="openMenu('ส้ม')">ส้ม</div>
-    <div class="card" onclick="openMenu('กระท้อน')">กระท้อน</div>
-    <div class="card" onclick="openMenu('ผลไม้รวม')">ผลไม้รวม</div>
-    <div class="card" onclick="openMenu('เรทส่ง')">เรทส่ง</div>
-    <div class="card" style="grid-column:2/3" onclick="openMenu('อื่น ๆ')">อื่น ๆ</div>
-  </div>
-
-  <div class="footer">
-    <button class="btn btn-primary" onclick="summarize()">สรุปออเดอร์</button>
-    <button class="btn btn-danger" onclick="clearAll()">ล้างรายการ</button>
-  </div>
-
-  <!-- Modal Summary -->
-  <div id="modalWrap" class="modal-backdrop">
-    <div class="modal">
-      <h3 style="margin:0 0 8px">สรุปออเดอร์</h3>
-      <pre id="summaryText"></pre>
-      <div class="modal-actions">
-        <button class="btn" onclick="copySummary()">คัดลอก</button>
-        <button class="btn btn-primary" onclick="printSummary()">พิมพ์</button>
-        <button class="btn btn-danger" onclick="closeModal()">ยกเลิก</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Menu (เลือกสินค้า) -->
-  <div id="menuWrap" class="modal-backdrop">
-    <div class="modal">
-      <h3 id="menuTitle" style="margin:0 0 8px">เลือกสินค้า</h3>
-      <div id="menuBody" class="menu-grid"></div>
-      <div class="modal-actions" style="margin-top:12px">
-        <button class="btn" id="btnMenuBack">กลับ</button>
-        <button class="btn btn-danger" id="btnMenuDelete">ลบ</button>
-        <button class="btn btn-primary" id="btnMenuConfirm">ยืนยัน</button>
-      </div>
-    </div>
-  </div>
-
+<div class="card" onclick="openMenu('เรทส่งพิเศษ')">เรทส่งพิเศษ</div><div class="card" onclick="openMenu('อื่น ๆ')" style="grid-column:2/3">อื่น ๆ</div>
+</div>
+<div class="footer">
+<button class="btn btn-primary" onclick="summarize()">สรุปออเดอร์</button>
+<button class="btn btn-danger" onclick="clearAll()">ล้างรายการ</button>
+</div>
+<!-- Modal Summary -->
+<div class="modal-backdrop" id="modalWrap">
+<div class="modal">
+<h3 style="margin:0 0 8px">สรุปออเดอร์</h3>
+<pre id="summaryText"></pre>
+<div class="modal-actions">
+<button class="btn" onclick="copySummary()">คัดลอก</button>
+<button class="btn btn-primary" onclick="printSummary()">พิมพ์</button>
+<button class="btn btn-danger" onclick="closeModal()">ยกเลิก</button>
+</div>
+</div>
+</div>
+<!-- Modal Menu (เลือกสินค้า) -->
+<div class="modal-backdrop" id="menuWrap">
+<div class="modal">
+<h3 id="menuTitle" style="margin:0 0 8px">เลือกสินค้า</h3>
+<div class="menu-grid" id="menuBody"></div>
+<div class="modal-actions" style="margin-top:12px">
+<button class="btn" id="btnMenuBack">กลับ</button>
+<button class="btn btn-danger" id="btnMenuDelete">ลบ</button>
+<button class="btn btn-primary" id="btnMenuConfirm">ยืนยัน</button>
+</div>
+</div>
+</div>
 <script>
 /*** ตั้งค่า URL ของ Apps Script Web App ***/
 const GAS_BASE = 'https://script.google.com/macros/s/AKfycbx0UDI3YS2xRExAAEaBpOm8M1SkbWC_2q84f4HLlEX8k4gW_yy5EQGVq1e2v2lN4oAJAA/exec';
@@ -124,12 +555,13 @@ const GAS_SEARCH = (q) => `${GAS_BASE}?q=${encodeURIComponent(q)}`;  // รอ�
 /* ====== วันที่ (DD/MM/YYYY) ====== */
 const btnDate = document.getElementById('btnDate');
 const dateHidden = document.getElementById('dateHidden');
-const dateText = document.getElementById('dateText');
 const toDDMMYYYY = d => {
   const pad = n => String(n).padStart(2,'0');
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
 };
-(function setToday(){ const d=new Date(); dateHidden.valueAsDate=d; dateText.textContent=toDDMMYYYY(d);}());
+(function setToday(){
+  // Do not auto-fill the date, placeholder handles display
+}());
 btnDate.addEventListener('click', ()=> dateHidden.showPicker ? dateHidden.showPicker() : dateHidden.focus());
 dateHidden.addEventListener('change', ()=> dateText.textContent = toDDMMYYYY(new Date(dateHidden.value)));
 
@@ -268,11 +700,10 @@ const catalog = {
   'ผลไม้รวม': [
     { id:'mixbox', name:'ผลไม้รวม', unit:35, special:'mixRule' }
   ],
-  'เรทส่ง': [
-    { id:'ws_guava_s_33', name:'ฝรั่งเล็ก',  unit:33 },
-    { id:'ws_guava_s_35', name:'ฝรั่งเล็ก (อีกไซส์)',  unit:35 },
-    { id:'ws_guava_l_65', name:'ฝรั่งใหญ่', unit:65 },
-    { id:'ws_custom', name:'— อื่น ๆ (กำหนดเอง) —', custom:true }
+  'เรทส่งพิเศษ': [
+    { id:'sp_ws_guava_s_33', name:'ฝรั่งเล็ก',  unit:33 },
+    { id:'sp_ws_guava_s_35', name:'ฝรั่งเล็ก (อีกไซส์)',  unit:35 },
+    { id:'sp_ws_guava_l_65', name:'ฝรั่งใหญ่', unit:65 }
   ],
   'อื่น ๆ': [
     { id:'misc_custom', name:'— กำหนดเอง —', custom:true }
@@ -465,7 +896,8 @@ const modalWrap = document.getElementById('modalWrap');
 const summaryText = document.getElementById('summaryText');
 
 function summarize(){
-  const d = dateText.textContent || toDDMMYYYY(new Date());
+  let d = '';
+  if (dateHidden.value) { d = toDDMMYYYY(new Date(dateHidden.value)); } else { d = toDDMMYYYY(new Date()); }
   let lines = [];
   let sum = 0;
   for(const v of cart.values()){
