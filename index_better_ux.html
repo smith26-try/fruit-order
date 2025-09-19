@@ -46,7 +46,7 @@
   <!-- วันที่ -->
   <div style="margin-bottom:14px">
     <button id="btnDate" class="pill">วันที่</button>
-    <input id="dateHidden" type="date" style="display:none" />
+    <input id="dateHidden" type="date" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;" />
     <span id="dateText" style="margin-left:12px;font-weight:700"></span>
   </div>
 
@@ -463,7 +463,7 @@ function summarize(){
   let lines = [];
   let sum = 0;
   for(const v of cart.values()){
-    lines.push(`・${v.name} × ${v.qty} (${v.subtotal}฿)`);
+    lines.push(`・${v.name} ×${v.qty} (${v.subtotal}฿)`);
     sum += v.subtotal;
   }
   const shippingVal = parseInt((shipping.value||'0').replace(/[^\\d]/g,''),10) || 0;
