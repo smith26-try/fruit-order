@@ -41,7 +41,7 @@
   </style>
 </head>
 <body>
-  <div class="badge">Version Better UI 1.8</div>
+  <div class="badge">Version Better UI 1.9</div>
   <h1>Fruit Order</h1>
   <!-- วันที่ -->
   <div style="margin-bottom:14px">
@@ -193,7 +193,7 @@ function showList(anchor,list,data,fill){
 const searchByName = debounce(async()=>{
   const data = await fetchSuggest(nameEl.value.trim());
   showList(nameEl.parentElement, nameList, data, o=>{
-    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\\D+/g,'');
+    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\D+/g,'');
     address.value=o.address||''; note.value=o.note||'';
   });
 }, 100);
@@ -201,7 +201,7 @@ const searchByName = debounce(async()=>{
 const searchByPhone = debounce(async()=>{
   const data = await fetchSuggest(phone.value.trim());
   showList(phone.parentElement, phoneList, data, o=>{
-    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\\D+/g,'');
+    nameEl.value=o.name||''; phone.value=(o.phone||'').replace(/\D+/g,'');
     address.value=o.address||''; note.value=o.note||'';
   });
 }, 100);
@@ -213,14 +213,14 @@ phone.addEventListener('input', searchByPhone);
 async function addCustomerPrompt(){
   const newCust = {
     name: nameEl.value.trim(),
-    phone: phone.value.replace(/\\D+/g,'').trim(),
+    phone: phone.value.replace(/\D+/g,'').trim(),
     address: address.value.trim(),
     note: note.value.trim()
   };
   if(!newCust.name || !newCust.phone){
     alert("กรุณาใส่ชื่อและเบอร์ก่อนเพิ่มลูกค้าใหม่"); return;
   }
-  if(!confirm(`เพิ่มลูกค้าใหม่?\\n\\nชื่อ: ${newCust.name}\\nเบอร์: ${newCust.phone}`)) return;
+  if(!confirm(`เพิ่มลูกค้าใหม่?\n\nชื่อ: ${newCust.name}\nเบอร์: ${newCust.phone}`)) return;
   try{
     const res = await fetch(GAS_BASE, { method: 'POST', body: JSON.stringify({ action:'add', customer:newCust }) });
     const r = await res.json();
@@ -309,6 +309,7 @@ function closeMenu(){
   currentCategory = null;
 }
 
+/* ====== ฟังก์ชันที่แก้เฉพาะส่วนนี้ ====== */
 function renderMenu(category){
   const items = catalog[category] || [];
   menuBody.innerHTML = '';
@@ -354,14 +355,15 @@ function renderMenu(category){
       if(it.special === 'mixRule'){
         subtotal = priceMix(q);
       }else if(it.custom){
-        // subtotal คำนวณตอน confirm (ต้องมีราคา)
+        // อ้างอิง priceInput ผ่านตัวแปรใน _custom (ถ้ามี)
+        const priceField = (qtyEl._custom && qtyEl._custom.priceInput) || null;
+        const priceVal = parseInt(((priceField && priceField.value) || '0').replace(/[^\d]/g,''),10) || 0;
+        subtotal = q * priceVal;
       }else{
         subtotal = q * (it.unit||0);
       }
       sumEl.textContent = q>0 ? `${subtotal}฿` : '';
     }
-    qtyEl.addEventListener('input', updateSum);
-    updateSum();
 
     // ถ้า custom ให้เพิ่ม input ชื่อ/ราคา
     if(it.custom){
@@ -374,7 +376,7 @@ function renderMenu(category){
       priceInput.className = 'input';
       priceInput.placeholder = 'ราคา/หน่วย';
       priceInput.inputMode = 'numeric';
-      priceInput.pattern = '\\\\d*';
+      priceInput.pattern = '\\d*';
       priceInput.style.width = '120px';
 
       // โหลด state
@@ -390,10 +392,12 @@ function renderMenu(category){
       menuBody.appendChild(qtyEl);
       menuBody.appendChild(sumEl);
 
-      // บันทึก accessor สำหรับ confirm
+      // บันทึก accessor สำหรับ confirm และผูก event
       qtyEl._custom = { nameInput, priceInput, item: it, sumEl, updater: updateSum };
       priceInput.addEventListener('input', updateSum);
       nameInput.addEventListener('input', updateSum);
+      qtyEl.addEventListener('input', updateSum);
+      updateSum(); // เรียกหลังสร้าง input ครบ
       return;
     }
 
@@ -402,8 +406,10 @@ function renderMenu(category){
     menuBody.appendChild(qtyEl);
     menuBody.appendChild(sumEl);
 
-    // เก็บไว้ใช้ตอน confirm
+    // เก็บไว้ใช้ตอน confirm + event
     qtyEl._item = it;
+    qtyEl.addEventListener('input', updateSum);
+    updateSum();
   });
 }
 
@@ -416,7 +422,7 @@ function saveCategory(){
 
     if(it.custom){
       const { nameInput, priceInput } = qtyEl._custom;
-      const unit = parseInt((priceInput.value||'0').replace(/[^\\d]/g,''),10) || 0;
+      const unit = parseInt((priceInput.value||'0').replace(/[^\d]/g,''),10) || 0;
       const name = (nameInput.value||'').trim() || 'รายการกำหนดเอง';
       const subtotal = unit * q;
       if(q>0){
@@ -466,7 +472,7 @@ function summarize(){
     lines.push(`・${v.name} ×${v.qty} (${v.subtotal}฿)`);
     sum += v.subtotal;
   }
-  const shippingVal = parseInt((shipping.value||'0').replace(/[^\\d]/g,''),10) || 0;
+  const shippingVal = parseInt((shipping.value||'0').replace(/[^\d]/g,''),10) || 0;
   const grand = sum + shippingVal;
 
   const txt =
