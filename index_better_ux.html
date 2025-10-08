@@ -479,7 +479,7 @@
 
 </head>
 <body>
-<div class="badge">Version Better UI 1.9.6</div>
+<div class="badge">Version Better UI 2.0</div>
 <h1>Fruit Order</h1>
 <!-- วันที่ -->
 <div style="margin-bottom:14px">
@@ -505,7 +505,7 @@
 <input autocomplete="off" class="input" id="shipping" maxlength="6" placeholder="ค่าส่ง" type="text"/>
 </div>
 <div class="row">
-<input class="input" id="note" placeholder="หมายเหตุ"/>
+<input class="input" id="note" placeholder="NOTE"/>
 <div></div>
 </div>
 </div>
@@ -910,24 +910,23 @@ function summarize(){
   }
   const shippingVal = parseInt((shipping.value||'0').replace(/[^\d]/g,''),10) || 0;
   const grand = sum + shippingVal;
-
+  const noteText = note.value.trim() ? `\n\nNOTE: ${note.value.trim()}` : '';
   const txt =
 `${d}
 ออเดอร์คุณ ${nameEl.value||'-'}
 (${phone.value||'-'})
 
 รายการคำสั่งซื้อ
-${lines.length?lines.join('\n'):'・(ยังไม่มีรายการ)'}
+${lines.length?lines.join('\n'):'・(ยังไม่มีรายการ)'} 
 
 ค่าส่ง ${shippingVal}฿
 รวมทั้งหมด ${grand}฿
 
-📍 ${address.value||'-'}`;
+📍 ${address.value||'-'}${noteText}`;
 
   summaryText.textContent = txt;
   modalWrap.style.display='flex';
 }
-
 function closeModal(){ modalWrap.style.display='none'; }
 
 async function copySummary(){
