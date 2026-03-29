@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POS ร้านผลไม้</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ===== GLOBAL ===== */
+* { box-sizing: border-box; }
+body { 
+  margin: 0; 
+  font-family: 'Kanit', sans-serif; 
+  background: #eef2f6; /* สีพื้นหลังเว็บอมเทาฟ้าสะอาดตา */
+  color: #333;
+}
+
+/* Scrollbar แบบทันสมัย */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ===== APP ===== */
+.app {
+  max-width: 1280px;
+  margin: 20px auto; 
+  height: calc(100vh - 40px);
+  display: grid; 
+  grid-template-columns: 1.4fr 1fr; 
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08); /* เงาฟุ้งๆ ดูมีมิติ */
+  overflow: hidden;
+}
+
+/* ===== LEFT ===== */
+.left { display: flex; flex-direction: column; background: #f8fafc; overflow: hidden; }
+
+/* CATEGORY */
+.category-bar {
+  display: flex; 
+  overflow-x: auto; 
+  background: linear-gradient(135deg, #2F6B3F, #10b981); /* ไล่สีเขียวชาตรามือไปเขียวสว่าง */
+  padding: 16px 20px; 
+  gap: 10px;
+}
+.category-btn {
+  background: rgba(255, 255, 255, 0.2); 
+  color: #fff;
+  padding: 8px 16px; 
+  border-radius: 30px; 
+  cursor: pointer; 
+  white-space: nowrap;
+  user-select: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.category-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.active { 
+  background: #ffffff !important; 
+  color: #047857 !important; 
+  font-weight: 600; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+}
+
+/* MENU */
+.menu {
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 20px;
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+  gap: 16px;
+  align-content: start;
+  min-height: 0;
+}
+.menu-item {
+  background: #fff; 
+  border-radius: 16px; 
+  padding: 10px; 
+  text-align: center; 
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+  transition: all 0.2s ease;
+}
+.menu-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(16, 185, 129, 0.15); /* เงามีติ่งสีเขียวเวลาโฮเวอร์ */
+  border-color: #10b981;
+}
+.menu-item:active { transform: scale(0.96); }
+.menu-item img {
+  width: 100%; 
+  height: 100px; 
+  object-fit: cover; 
+  border-radius: 12px; 
+  margin-bottom: 8px;
+}
+.menu-title { font-size: 14px; margin-bottom: 4px; line-height: 1.3; }
+.menu-price { color: #059669; font-weight: 600; font-size: 16px; } /* สีเขียวเด่นๆ */
+
+/* CUSTOM */
+.custom-box {
+  padding: 16px 20px; 
+  border-top: 1px solid #e2e8f0; 
+  background: #fff;
+}
+.custom-box input {
+  width: 100%; margin-bottom: 10px; padding: 10px 12px; 
+  border: 1px solid #cbd5e1; border-radius: 8px; 
+  font-family: inherit; transition: all 0.3s;
+}
+.custom-box input:focus {
+  border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); outline: none;
+}
+.custom-box button {
+  width: 100%; padding: 10px; background: #0ea5e9; color: #fff; 
+  border: none; border-radius: 8px; cursor: pointer; 
+  font-weight: 600; font-family: inherit; font-size: 15px; transition: 0.2s;
+}
+.custom-box button:hover { background: #0284c7; }
+
+/* ===== RIGHT ===== */
+.right { 
+  display: flex; flex-direction: column; 
+  border-left: 1px solid #e2e8f0; 
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.customer { 
+  padding: 20px; 
+  background: #fff; 
+  border-bottom: 1px solid #e2e8f0; 
+}
+.customer input, .customer textarea {
+  width: 100%; margin-bottom: 10px; padding: 10px 12px; 
+  border: 1px solid #cbd5e1; border-radius: 8px; 
+  font-family: inherit; font-size: 14px; transition: all 0.3s;
+  background: #f8fafc;
+}
+.customer input:focus, .customer textarea:focus {
+  border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15); 
+  outline: none; background: #fff;
+}
+.customer textarea { resize: vertical; min-height: 70px; }
+
+/* AUTOCOMPLETE */
+.autocomplete-wrapper { position: relative; width: 100%; }
+.suggestions-box {
+  position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
+  border: 1px solid #e2e8f0; border-radius: 8px; z-index: 99; display: none;
+  max-height: 200px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+.suggestion-item { padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.suggestion-item:hover { background: #f0fdf4; color: #047857; }
+.add-new-btn { 
+  background: #f0fdf4; color: #10b981; font-weight: 600; 
+  text-align: center; position: sticky; bottom: 0; border-top: 1px solid #a7f3d0;
+}
+.add-new-btn:hover { background: #d1fae5; }
+
+/* CART */
+.cart { 
+  flex: 1; overflow-y: auto; padding: 20px; 
+  display: flex; flex-direction: column; gap: 12px; 
+  background: #f8fafc;
+  min-height: 0;
+}
+.cart-item { 
+  background: #fff; padding: 14px; border-radius: 12px; 
+  border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.cart-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: 15px;}
+.qty-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.qty-controls button {
+  padding: 6px 10px; border: 1px solid #e2e8f0; background: #f8fafc; 
+  border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 13px;
+  color: #475569; font-weight: 500; transition: 0.2s;
+}
+.qty-controls button:hover { background: #e2e8f0; color: #0f172a; }
+.btn-remove { color: #ef4444 !important; border-color: #fca5a5 !important; background: #fef2f2 !important; }
+.btn-remove:hover { background: #fee2e2 !important; color: #dc2626 !important; }
+
+/* SUMMARY */
+.summary { padding: 20px; border-top: 1px solid #e2e8f0; background: #fff; }
+.total { font-size: 26px; font-weight: 600; margin-bottom: 16px; text-align: right; color: #047857; }
+
+.btn-group { display: flex; gap: 12px; }
+.btn-group button {
+  flex: 1; padding: 14px; border: none; border-radius: 12px; 
+  font-size: 16px; cursor: pointer; font-weight: 600; font-family: inherit;
+  transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.primary { background: #10b981; color: #fff; }
+.primary:hover { background: #059669; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(16,185,129,0.2); }
+.danger { background: #ef4444; color: #fff; }
+.danger:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(239,68,68,0.2); }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-content {
+  background: #fff; padding: 24px; border-radius: 16px; width: 90%; max-width: 420px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-content h3 { color: #0f172a; margin-bottom: 4px; }
+.modal-content input, .modal-content textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit;
+}
+.modal-content input:focus, .modal-content textarea:focus { border-color: #10b981; outline: none; }
+.modal-content textarea.bill-textarea {
+  height: 250px; resize: none; font-family: monospace; background: #f8fafc; font-size: 14px;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+.modal-actions button { 
+  padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; 
+  font-weight: 600; font-family: inherit; transition: 0.2s;
+}
+.btn-cancel { background: #e2e8f0; color: #475569; }
+.btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
+.btn-confirm { background: #10b981; color: #fff; }
+.btn-confirm:hover { background: #059669; }
+.btn-copy { background: #3b82f6; color: #fff; }
+.btn-copy:hover { background: #2563eb; }
+
+/* ===== RESPONSIVE (Mobile & Tablet) ===== */
+@media screen and (max-width: 1024px) {
+  .app {
+    display: flex; flex-direction: column; height: auto; min-height: 100vh;
+    margin: 0; border-radius: 0; box-shadow: none;
+  }
+  .left {
+    order: 2; height: 60vh; border-top: 4px solid #10b981; border-bottom: none;
+  }
+  .right {
+    order: 1; height: auto; border-left: none;
+  }
+  .menu { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 16px; gap: 12px;}
+  .menu-item img { height: 85px; }
+  .cart { min-height: 150px; max-height: 35vh; }
+  .category-btn { padding: 8px 14px; font-size: 14px; }
+  .summary { padding: 16px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- LEFT -->
+<div class="left">
+  <div class="category-bar" id="categoryBar"></div>
+  <div class="menu" id="menuList"></div>
+
+  <!-- สินค้าอื่นๆ (Custom) -->
+  <div class="custom-box">
+    <b style="display:block; margin-bottom:10px; color:#0f172a;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
+    <div style="display: flex; gap: 10px;">
+      <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
+      <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
+    </div>
+    <button onclick="addCustom()" style="margin-top: 10px;">+ เพิ่มลงตะกร้า</button>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+
+  <div class="customer">
+    <!-- ค้นหาจากชื่อ -->
+    <div class="autocomplete-wrapper">
+      <input id="name" placeholder="ชื่อลูกค้า" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
+      <div id="nameSuggestions" class="suggestions-box"></div>
+    </div>
+    
+    <!-- ค้นหาจากเบอร์โทร -->
+    <div class="autocomplete-wrapper">
+      <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off">
+      <div id="phoneSuggestions" class="suggestions-box"></div>
+    </div>
+
+    <textarea id="address" placeholder="ที่อยู่จัดส่ง"></textarea>
+    
+    <div style="display: flex; gap: 10px;">
+      <input id="shipping" type="number" placeholder="ค่าจัดส่ง" oninput="renderCart()" style="flex: 1;">
+      <input id="remark" placeholder="หมายเหตุเพิ่มเติม" style="flex: 2;">
+    </div>
+  </div>
+
+  <div class="cart" id="cartList"></div>
+
+  <div class="summary">
+    <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
+    <div class="btn-group">
+      <button class="primary" onclick="checkout()">สรุปบิล</button>
+      <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- Modals -->
+<div id="alertModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 300px; text-align: center;">
+    <h3 style="margin-top:0;">แจ้งเตือน</h3>
+    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;">ข้อความ</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<div id="billModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">สรุปรายการสั่งซื้อ</h3>
+    <textarea id="billTextarea" class="bill-textarea" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('billModal')">ปิดหน้าต่าง</button>
+      <button class="btn-copy" id="copyBtn" onclick="copyBillText()">คัดลอกข้อความ</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 320px; text-align: center;">
+    <h3 style="margin-top:0; color: #ef4444;">ยืนยันการทำรายการ</h3>
+    <p style="color: #475569;">ต้องการล้างตะกร้าและเริ่มบิลใหม่ใช่หรือไม่?</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')" style="flex:1;">ยกเลิก</button>
+      <button class="btn-confirm" onclick="executeNewOrder()" style="flex:1; background: #ef4444;">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal สำหรับเพิ่มลูกค้าใหม่ -->
+<div id="addCustomerModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">เพิ่มข้อมูลลูกค้าใหม่</h3>
+    <input id="newCustName" placeholder="ชื่อลูกค้า">
+    <input id="newCustPhone" placeholder="เบอร์โทรศัพท์">
+    <textarea id="newCustAddress" placeholder="ที่อยู่จัดส่ง" style="resize:vertical; min-height:80px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addCustomerModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveNewCustomer()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ===== GOOGLE SHEETS DATABASE ===== */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1JQUAXqkOuMQX4EPFlwTf383s41DlnHOX2iX25WtiqRg/export?format=csv&gid=0";
+
+// ** สำคัญมาก: เพื่อให้บันทึกข้อมูลลง Google Sheet ได้ ต้องนำโค้ด Apps Script (ในแชท) ไป Deploy แล้วนำ URL มาวางที่ตัวแปรด้านล่างนี้ **
+const APPS_SCRIPT_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBBWTHCV3FCtlzm9dyczfB71m8paEZ5iXpwQO5FFL6mvB_H_QPpYnv4MDDjCQ/exec"; 
+
+let customersDB = [];
+
+async function loadCustomersData() {
+  try {
+    const response = await fetch(SHEET_CSV_URL);
+    if (!response.ok) throw new Error("Network response was not ok");
+    const csvText = await response.text();
+    
+    const lines = csvText.split(/\r?\n/);
+    customersDB = [];
+    for (let i = 1; i < lines.length; i++) {
+      if(!lines[i].trim()) continue; 
+      const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim());
+      
+      customersDB.push({
+        name: cols[0] || "",
+        phone: cols[1] || "",
+        address: cols[2] || ""
+      });
+    }
+  } catch (error) {
+    console.error("ไม่สามารถดึงข้อมูลจาก Google Sheets ได้:", error);
+  }
+}
+loadCustomersData();
+
+/* ฟังก์ชันค้นหาและ Auto-complete */
+function searchCustomer(field) {
+  const inputEl = document.getElementById(field);
+  const keyword = inputEl.value.trim();
+  const lowerKeyword = keyword.toLowerCase();
+  const suggestionsBox = document.getElementById(field + 'Suggestions');
+  
+  if (!keyword) {
+    suggestionsBox.style.display = 'none';
+    return;
+  }
+
+  const matched = [];
+  customersDB.forEach((c, idx) => {
+    let match = false;
+    
+    if (field === 'phone') {
+      // ตัดอักขระที่ไม่ใช่ตัวเลขออก และ ตัดเลข 0 ตัวหน้าสุดออก (ถ้ามี)
+      const cleanKeyword = lowerKeyword.replace(/\D/g, '').replace(/^0/, '');
+      const cleanPhone = (c.phone || '').replace(/\D/g, '').replace(/^0/, '');
+      
+      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) {
+        match = true;
+      }
+    } else {
+      if (c[field] && c[field].toLowerCase().includes(lowerKeyword)) {
+        match = true;
+      }
+    }
+
+    if (match) matched.push({ c, idx });
+  });
+
+  let html = matched.map(m => `
+    <div class="suggestion-item" onclick="fillCustomer(${m.idx})">
+      <b>${m.c.name}</b> - <span style="color:#64748b;">${m.c.phone}</span>
+    </div>
+  `).join('');
+
+  if (field === 'name') {
+    html += `
+      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${keyword}')">
+        + เพิ่มข้อมูลลูกค้าใหม่ "${keyword}"
+      </div>
+    `;
+  }
+
+  if (html) {
+    suggestionsBox.innerHTML = html;
+    suggestionsBox.style.display = 'block';
+  } else {
+    suggestionsBox.style.display = 'none';
+  }
+}
+
+function fillCustomer(index) {
+  const customer = customersDB[index];
+  document.getElementById('name').value = customer.name;
+  document.getElementById('phone').value = customer.phone;
+  document.getElementById('address').value = customer.address;
+  
+  document.getElementById('nameSuggestions').style.display = 'none';
+  document.getElementById('phoneSuggestions').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.autocomplete-wrapper')) {
+    document.getElementById('nameSuggestions').style.display = 'none';
+    document.getElementById('phoneSuggestions').style.display = 'none';
+  }
+});
+
+/* ===== ระบบเพิ่มลูกค้าใหม่ ===== */
+function openAddCustomerModal(nameValue = '') {
+  document.getElementById('newCustName').value = nameValue;
+  document.getElementById('newCustPhone').value = document.getElementById('phone').value;
+  document.getElementById('newCustAddress').value = document.getElementById('address').value;
+  openModal('addCustomerModal');
+  document.getElementById('nameSuggestions').style.display = 'none';
+}
+
+async function saveNewCustomer() {
+  const name = document.getElementById('newCustName').value.trim();
+  const phone = document.getElementById('newCustPhone').value.trim();
+  const address = document.getElementById('newCustAddress').value.trim();
+
+  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
+
+  customersDB.push({ name, phone, address });
+
+  document.getElementById('name').value = name;
+  document.getElementById('phone').value = phone;
+  document.getElementById('address').value = address;
+  
+  closeModal('addCustomerModal');
+  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบแล้ว");
+
+  if (APPS_SCRIPT_WEBHOOK_URL) {
+    try {
+      await fetch(APPS_SCRIPT_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, address })
+      });
+    } catch (error) {
+      console.error("Error saving to Google Sheets:", error);
+    }
+  }
+}
+
+/* ===== MODAL HELPERS ===== */
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function customAlert(msg) { 
+  document.getElementById('alertMessage').innerText = msg; 
+  openModal('alertModal'); 
+}
+
+function copyBillText() {
+  const copyText = document.getElementById("billTextarea");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  
+  const btn = document.getElementById('copyBtn');
+  const originalText = btn.innerText;
+  btn.innerText = 'คัดลอกสำเร็จ!';
+  btn.style.background = '#0ea5e9';
+  setTimeout(() => { 
+    btn.innerText = originalText; 
+    btn.style.background = '#3b82f6';
+  }, 2000);
+}
+
+/* ===== MENU ครบทั้งร้าน ===== */
+let menu = [
+/* ===== ฝรั่ง ===== */
+// แก้ไขลิงก์รูปภาพ Google Drive ตรงนี้ โดยใช้โครงสร้าง lh3.googleusercontent.com/d/{id}
+{name:"ฝรั่งแช่บ๊วยเล็ก",price:39,category:"ฝรั่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
+{name:"ฝรั่งแช่บ๊วยใหญ่",price:69,category:"ฝรั่ง",img:"https://lh3.googleusercontent.com/d/1odq6BoS94hjYRbIIRQhwGQ-Urw5tQVdw"},
+/* ===== แอปเปิ้ล / สาลี่ ===== */
+{name:"แอปเปิ้ลบูทู",price:39,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1WINUQytmaF63T_S79G5S31_HI-7zEV1-"},
+{name:"แอปเปิ้ลโอริน",price:59,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1Ozg5BLXbOhAkC99HRbIqqq40Y9ZyVHD2"},
+{name:"แอปเปิ้ลโทกิ",price:69,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1fLqMgE1r68nge_sO0rrKNp2HSB1V_2Qw"},
+{name:"สาลี่ทอง",price:39,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1uTZVAP_bCLcivY6IEhAWfVUY6Pxxn0tI"},
+/* ===== ส้ม ===== */
+{name:"ส้มไต้หวัน",price:59,category:"ส้ม",img:"https://lh3.googleusercontent.com/d/1szPIT3a6phRiQnwmlyGbs824np0J8Mhm"},
+{name:"ส้มว่อกาน",price:59,category:"ส้ม",img:"https://lh3.googleusercontent.com/d/1AYugJmSQyB939z0Qb3VnlQ9vUL99ghGb"},
+{name:"ส้มฮันนี่เมอร์คอต",price:59,category:"ส้ม",img:"https://lh3.googleusercontent.com/d/1RD1KyS8K-S86I3Edj42Ff7N7VxVDnBEg"},
+{name:"ส้มเช้งน้ำผึ้ง (นำเข้า)",price:59,category:"ส้ม",img:"https://lh3.googleusercontent.com/d/1VfteUMKOH8xhLloFxeFAIEk3TXaooJC1"},
+{name:"ส้มเช้งดำเนิน (ไทย)",price:59,category:"ส้ม",img:"https://lh3.googleusercontent.com/d/1pdWZWLJ0OEoq1xfl-w5omqYf8SXNQzYD"},
+/* ===== มะม่วง ===== */
+{name:"มะม่วงน้ำปลาหวาน (กุ้งแห้ง)",price:69,category:"มะม่วง",img:"https://lh3.googleusercontent.com/d/1LHwGIIPJwEIatrf0A8qBM_pzoYCOYCdn"},
+{name:"มะม่วงน้ำปลาหวาน (ปลากรอบ)",price:69,category:"มะม่วง",img:"https://lh3.googleusercontent.com/d/1DdXtGLGpVMncC2gG-x5yjAApBNvXEImu"},
+{name:"มะม่วงน้ำปลาหวานสับทรงเครื่อง",price:69,category:"มะม่วง",img:"https://lh3.googleusercontent.com/d/1_XAOOPfZvQHsz6eHluCpbHTPDQy_XNFp"},
+{name:"มะม่วงมัน",price:49,category:"มะม่วง",img:"https://lh3.googleusercontent.com/d/10YZxw2mkLRKVKOoFr2DtjslXraXXuKml"},
+/* ===== ผลไม้ทั่วไป ===== */
+{name:"แตงโมบอล",price:59,category:"ทั่วไป",img:"https://lh3.googleusercontent.com/d/1zdJ1PUiEUvtHLAnOIWul55unyFX2uvkT"},
+{name:"แคนตาลูปซันเลดี้",price:59,category:"ทั่วไป",img:"https://lh3.googleusercontent.com/d/1-SaMDorGcpJP2alYLy3ouKHckAdhLTnp"},
+{name:"มะละกอฮอลแลนด์",price:49,category:"ทั่วไป",img:"https://lh3.googleusercontent.com/d/16zPNsBd1U3zM-hxZZLHe4UiJkbVPgw3p"},
+/* ===== พรีเมียม ===== */
+{name:"องุ่นไชน์มัสแคท",price:89,category:"พรีเมียม",img:"https://lh3.googleusercontent.com/d/1tKR59uf6_ugdA11ocb6C-N_FiDf5rk1I"},
+{name:"กีวี่",price:89,category:"พรีเมียม",img:"https://lh3.googleusercontent.com/d/1wKgd2nAz2aoUVhyz_pFHi0B1jCToe6wb"},
+{name:"สตรอว์เบอร์รี่น้ำจิ้มบ๊วย",price:89,category:"พรีเมียม",img:"https://lh3.googleusercontent.com/d/1dpzLMb1sG_Tb2W_5LBo8_MFaj1o21ypI"},
+{name:"มะยงชิด",price:99,category:"พรีเมียม",img:"https://lh3.googleusercontent.com/d/1RZwf2PLa-kQBN4_2YqH3Vl5my0eamrQl"},
+/* ===== ทรงเครื่อง ===== */
+{name:"กระท้อนทรงเครื่องโบราณ",price:89,category:"ทรงเครื่อง",img:"https://lh3.googleusercontent.com/d/1JDCxDNeWdHT4vbb3nzpu7ot54h-xL6Yv"},
+{name:"สละทรงเครื่องโบราณ",price:89,category:"ทรงเครื่อง",img:"https://lh3.googleusercontent.com/d/1zkSWFUSpnVf8X5-4ZeouHuHwt08uqee_"},
+/* ===== ราคาส่ง ===== */
+{name:"ฝรั่งเล็ก 33",price:33,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
+{name:"ฝรั่งเล็ก 35",price:35,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
+{name:"ฝรั่งใหญ่ 65",price:65,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/1odq6BoS94hjYRbIIRQhwGQ-Urw5tQVdw"}
+];
+
+let categories=["ทั้งหมด",...new Set(menu.map(i=>i.category))];
+let active="ทั้งหมด";
+let cart=[];
+
+/* ===== CATEGORY ===== */
+function renderCategory(){
+  const categoryBar = document.getElementById('categoryBar');
+  categoryBar.innerHTML="";
+  categories.forEach(c=>{
+    categoryBar.innerHTML+=`
+    <div class="category-btn ${c===active?'active':''}"
+    onclick="selectCat('${c}')">${c}</div>`;
+  });
+}
+
+/* ===== MENU ===== */
+function renderMenu(){
+  const menuList = document.getElementById('menuList');
+  menuList.innerHTML="";
+  menu
+  .filter(i=>active==="ทั้งหมด"||i.category===active)
+  .forEach(i=>{
+    menuList.innerHTML+=`
+    <div class="menu-item" onclick="addItem('${i.name}',${i.price})">
+    <img src="${i.img}">
+    <div class="menu-title">${i.name}</div>
+    <div class="menu-price">฿${i.price}</div>
+    </div>`;
+  });
+}
+
+function selectCat(c){
+  active=c;
+  renderCategory();
+  renderMenu();
+}
+
+/* ===== CART ===== */
+function addItem(name,price){
+  let f=cart.find(i=>i.name===name);
+  if(f) f.qty++;
+  else cart.push({name,price,qty:1});
+  renderCart();
+}
+
+function renderCart(){
+  let total=0;
+  const cartList = document.getElementById('cartList');
+  if(!cartList) return;
+  cartList.innerHTML="";
+
+  cart.forEach((i,idx)=>{
+    let sum=i.price*i.qty;
+    total+=sum;
+
+    cartList.innerHTML+=`
+    <div class="cart-item">
+      <div style="margin-bottom: 8px; font-weight: 500;">${i.name}</div>
+      <div class="cart-row">
+        <span style="color:#64748b; font-weight: 400;">${i.price} x ${i.qty}</span>
+        <span style="color:#0f172a;">฿${sum}</span>
+      </div>
+      <div class="qty-controls">
+        <button onclick="change(${idx},-1)">-1</button>
+        <button onclick="change(${idx},1)">+1</button>
+        <button onclick="change(${idx},10)">+10</button>
+        <button onclick="setQty(${idx},10)">=10</button>
+        <button onclick="setQty(${idx},20)">=20</button>
+        <button onclick="setQty(${idx},30)">=30</button>
+        <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
+      </div>
+    </div>
+    `;
+  });
+
+  const shippingInput = document.getElementById('shipping');
+  const shippingCost = Number(shippingInput ? shippingInput.value : 0) || 0;
+  total += shippingCost;
+  
+  const totalEl = document.getElementById('totalEl');
+  if(totalEl) totalEl.innerText = total.toLocaleString();
+}
+
+/* ACTION ตะกร้า */
+function change(i,d){
+  cart[i].qty+=d;
+  if(cart[i].qty<=0) cart.splice(i,1);
+  renderCart();
+}
+
+function setQty(i,q){
+  if(q <= 0) {
+    cart.splice(i,1);
+  } else {
+    cart[i].qty=q;
+  }
+  renderCart();
+}
+
+/* CUSTOM (เพิ่มสินค้าอื่นที่ไม่มีในเมนู) */
+function addCustom(){
+  const name=document.getElementById('customName').value;
+  const price=parseFloat(document.getElementById('customPrice').value);
+  if(!name || isNaN(price)) {
+    customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
+    return;
+  }
+
+  let f=cart.find(i=>i.name===name && i.price===price);
+  if(f) f.qty++;
+  else cart.push({name,price,qty:1});
+  
+  renderCart();
+
+  document.getElementById('customName').value="";
+  document.getElementById('customPrice').value="";
+}
+
+/* ปุ่มสรุปบิล (CHECKOUT) */
+function checkout() {
+  if (cart.length === 0) {
+    customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
+    return;
+  }
+
+  const name = document.getElementById('name').value || 'ไม่ระบุ';
+  const phone = document.getElementById('phone').value || 'ไม่ระบุ';
+  const address = document.getElementById('address').value || 'ไม่ระบุ';
+  const shipping = Number(document.getElementById('shipping').value) || 0;
+  const remark = document.getElementById('remark').value.trim();
+  
+  let billText = `===== สรุปรายการสั่งซื้อ =====\n`;
+  billText += `ลูกค้า: คุณ ${name}\n`;
+  billText += `เบอร์โทร: ${phone}\n`;
+  billText += `ที่อยู่: ${address}\n`;
+  billText += `------------------------------\n`;
+  
+  cart.forEach(item => {
+    billText += `${item.name}\n`;
+    billText += `   ${item.price} x ${item.qty} = ${item.price * item.qty} บาท\n`;
+  });
+  
+  billText += `------------------------------\n`;
+  if(shipping > 0) billText += `ค่าจัดส่ง: ${shipping} บาท\n`;
+  if(remark) billText += `หมายเหตุ: ${remark}\n`;
+  billText += `ยอดรวมทั้งสิ้น: ${document.getElementById('totalEl').innerText} บาท\n`;
+  billText += `==============================`;
+
+  document.getElementById('billTextarea').value = billText;
+  openModal('billModal');
+}
+
+/* RESET (เริ่มบิลใหม่) */
+function newOrder(){
+  if(cart.length > 0) {
+    openModal('confirmModal');
+  } else {
+    executeNewOrder();
+  }
+}
+
+function executeNewOrder() {
+  closeModal('confirmModal');
+  cart=[];
+  
+  document.getElementById('name').value = "";
+  document.getElementById('phone').value = "";
+  document.getElementById('address').value = "";
+  document.getElementById('shipping').value = ""; 
+  document.getElementById('remark').value = "";
+  
+  document.getElementById('customName').value = "";
+  document.getElementById('customPrice').value = "";
+
+  renderCart();
+}
+
+/* INIT */
+renderCategory();
+renderMenu();
+
+</script>
+
+</body>
+</html>
