@@ -239,14 +239,24 @@ body {
   .app {
     display: flex; flex-direction: column; height: auto; min-height: 100vh;
     margin: 0; border-radius: 0; box-shadow: none;
+    overflow: visible; /* ปลดล็อกให้หน้าจอหลัก Scroll ได้ */
   }
   .left {
-    order: 2; height: 60vh; border-top: 4px solid #10b981; border-bottom: none;
+    order: 2; 
+    height: auto; /* ปล่อยความสูงให้ยาวตามเนื้อหาเมนู */
+    border-top: 4px solid #10b981; border-bottom: none;
+    overflow: visible; 
   }
   .right {
     order: 1; height: auto; border-left: none;
+    overflow: visible;
   }
-  .menu { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 16px; gap: 12px;}
+  .menu { 
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    padding: 16px; 
+    gap: 12px;
+    overflow-y: visible; /* ปิดการ Scroll ภายในกล่องเมนู */
+  }
   .menu-item img { height: 85px; }
   .cart { min-height: 150px; max-height: 35vh; }
   .category-btn { padding: 8px 14px; font-size: 14px; }
