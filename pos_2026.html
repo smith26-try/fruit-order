@@ -704,30 +704,59 @@ function checkout() {
     return;
   }
 
-  const name = document.getElementById('name').value || 'ไม่ระบุ';
+  const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
+  // เติมคำว่า "คุณ" ให้อัตโนมัติ หากยังไม่ได้พิมพ์
+  const nameDisplay = nameVal === 'ไม่ระบุ' ? 'ไม่ระบุ' : (nameVal.startsWith('คุณ') ? nameVal : `คุณ ${nameVal}`);
   const phone = document.getElementById('phone').value || 'ไม่ระบุ';
   const address = document.getElementById('address').value || 'ไม่ระบุ';
   const shipping = Number(document.getElementById('shipping').value) || 0;
   const remark = document.getElementById('remark').value.trim();
   
-  let billText = `===== สรุปรายการสั่งซื้อ =====\n`;
-  billText += `ลูกค้า: คุณ ${name}\n`;
-  billText += `เบอร์โทร: ${phone}\n`;
-  billText += `ที่อยู่: ${address}\n`;
-  billText += `-------------------\n`;
+  // ดึงวันที่ปัจจุบัน
+  const d = new Date();
+  const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   
-  cart.forEach(item => {
+  const sep = `──────────\n`;
+  
+  let billText = `สรุปรายการคำสั่งซื้อ\n`;
+  billText += sep;
+  billText += `วันที่: ${dateStr}\n`;
+  billText += `ลูกค้า: ${nameDisplay}\n`;
+  billText += `โทร: ${phone}\n`;
+  billText += `สถานที่ส่ง : ${address}\n`;
+  if(remark) billText += `หมายเหตุ: ${remark}\n`;
+  billText += sep;
+  billText += `รายการ\n`;
+  billText += sep;
+  
+  // ฟังก์ชันช่วยเว้นวรรคให้ข้อความชิดขวาพอดี (ละเว้นสระ/วรรณยุกต์ไทยในการนับความยาว)
+  function formatLine(left, right, width = 28) {
+    const leftLen = left.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g, '').length;
+    const rightLen = right.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g, '').length;
+    let spaces = width - leftLen - rightLen;
+    return left + ' '.repeat(Math.max(1, spaces)) + right;
+  }
+  
+  cart.forEach((item, index) => {
+    let leftStr = `  ${item.price.toLocaleString()} x ${item.qty}`;
+    let rightStr = (item.price * item.qty).toLocaleString();
     billText += `${item.name}\n`;
-    billText += `   ${item.price} x ${item.qty} = ${item.price * item.qty} บาท\n`;
+    billText += formatLine(leftStr, rightStr) + `\n`;
+    
+    // เว้นบรรทัดระหว่างรายการสินค้า
+    if (index < cart.length - 1) {
+      billText += `\n`;
+    }
   });
   
-  billText += `-------------------\n`;
-  if(shipping > 0) billText += `ค่าจัดส่ง: ${shipping} บาท\n`;
-  if(remark) billText += `หมายเหตุ: ${remark}\n`;
-  billText += `ยอดรวมทั้งสิ้น: ${document.getElementById('totalEl').innerText} บาท\n`;
-  billText += `===================`;
+  billText += sep;
+  if(shipping > 0) {
+    billText += formatLine(`ค่าจัดส่ง`, shipping.toLocaleString()) + `\n`;
+  }
+  billText += formatLine(`ยอดรวม`, document.getElementById('totalEl').innerText) + `\n`;
+  billText += sep;
 
-  document.getElementById('billTextarea').value = billText;
+  document.getElementById('billTextarea').value = billText.trim();
   openModal('billModal');
 }
 
