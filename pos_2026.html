@@ -740,7 +740,7 @@ function checkout() {
   cart.forEach((item, index) => {
     let leftStr = `  ${item.price.toLocaleString()} x ${item.qty}`;
     let rightStr = (item.price * item.qty).toLocaleString();
-    billText += `${item.name}\n`;
+    billText += `(${index + 1}) ${item.name}\n`;
     billText += formatLine(leftStr, rightStr) + `\n`;
     
     // เว้นบรรทัดระหว่างรายการสินค้า
