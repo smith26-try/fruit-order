@@ -295,6 +295,9 @@ body {
       <div id="nameSuggestions" class="suggestions-box"></div>
     </div>
     
+    <!-- วันที่สั่งซื้อ -->
+    <input type="date" id="orderDate" style="color: #475569; cursor: pointer;" title="เลือกวันที่">
+    
     <!-- ค้นหาจากเบอร์โทร -->
     <div class="autocomplete-wrapper">
       <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off">
@@ -705,56 +708,36 @@ function checkout() {
   }
 
   const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
-  // เติมคำว่า "คุณ" ให้อัตโนมัติ หากยังไม่ได้พิมพ์
-  const nameDisplay = nameVal === 'ไม่ระบุ' ? 'ไม่ระบุ' : (nameVal.startsWith('คุณ') ? nameVal : `คุณ ${nameVal}`);
+  // ลบคำว่า "คุณ" ออกก่อน (ถ้ามีพิมพ์ซ้ำมา) เพื่อไม่ให้เป็น "ออเดอร์คุณ คุณ..."
+  const cleanName = nameVal.startsWith('คุณ') ? nameVal.replace(/^คุณ\s*/, '') : nameVal;
   const phone = document.getElementById('phone').value || 'ไม่ระบุ';
   const address = document.getElementById('address').value || 'ไม่ระบุ';
   const shipping = Number(document.getElementById('shipping').value) || 0;
-  const remark = document.getElementById('remark').value.trim();
   
-  // ดึงวันที่ปัจจุบัน
-  const d = new Date();
-  const dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-  
-  const sep = `──────────\n`;
-  
-  let billText = `สรุปรายการคำสั่งซื้อ\n`;
-  billText += sep;
-  billText += `วันที่: ${dateStr}\n`;
-  billText += `ลูกค้า: ${nameDisplay}\n`;
-  billText += `โทร: ${phone}\n`;
-  billText += `สถานที่ส่ง : ${address}\n`;
-  if(remark) billText += `หมายเหตุ: ${remark}\n`;
-  billText += sep;
-  billText += `รายการ\n`;
-  billText += sep;
-  
-  // ฟังก์ชันช่วยเว้นวรรคให้ข้อความชิดขวาพอดี (ละเว้นสระ/วรรณยุกต์ไทยในการนับความยาว)
-  function formatLine(left, right, width = 28) {
-    const leftLen = left.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g, '').length;
-    const rightLen = right.replace(/[\u0E31\u0E34-\u0E3A\u0E47-\u0E4E]/g, '').length;
-    let spaces = width - leftLen - rightLen;
-    return left + ' '.repeat(Math.max(1, spaces)) + right;
+  // จัดการดึงวันที่จาก Calendar มาแสดงในบิล
+  let dateStr = "";
+  const dateInput = document.getElementById('orderDate').value;
+  if (dateInput) {
+    const [y, m, d] = dateInput.split('-');
+    dateStr = `${d}/${m}/${y}`;
+  } else {
+    // กรณีไม่ได้เลือกวันที่ไว้ ให้ใช้วันนี้แทน
+    const d = new Date();
+    dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
   
-  cart.forEach((item, index) => {
-    let leftStr = `  ${item.price.toLocaleString()} x ${item.qty}`;
-    let rightStr = (item.price * item.qty).toLocaleString();
-    billText += `(${index + 1}) ${item.name}\n`;
-    billText += formatLine(leftStr, rightStr) + `\n`;
-    
-    // เว้นบรรทัดระหว่างรายการสินค้า
-    if (index < cart.length - 1) {
-      billText += `\n`;
-    }
+  let billText = `${dateStr}\n`;
+  billText += `ออเดอร์คุณ ${cleanName}\n`;
+  billText += `(${phone})\n\n`;
+  billText += `รายการคำสั่งซื้อ\n`;
+  
+  cart.forEach((item) => {
+    billText += `・${item.name} ×${item.qty} (${(item.price * item.qty).toLocaleString()}฿)\n`;
   });
   
-  billText += sep;
-  if(shipping > 0) {
-    billText += formatLine(`ค่าจัดส่ง`, shipping.toLocaleString()) + `\n`;
-  }
-  billText += formatLine(`ยอดรวม`, document.getElementById('totalEl').innerText) + `\n`;
-  billText += sep;
+  billText += `\nค่าส่ง ${shipping.toLocaleString()}฿\n`;
+  billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
+  billText += `📍 ${address}`;
 
   document.getElementById('billTextarea').value = billText.trim();
   openModal('billModal');
@@ -782,10 +765,24 @@ function executeNewOrder() {
   document.getElementById('customName').value = "";
   document.getElementById('customPrice').value = "";
 
+  // รีเซ็ตวันที่กลับมาเป็นวันนี้
+  setDefaultDate();
+
   renderCart();
 }
 
+// ฟังก์ชันช่วยตั้งค่า Calendar ให้เป็น "วันนี้" อัตโนมัติ
+function setDefaultDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const orderDateEl = document.getElementById('orderDate');
+  if (orderDateEl) orderDateEl.value = `${yyyy}-${mm}-${dd}`;
+}
+
 /* INIT */
+setDefaultDate();
 renderCategory();
 renderMenu();
 
