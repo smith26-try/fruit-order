@@ -308,7 +308,7 @@ body {
     
     <div style="display: flex; gap: 10px;">
       <input id="shipping" type="number" placeholder="ค่าจัดส่ง" oninput="renderCart()" style="flex: 1;">
-      <input id="remark" placeholder="หมายเหตุเพิ่มเติม" style="flex: 2;">
+      <input id="remark" placeholder="หมายเหตุ" style="flex: 2;">
     </div>
   </div>
 
@@ -713,6 +713,7 @@ function checkout() {
   const phone = document.getElementById('phone').value || 'ไม่ระบุ';
   const address = document.getElementById('address').value || 'ไม่ระบุ';
   const shipping = Number(document.getElementById('shipping').value) || 0;
+  const remark = document.getElementById('remark').value.trim();
   
   // จัดการดึงวันที่จาก Calendar มาแสดงในบิล
   let dateStr = "";
@@ -738,6 +739,10 @@ function checkout() {
   billText += `\nค่าส่ง ${shipping.toLocaleString()}฿\n`;
   billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
   billText += `📍 ${address}`;
+  
+  if (remark) {
+    billText += `\nหมายเหตุ: ${remark}`;
+  }
 
   document.getElementById('billTextarea').value = billText.trim();
   openModal('billModal');
