@@ -241,26 +241,40 @@ body {
     margin: 0; border-radius: 0; box-shadow: none;
     overflow: visible; /* ปลดล็อกให้หน้าจอหลัก Scroll ได้ */
   }
+  .right {
+    display: contents; /* ปลดล็อกเพื่อแยกส่วนเรียงใหม่ (Customer -> Left -> Cart -> Summary) */
+  }
+  .customer {
+    order: 1; /* ฟอร์มลูกค้าอยู่บนสุด */
+  }
   .left {
-    order: 2; 
-    height: auto; /* ปล่อยความสูงให้ยาวตามเนื้อหาเมนู */
-    border-top: 4px solid #10b981; border-bottom: none;
+    order: 2; /* เมนูผลไม้อยู่ถัดลงมา */
+    height: auto; 
+    border-top: 4px solid #10b981; 
+    border-bottom: 4px solid #10b981; /* เพิ่มเส้นคั่นด้านล่างด้วย */
     overflow: visible; 
   }
-  .right {
-    order: 1; height: auto; border-left: none;
-    overflow: visible;
+  .cart { 
+    order: 3; /* ตะกร้า List Item อยู่ด้านล่าง */
+    min-height: 150px; 
+    max-height: none; /* ให้ยาวลงไปตามเนื้อหาตะกร้า */
+  }
+  .summary { 
+    order: 4; /* ปุ่มสรุปอยู่ล่างสุด */
+    padding: 16px; 
+    position: sticky; /* ตรึงติดขอบจอด้านล่างเวลาไถจอ */
+    bottom: 0; 
+    z-index: 10;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.08); /* เพิ่มเงาสะท้อนขึ้นด้านบน */
   }
   .menu { 
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
     padding: 16px; 
     gap: 12px;
-    overflow-y: visible; /* ปิดการ Scroll ภายในกล่องเมนู */
+    overflow-y: visible; 
   }
   .menu-item img { height: 85px; }
-  .cart { min-height: 150px; max-height: 35vh; }
   .category-btn { padding: 8px 14px; font-size: 14px; }
-  .summary { padding: 16px; }
 }
 </style>
 </head>
