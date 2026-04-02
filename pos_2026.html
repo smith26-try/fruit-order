@@ -295,20 +295,20 @@ body {
       <div id="nameSuggestions" class="suggestions-box"></div>
     </div>
     
-    <!-- วันที่สั่งซื้อ -->
-    <input type="date" id="orderDate" style="color: #475569; cursor: pointer;" title="เลือกวันที่">
-    
-    <!-- ค้นหาจากเบอร์โทร -->
-    <div class="autocomplete-wrapper">
-      <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off">
-      <div id="phoneSuggestions" class="suggestions-box"></div>
+    <!-- เบอร์โทรศัพท์ และ วันที่สั่งซื้อ (จัดให้อยู่บรรทัดเดียวกัน และป้องกันไม่ให้ล้นหน้าจอ) -->
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+      <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
+        <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
+        <div id="phoneSuggestions" class="suggestions-box"></div>
+      </div>
+      <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;" title="เลือกวันที่">
     </div>
 
     <textarea id="address" placeholder="ที่อยู่จัดส่ง"></textarea>
     
     <div style="display: flex; gap: 10px;">
-      <input id="shipping" type="number" placeholder="ค่าจัดส่ง" oninput="renderCart()" style="flex: 1;">
-      <input id="remark" placeholder="หมายเหตุ" style="flex: 2;">
+      <input id="shipping" type="number" placeholder="ค่าจัดส่ง" oninput="renderCart()" style="flex: 1; min-width: 0;">
+      <input id="remark" placeholder="หมายเหตุเพิ่มเติม" style="flex: 2; min-width: 0;">
     </div>
   </div>
 
