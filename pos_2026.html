@@ -593,9 +593,10 @@ let menu = [
 {name:"กระท้อนทรงเครื่องโบราณ",price:89,category:"ทรงเครื่อง",img:"https://lh3.googleusercontent.com/d/1JDCxDNeWdHT4vbb3nzpu7ot54h-xL6Yv"},
 {name:"สละทรงเครื่องโบราณ",price:89,category:"ทรงเครื่อง",img:"https://lh3.googleusercontent.com/d/1zkSWFUSpnVf8X5-4ZeouHuHwt08uqee_"},
 /* ===== ราคาส่ง ===== */
-{name:"ฝรั่งเล็ก 33",price:33,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
-{name:"ฝรั่งเล็ก 35",price:35,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
-{name:"ฝรั่งเล็ก 45",price:45,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"}
+// ปิดการใช้งานเมนูราคาส่ง 33 และ 45
+// {name:"ฝรั่งเล็ก 33",price:33,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
+{name:"ฝรั่งเล็ก 35",price:35,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"}
+// {name:"ฝรั่งเล็ก 45",price:45,category:"ราคาส่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"}
 ];
 
 let categories=["ทั้งหมด",...new Set(menu.map(i=>i.category))];
