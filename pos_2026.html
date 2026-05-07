@@ -562,6 +562,7 @@ let menu = [
 // ปิดการใช้งานเมนูฝรั่งแช่บ๊วยเล็ก
 // {name:"ฝรั่งแช่บ๊วยเล็ก",price:39,category:"ฝรั่ง",img:"https://lh3.googleusercontent.com/d/13BssUpbBNbi_gnPTuMOdroUpsQ2gTwyM"},
 {name:"ฝรั่งแช่บ๊วย",price:55,category:"ฝรั่ง",img:"https://lh3.googleusercontent.com/d/1odq6BoS94hjYRbIIRQhwGQ-Urw5tQVdw"},
+{name:"โปรฝรั่ง 2 กล่อง 100",price:100,category:"ฝรั่ง",img:"https://lh3.googleusercontent.com/d/1odq6BoS94hjYRbIIRQhwGQ-Urw5tQVdw", textColor:"#ef4444"},
 /* ===== แอปเปิ้ล / สาลี่ ===== */
 {name:"แอปเปิ้ลบูทู",price:39,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1WINUQytmaF63T_S79G5S31_HI-7zEV1-"},
 {name:"แอปเปิ้ลเอนวี่ S",price:49,category:"แอปเปิ้ล",img:"https://lh3.googleusercontent.com/d/1SDfrHbi93YIh8hdIu3z-vE0lcDCML8TK"},
@@ -619,10 +620,11 @@ function renderMenu(){
   menu
   .filter(i=>active==="ทั้งหมด"||i.category===active)
   .forEach(i=>{
+    let titleStyle = i.textColor ? `style="color: ${i.textColor}; font-weight: 600;"` : '';
     menuList.innerHTML+=`
     <div class="menu-item" onclick="addItem('${i.name}',${i.price})">
     <img src="${i.img}">
-    <div class="menu-title">${i.name}</div>
+    <div class="menu-title" ${titleStyle}>${i.name}</div>
     <div class="menu-price">฿${i.price}</div>
     </div>`;
   });
