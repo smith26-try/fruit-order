@@ -131,7 +131,6 @@ body {
 .menu-title { font-size: 13.5px; margin-bottom: 6px; line-height: 1.3; font-weight: 500; }
 .menu-price { color: #3F7D58; font-weight: 600; font-size: 15.5px; }
 
-/* ปุ่มเฟืองแก้ไขด่วน */
 .btn-edit-item {
   position: absolute;
   top: 6px;
@@ -322,10 +321,9 @@ body {
   </div>
   
   <div class="menu" id="menuList">
-    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูจาก Google Sheets...</div>
+    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล Google Sheets...</div>
   </div>
 
-  <!-- สินค้าอื่นๆ (Custom) -->
   <div class="custom-box">
     <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
     <div style="display: flex; gap: 10px;">
@@ -340,13 +338,11 @@ body {
 <div class="right">
 
   <div class="customer">
-    <!-- ค้นหาจากชื่อ -->
     <div class="autocomplete-wrapper">
       <input id="name" placeholder="ชื่อลูกค้า" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
       <div id="nameSuggestions" class="suggestions-box"></div>
     </div>
     
-    <!-- เบอร์โทร และ วันที่ -->
     <div style="display: flex; gap: 10px; margin-bottom: 8px;">
       <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
         <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
@@ -423,7 +419,7 @@ body {
   </div>
 </div>
 
-<!-- Modal สำหรับแก้ไขราคาและสถานะสินค้าแบบด่วน (อัปเดตลง Google Sheets ทันที) -->
+<!-- Modal สำหรับแก้ไขราคาและหมวดหมู่/สถานะของสินค้า -->
 <div id="editItemModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0;" id="editItemTitle">แก้ไขสินค้า</h3>
@@ -432,12 +428,12 @@ body {
     <label style="font-size:13px; font-weight:600; color:#475569;">ราคา (บาท):</label>
     <input id="editItemPrice" type="number">
 
-    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">หมวดหมู่ (Category):</label>
+    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่ (Category):</label>
     <select id="editItemCategory">
-      <option value="ผลไม้พร้อมส่งวันนี้">ผลไม้พร้อมส่งวันนี้</option>
-      <option value="ใกล้หมดฤดูกาล">ใกล้หมดฤดูกาล</option>
-      <option value="หมดชั่วคราว">หมดชั่วคราว</option>
-      <option value="หมดฤดูกาลแล้ว">หมดฤดูกาลแล้ว</option>
+      <option value="ผลไม้พร้อมส่งวันนี้ (ลูกค้ากดสั่งซื้อได้)">ผลไม้พร้อมส่งวันนี้</option>
+      <option value="ใกล้หมดฤดูกาล (มีป้ายเตือนสีส้ม ลูกค้ากดสั่งได้)">ใกล้หมดฤดูกาล</option>
+      <option value="หมดชั่วคราว (ปุ่มสั่งซื้อจะถูกปิดการใช้งานชั่วคราว)">หมดชั่วคราว</option>
+      <option value="หมดฤดูกาลแล้ว (ป้ายสีเทา ปิดการสั่งซื้อ)">หมดฤดูกาลแล้ว</option>
       <option value="บริการการ์ด ริบบิ้น และปิ่นโตผลไม้">บริการการ์ด ริบบิ้น และปิ่นโตผลไม้</option>
     </select>
 
@@ -449,10 +445,8 @@ body {
 </div>
 
 <script>
-/* ===== URL เชื่อมต่อ WEB APP เดียวกันกับหน้าร้าน ===== */
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyPQUcJ3lqv67b6nOJHgQMrFxowoPbiprYFbFOfH_yPLimMWAoneY_e2vS82yBIWSj/exec";
 
-// หมวดหมู่มาตรฐานที่ตรงกับหน้าร้าน
 const APP_CATEGORIES = [
   "ทั้งหมด",
   "ผลไม้พร้อมส่งวันนี้",
@@ -467,7 +461,17 @@ let active = "ทั้งหมด";
 let cart = [];
 let customersDB = [];
 
-/* ===== โหลดข้อมูลเมนูจาก Google Sheets (JSONP) ===== */
+// จัดการจับคู่ชื่อหมวดหมู่ที่ยาวหรือมีวงเล็บ ให้เข้ากับแท็บหมวดหมู่หลัก
+function normalizeCategory(raw) {
+  const text = String(raw || '').trim();
+  if (text.includes('ผลไม้พร้อมส่งวันนี้')) return 'ผลไม้พร้อมส่งวันนี้';
+  if (text.includes('ใกล้หมดฤดูกาล')) return 'ใกล้หมดฤดูกาล';
+  if (text.includes('หมดชั่วคราว')) return 'หมดชั่วคราว';
+  if (text.includes('หมดฤดูกาลแล้ว')) return 'หมดฤดูกาลแล้ว';
+  if (text.includes('บริการการ์ด') || text.includes('ปิ่นโต') || text.includes('ริบบิ้น')) return 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้';
+  return text;
+}
+
 function loadMenuFromDB() {
   const menuList = document.getElementById('menuList');
   menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
@@ -482,13 +486,15 @@ function loadMenuFromDB() {
 
 window.onPOSMenuLoaded = function(json) {
   if (json && Array.isArray(json.data) && json.data.length > 0) {
-    menu = json.data;
+    menu = json.data.map(item => ({
+      ...item,
+      normalizedCategory: normalizeCategory(item.category)
+    }));
     renderCategory();
     renderMenu();
   }
 };
 
-/* ===== CATEGORY ===== */
 function renderCategory(){
   const categoryBar = document.getElementById('categoryBar');
   categoryBar.innerHTML = "";
@@ -506,12 +512,11 @@ function selectCat(c){
   renderMenu();
 }
 
-/* ===== MENU ===== */
 function renderMenu(){
   const menuList = document.getElementById('menuList');
   menuList.innerHTML = "";
 
-  const filtered = menu.filter(i => active === "ทั้งหมด" || String(i.category || '').trim() === active);
+  const filtered = menu.filter(i => active === "ทั้งหมด" || i.normalizedCategory === active);
 
   if (filtered.length === 0) {
     menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8;">ไม่มีรายการในหมวดนี้</div>`;
@@ -519,13 +524,13 @@ function renderMenu(){
   }
 
   filtered.forEach(i => {
-    const isOut = (i.category === 'หมดชั่วคราว' || i.category === 'หมดฤดูกาลแล้ว');
-    const isNearEnd = (i.category === 'ใกล้หมดฤดูกาล');
+    const isOut = (i.normalizedCategory === 'หมดชั่วคราว' || i.normalizedCategory === 'หมดฤดูกาลแล้ว');
+    const isNearEnd = (i.normalizedCategory === 'ใกล้หมดฤดูกาล');
 
     let badge = '';
     if (isNearEnd) badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
-    if (i.category === 'หมดชั่วคราว') badge = `<span class="item-badge badge-danger">หมดชั่วคราว</span>`;
-    if (i.category === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
+    if (i.normalizedCategory === 'หมดชั่วคราว') badge = `<span class="item-badge badge-danger">หมดชั่วคราว</span>`;
+    if (i.normalizedCategory === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
 
     menuList.innerHTML += `
       <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `addItem('${i.name}',${i.price})`}">
@@ -539,13 +544,21 @@ function renderMenu(){
   });
 }
 
-/* ===== แก้ไขราคาและหมวดหมู่ส่งกลับไปที่ชีท ===== */
 function openEditItem(event, rowIndex, name, price, category) {
-  event.stopPropagation(); // ไม่ให้คลิกแล้วเพิ่มลงตะกร้า
+  event.stopPropagation();
   document.getElementById('editItemTitle').innerText = `แก้ไข: ${name}`;
   document.getElementById('editRowIndex').value = rowIndex;
   document.getElementById('editItemPrice').value = price;
-  document.getElementById('editItemCategory').value = category;
+  
+  // ตรวจสอบตัวเลือกใน Dropdown ให้ตรงกับค่าเดิม
+  const catSelect = document.getElementById('editItemCategory');
+  for (let opt of catSelect.options) {
+    if (category.includes(opt.text)) {
+      catSelect.value = opt.value;
+      break;
+    }
+  }
+
   openModal('editItemModal');
 }
 
@@ -555,7 +568,7 @@ async function saveItemUpdate() {
   const category = document.getElementById('editItemCategory').value;
 
   closeModal('editItemModal');
-  customAlert("กำลังบันทึกการแก้ไขลงฐานข้อมูล...");
+  customAlert("กำลังบันทึกการแก้ไขลงชีท...");
 
   try {
     await fetch(APPS_SCRIPT_URL, {
@@ -572,7 +585,7 @@ async function saveItemUpdate() {
 
     setTimeout(() => {
       closeModal('alertModal');
-      loadMenuFromDB(); // ดึงข้อมูลใหม่
+      loadMenuFromDB();
     }, 1500);
 
   } catch (error) {
@@ -580,7 +593,6 @@ async function saveItemUpdate() {
   }
 }
 
-/* ===== CART ===== */
 function addItem(name, price){
   let f = cart.find(i => i.name === name);
   if(f) f.qty++;
@@ -654,7 +666,6 @@ function addCustom(){
   document.getElementById('customPrice').value = "";
 }
 
-/* ===== CHECKOUT ===== */
 function checkout() {
   if (cart.length === 0) {
     customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
@@ -727,7 +738,6 @@ function setDefaultDate() {
   if (orderDateEl) orderDateEl.value = `${yyyy}-${mm}-${dd}`;
 }
 
-/* ===== MODAL & CLIPBOARD ===== */
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 function customAlert(msg) { 
@@ -751,7 +761,6 @@ function copyBillText() {
   }, 2000);
 }
 
-/* ===== AUTOCOMPLETE ลูกค้า ===== */
 function searchCustomer(field) {
   const inputEl = document.getElementById(field);
   const keyword = inputEl.value.trim().toLowerCase();
@@ -845,7 +854,6 @@ document.addEventListener('click', function(e) {
   }
 });
 
-/* INIT */
 setDefaultDate();
 loadMenuFromDB();
 </script>
