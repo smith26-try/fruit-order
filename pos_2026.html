@@ -178,7 +178,7 @@ body {
   overflow: hidden;
 }
 
-/* กล่องวางข้อความออเดอร์ของลูกค้า */
+/* กล่องวางข้อความคำสั่งซื้อจากลูกค้า */
 .paste-order-box {
   padding: 12px 18px;
   background: #f0fdf4;
@@ -186,7 +186,7 @@ body {
 }
 .paste-order-box textarea {
   width: 100%;
-  height: 60px;
+  height: 65px;
   padding: 8px 12px;
   border: 1px solid #86efac;
   border-radius: 8px;
@@ -493,7 +493,7 @@ let active = "ทั้งหมด";
 let cart = [];
 let customersDB = [];
 
-/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (PARSE ORDER) ===== */
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (เวอร์ชันรองรับทุกรูปแบบ) ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
 
@@ -504,27 +504,42 @@ function parseCustomerOrder(rawText) {
     const trimmed = line.trim();
     if (!trimmed) return;
 
-    // ตรวจจับรายการสินค้า เช่น "1. ฝรั่งแช่บ๊วย x 2 = 110 ฿" หรือ "1. ฝรั่งแช่บ๊วย x 2"
-    const itemMatch = trimmed.match(/^\d+\.\s*(.+?)\s*[xX×]\s*(\d+)/);
+    // 1. ดักจับบรรทัดรายการสินค้า เช่น "1. ฝรั่งแช่บ๊วยสูตรน้องเอิน x 2 = 110 ฿" หรือ "1. มะม่วง x 1"
+    const itemMatch = trimmed.match(/^\d+\.\s*(.+?)\s+[xX×]\s*(\d+)/);
     if (itemMatch) {
-      const itemName = itemMatch[1].trim();
+      const rawItemName = itemMatch[1].trim();
       const itemQty = parseInt(itemMatch[2], 10) || 1;
 
-      // ค้นหารายการสินค้าในเมนูของร้าน
-      const foundInMenu = menu.find(m => m.name.toLowerCase() === itemName.toLowerCase() || m.name.includes(itemName));
-      const price = foundInMenu ? foundInMenu.price : 0;
+      // ค้นหารายการผลไม้ในเมนู โดยเทียบชื่อแบบยืดหยุ่น
+      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === rawItemName.toLowerCase());
+      if (!foundInMenu) {
+        foundInMenu = menu.find(m => m.name.includes(rawItemName) || rawItemName.includes(m.name));
+      }
 
-      const existingCart = cart.find(c => c.name.toLowerCase() === itemName.toLowerCase());
+      const finalName = foundInMenu ? foundInMenu.name : rawItemName;
+      let finalPrice = foundInMenu ? Number(foundInMenu.price) : 0;
+
+      // ถ้าในเมนูหาไม่เจอ ให้ลองแกะราคาต่อหน่วยจากท้ายบรรทัด เช่น "= 110 ฿"
+      if (finalPrice === 0) {
+        const priceMatch = trimmed.match(/=\s*(\d+[\d,]*)\s*฿/);
+        if (priceMatch) {
+          const totalLinePrice = parseFloat(priceMatch[1].replace(/,/g, ''));
+          finalPrice = Math.round(totalLinePrice / itemQty);
+        }
+      }
+
+      // ตรวจสอบในตะกร้าว่ามีสินค้านี้อยู่แล้วหรือไม่
+      const existingCart = cart.find(c => c.name.toLowerCase() === finalName.toLowerCase());
       if (existingCart) {
-        existingCart.qty = itemQty; // ตั้งจำนวนตามที่ลูกค้าก๊อปมา
+        existingCart.qty = itemQty;
       } else {
-        cart.push({ name: foundInMenu ? foundInMenu.name : itemName, price: price, qty: itemQty });
+        cart.push({ name: finalName, price: finalPrice, qty: itemQty });
       }
       parsedAny = true;
     }
 
-    // ตรวจจับโน้ต/รอบส่ง เช่น "📝 รอบจัดส่ง / จุดรับ / โน้ตเพิ่มเติม: รอบ 11.00 น. ป้อมยาม"
-    if (trimmed.includes('โน้ตเพิ่มเติม:') || trimmed.includes('รอบจัดส่ง')) {
+    // 2. ดักจับบรรทัดหมายเหตุ / จุดรับ / รอบส่ง
+    if (trimmed.includes('โน้ตเพิ่มเติม:') || trimmed.includes('รอบจัดส่ง') || trimmed.includes('จุดรับ')) {
       const noteMatch = trimmed.split(':');
       if (noteMatch.length > 1) {
         const noteContent = noteMatch.slice(1).join(':').trim();
