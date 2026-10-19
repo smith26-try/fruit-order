@@ -815,8 +815,8 @@ function checkout() {
 
   const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
   const cleanName = nameVal.startsWith('คุณ') ? nameVal.replace(/^คุณ\s*/, '') : nameVal;
-  const phone = document.getElementById('phone').value || 'ไม่ระบุ';
-  const address = document.getElementById('address').value || 'ไม่ระบุ';
+  const phone = document.getElementById('phone').value.trim() || 'ไม่ระบุ';
+  const address = document.getElementById('address').value.trim() || 'ไม่ระบุ';
   const shipping = Number(document.getElementById('shipping').value) || 0;
   const remark = document.getElementById('remark').value.trim();
   
@@ -830,19 +830,54 @@ function checkout() {
     dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
   
+  // 1. ส่วนหัวบิล วันที่และข้อมูลลูกค้า
   let billText = `${dateStr}\n`;
   billText += `ออเดอร์คุณ ${cleanName}\n`;
   billText += `(${phone})\n\n`;
-  billText += `รายการคำสั่งซื้อ\n`;
   
-  cart.forEach((item) => {
-    billText += `・${item.name} ×${item.qty} (${(item.price * item.qty).toLocaleString()}฿)\n`;
+  // 2. ส่วนรายการคำสั่งซื้อ
+  billText += `รายการคำสั่งซื้อ\n`;
+  billText += `____________\n`;
+  
+  cart.forEach((item, idx) => {
+    // ตัดอีโมจิออกจากชื่อ
+    const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
+    const itemTotal = (item.price * item.qty).toLocaleString();
+
+    // ตรวจสอบว่ามีตัวเลือกพิเศษในวงเล็บ เช่น (น้ำปลาหวานกุ้งแห้ง) หรือ (สูตรกุ้งแห้ง) หรือไม่
+    const optionMatch = cleanItemName.match(/^(.*?)\s*\((.*?)\)$/);
+
+    if (optionMatch) {
+      const baseName = optionMatch[1].trim();
+      let optionText = optionMatch[2].trim();
+
+      // ปรับคำให้อยู่ในรูป (สูตร...)
+      if (!optionText.startsWith('สูตร')) {
+        optionText = optionText.replace(/^น้ำปลาหวาน\s*/, '');
+        if (!optionText.startsWith('สูตร')) {
+          optionText = 'สูตร' + optionText;
+        }
+      }
+
+      // แสดงชื่อหลักบรรทัดบน แล้วเคาะเยื้องตัวเลือกพิเศษลงมาบรรทัดล่าง
+      billText += `${idx + 1}. ${baseName}\n`;
+      billText += `  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
+    } else {
+      // รายการปกติทั่วไป
+      billText += `${idx + 1}. ${cleanItemName} ×${item.qty} (${itemTotal}฿)\n`;
+    }
   });
   
-  billText += `\nค่าส่ง ${shipping.toLocaleString()}฿\n`;
+  billText += `____________\n\n`;
+  
+  // 3. ค่าส่งและยอดรวม
+  billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
   billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
+  
+  // 4. จุดจัดส่ง
   billText += `📍 ${address}`;
   
+  // 5. หมายเหตุ (แสดงเฉพาะเมื่อมีการกรอก)
   if (remark) {
     billText += `\nหมายเหตุ: ${remark}`;
   }
