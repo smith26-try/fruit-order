@@ -303,6 +303,15 @@ body {
 .btn-copy { background: #EC5228; color: #fff; }
 .btn-copy:hover { background: #d4441c; }
 
+/* Option Buttons for POS */
+.pos-option-btn {
+  width: 100%; padding: 12px 14px; margin-bottom: 8px;
+  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 500; color: #334155;
+  cursor: pointer; transition: 0.2s; text-align: left;
+}
+.pos-option-btn:hover { background: #f0fdf4; border-color: #3F7D58; color: #166534; }
+
 /* ===== RESPONSIVE ===== */
 @media screen and (max-width: 1024px) {
   .app {
@@ -406,7 +415,23 @@ body {
 
 </div>
 
-<!-- Modals -->
+<!-- Modal: เลือกสูตรน้ำปลาหวานฝั่ง POS -->
+<div id="posSauceModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 360px;">
+    <h3 style="margin-top:0;" id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
+    <p style="font-size:13px; color:#64748b; margin-bottom:8px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
+    
+    <button class="pos-option-btn" onclick="confirmSauceSelection('น้ำปลาหวานกุ้งแห้ง')">🦐 น้ำปลาหวานกุ้งแห้ง</button>
+    <button class="pos-option-btn" onclick="confirmSauceSelection('น้ำปลาหวานปลาป่น')">🐟 น้ำปลาหวานปลาป่น</button>
+    <button class="pos-option-btn" onclick="confirmSauceSelection('น้ำปลาหวาน สูตรปลาร้าข้าวคั่ว')">🌾 น้ำปลาหวาน สูตรปลาร้าข้าวคั่ว</button>
+    
+    <div class="modal-actions" style="margin-top:6px;">
+      <button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modals อื่นๆ -->
 <div id="alertModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 300px; text-align: center;">
     <h3 style="margin-top:0;">แจ้งเตือน</h3>
@@ -492,8 +517,9 @@ let menu = [];
 let active = "ทั้งหมด";
 let cart = [];
 let customersDB = [];
+let pendingPOSItem = null;
 
-/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (เวอร์ชันรองรับทุกรูปแบบ) ===== */
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (รองรับสูตรน้ำปลาหวาน) ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
 
@@ -504,22 +530,22 @@ function parseCustomerOrder(rawText) {
     const trimmed = line.trim();
     if (!trimmed) return;
 
-    // 1. ดักจับบรรทัดรายการสินค้า เช่น "1. ฝรั่งแช่บ๊วยสูตรน้องเอิน x 2 = 110 ฿" หรือ "1. มะม่วง x 1"
+    // ตรวจจับรายการสินค้า เช่น "1. มะม่วงเปรี้ยว (น้ำปลาหวานกุ้งแห้ง) x 2 = 120 ฿"
     const itemMatch = trimmed.match(/^\d+\.\s*(.+?)\s+[xX×]\s*(\d+)/);
     if (itemMatch) {
-      const rawItemName = itemMatch[1].trim();
+      const fullItemName = itemMatch[1].trim();
       const itemQty = parseInt(itemMatch[2], 10) || 1;
 
-      // ค้นหารายการผลไม้ในเมนู โดยเทียบชื่อแบบยืดหยุ่น
-      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === rawItemName.toLowerCase());
+      // ค้นหาราคาจากเมนูเดิม (ตัดวงเล็บตัวเลือกออกเพื่อหาฐานสินค้า)
+      const baseName = fullItemName.replace(/\s*\(.*?\)\s*/g, '').trim();
+      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase());
       if (!foundInMenu) {
-        foundInMenu = menu.find(m => m.name.includes(rawItemName) || rawItemName.includes(m.name));
+        foundInMenu = menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
       }
 
-      const finalName = foundInMenu ? foundInMenu.name : rawItemName;
       let finalPrice = foundInMenu ? Number(foundInMenu.price) : 0;
 
-      // ถ้าในเมนูหาไม่เจอ ให้ลองแกะราคาต่อหน่วยจากท้ายบรรทัด เช่น "= 110 ฿"
+      // ถ้าไม่เจอก็คำนวณจากยอดรวมท้ายบรรทัด
       if (finalPrice === 0) {
         const priceMatch = trimmed.match(/=\s*(\d+[\d,]*)\s*฿/);
         if (priceMatch) {
@@ -528,17 +554,17 @@ function parseCustomerOrder(rawText) {
         }
       }
 
-      // ตรวจสอบในตะกร้าว่ามีสินค้านี้อยู่แล้วหรือไม่
-      const existingCart = cart.find(c => c.name.toLowerCase() === finalName.toLowerCase());
+      // นำเข้าตะกร้าโดยใช้ชื่อเต็มพร้อมสูตรที่ลูกค้าเลือก
+      const existingCart = cart.find(c => c.name.toLowerCase() === fullItemName.toLowerCase());
       if (existingCart) {
         existingCart.qty = itemQty;
       } else {
-        cart.push({ name: finalName, price: finalPrice, qty: itemQty });
+        cart.push({ name: fullItemName, price: finalPrice, qty: itemQty });
       }
       parsedAny = true;
     }
 
-    // 2. ดักจับบรรทัดหมายเหตุ / จุดรับ / รอบส่ง
+    // ตรวจจับโน้ต / รอบจัดส่ง
     if (trimmed.includes('โน้ตเพิ่มเติม:') || trimmed.includes('รอบจัดส่ง') || trimmed.includes('จุดรับ')) {
       const noteMatch = trimmed.split(':');
       if (noteMatch.length > 1) {
@@ -629,7 +655,7 @@ function renderMenu(){
     if (i.normalizedCategory === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
 
     menuList.innerHTML += `
-      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `addItem('${i.name}',${i.price})`}">
+      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${i.name}',${i.price})`}">
         <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${i.name}', ${i.price}, '${i.category}')" title="แก้ไขราคา/สถานะ">⚙️</button>
         <div>
           ${badge}
@@ -638,6 +664,26 @@ function renderMenu(){
         <div class="menu-price">${i.price > 0 ? `฿${i.price}` : 'ฟรี/พิเศษ'}</div>
       </div>`;
   });
+}
+
+/* จัดการคลิกสินค้าฝั่ง POS หากมีน้ำปลาหวานในชื่อ */
+function handlePOSItemClick(name, price) {
+  if (name.includes('น้ำปลาหวาน')) {
+    pendingPOSItem = { name, price };
+    document.getElementById('posSauceTitle').innerText = name;
+    openModal('posSauceModal');
+  } else {
+    addItem(name, price);
+  }
+}
+
+function confirmSauceSelection(sauceName) {
+  if (pendingPOSItem) {
+    const fullName = `${pendingPOSItem.name} (${sauceName})`;
+    addItem(fullName, pendingPOSItem.price);
+  }
+  closeModal('posSauceModal');
+  pendingPOSItem = null;
 }
 
 function openEditItem(event, rowIndex, name, price, category) {
