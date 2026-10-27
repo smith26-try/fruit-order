@@ -687,7 +687,7 @@ function parseCustomerOrder(rawText) {
 
   lines.forEach(line => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.includes('____') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
+    if (!trimmed || trimmed.includes('---------------------') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
       const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
