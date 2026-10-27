@@ -2,472 +2,217 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>POS ร้านผลไม้ - น้องเอิน ฝรั่งแช่บ๊วย</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-
 <style>
-/* ===== GLOBAL ===== */
-* { box-sizing: border-box; }
-body { 
-  margin: 0; 
-  font-family: 'Kanit', sans-serif; 
-  background: #eef2f6; 
-  color: #333;
-}
-
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: #333; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-/* ===== APP ===== */
-.app {
-  max-width: 1380px;
-  margin: 20px auto; 
-  height: calc(100vh - 40px);
-  display: grid; 
-  grid-template-columns: 1.45fr 1fr; 
-  background: #ffffff;
-  border-radius: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-  overflow: hidden;
-}
-
-/* ===== LEFT ===== */
+.app { max-width: 1380px; margin: 20px auto; height: calc(100vh - 40px); display: grid; grid-template-columns: 1.45fr 1fr; background: #fff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; }
 .left { display: flex; flex-direction: column; background: #f8fafc; overflow: hidden; }
+.category-bar { display: flex; overflow-x: auto; background: linear-gradient(135deg, #3F7D58, #2c593e); padding: 14px 18px; gap: 8px; align-items: center; }
+.category-btn { background: rgba(255,255,255,0.2); color: #fff; padding: 7px 14px; border-radius: 30px; cursor: pointer; white-space: nowrap; user-select: none; font-weight: 500; font-size: 13.5px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+.active { background: #fff !important; color: #2c593e !important; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.btn-refresh { margin-left: auto; background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
 
-/* CATEGORY */
-.category-bar {
-  display: flex; 
-  overflow-x: auto; 
-  background: linear-gradient(135deg, #3F7D58, #2c593e);
-  padding: 14px 18px; 
-  gap: 8px;
-  align-items: center;
-}
-.category-btn {
-  background: rgba(255, 255, 255, 0.2); 
-  color: #fff;
-  padding: 7px 14px; 
-  border-radius: 30px; 
-  cursor: pointer; 
-  white-space: nowrap;
-  user-select: none;
-  font-weight: 500;
-  font-size: 13.5px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-.category-btn:hover { background: rgba(255, 255, 255, 0.3); }
-.active { 
-  background: #ffffff !important; 
-  color: #2c593e !important; 
-  font-weight: 600; 
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-}
-.btn-refresh {
-  margin-left: auto;
-  background: rgba(255,255,255,0.25);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-family: inherit;
-  font-size: 13px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.btn-refresh:hover { background: rgba(255,255,255,0.4); }
-
-/* MENU */
-.menu {
-  flex: 1; 
-  overflow-y: auto; 
-  padding: 18px;
-  display: grid; 
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-  gap: 14px;
-  align-content: start;
-  min-height: 0;
-}
-.menu-item {
-  background: #fff; 
-  border-radius: 16px; 
-  padding: 10px; 
-  text-align: center; 
-  cursor: pointer;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
-  transition: all 0.2s ease;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.menu-item:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 15px rgba(63, 125, 88, 0.15);
-  border-color: #3F7D58;
-}
+.menu { flex: 1; overflow-y: auto; padding: 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; align-content: start; min-height: 0; }
+.menu-item { background: #fff; border-radius: 16px; padding: 10px; text-align: center; cursor: pointer; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
 .menu-item:active { transform: scale(0.96); }
-.menu-item.unavailable {
-  opacity: 0.55;
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-.item-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  display: inline-block;
-}
+.menu-item.unavailable { opacity: 0.55; background: #f1f5f9; border-color: #cbd5e1; }
+.item-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; margin-bottom: 6px; display: inline-block; }
 .badge-warning { background: #ffedd5; color: #ea580c; }
 .badge-danger { background: #fee2e2; color: #dc2626; }
-
 .menu-title { font-size: 13.5px; margin-bottom: 6px; line-height: 1.3; font-weight: 500; }
 .menu-price { color: #3F7D58; font-weight: 600; font-size: 15.5px; }
+.btn-edit-item { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 50%; width: 24px; height: 24px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-.btn-edit-item {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid #e2e8f0;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 0.2s;
-}
-.btn-edit-item:hover { background: #3F7D58; color: #fff; }
+.custom-box { padding: 14px 18px; border-top: 1px solid #e2e8f0; background: #fff; }
+.custom-box input { width: 100%; margin-bottom: 8px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.custom-box button { width: 100%; padding: 9px; background: #0ea5e9; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; }
 
-/* CUSTOM */
-.custom-box {
-  padding: 14px 18px; 
-  border-top: 1px solid #e2e8f0; 
-  background: #fff;
-}
-.custom-box input {
-  width: 100%; margin-bottom: 8px; padding: 8px 12px; 
-  border: 1px solid #cbd5e1; border-radius: 8px; 
-  font-family: inherit; transition: all 0.3s;
-}
-.custom-box input:focus {
-  border-color: #3F7D58; box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.15); outline: none;
-}
-.custom-box button {
-  width: 100%; padding: 9px; background: #0ea5e9; color: #fff; 
-  border: none; border-radius: 8px; cursor: pointer; 
-  font-weight: 600; font-family: inherit; font-size: 14px; transition: 0.2s;
-}
-.custom-box button:hover { background: #0284c7; }
+.right { display: flex; flex-direction: column; border-left: 1px solid #e2e8f0; background: #fff; overflow: hidden; }
+.paste-order-box { padding: 12px 18px; background: #f0fdf4; border-bottom: 2px dashed #bbf7d0; }
+.paste-order-box textarea { width: 100%; height: 60px; padding: 8px 12px; border: 1px solid #86efac; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; background: #fff; }
 
-/* ===== RIGHT ===== */
-.right { 
-  display: flex; flex-direction: column; 
-  border-left: 1px solid #e2e8f0; 
-  background: #ffffff;
-  overflow: hidden;
-}
+.customer { padding: 12px 18px 14px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+.customer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; gap: 6px; flex-wrap: wrap; }
+.cust-status { font-size: 11.5px; padding: 4px 10px; border-radius: 12px; background: #dcfce7; color: #166534; font-weight: 600; cursor: pointer; border: 1px solid #bbf7d0; }
+.btn-sync-sheet { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px; font-size: 11.5px; font-family: inherit; cursor: pointer; }
 
-.paste-order-box {
-  padding: 12px 18px;
-  background: #f0fdf4;
-  border-bottom: 2px dashed #bbf7d0;
-}
-.paste-order-box textarea {
-  width: 100%;
-  height: 65px;
-  padding: 8px 12px;
-  border: 1px solid #86efac;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 12.5px;
-  resize: vertical;
-  background: #fff;
-}
-.paste-order-box textarea:focus {
-  border-color: #3F7D58;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(63, 125, 88, 0.15);
-}
-
-.customer { 
-  padding: 12px 18px 14px; 
-  background: #fff; 
-  border-bottom: 1px solid #e2e8f0; 
-}
-.customer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 12px;
-}
-.cust-status {
-  font-size: 11.5px;
-  padding: 2px 8px;
-  border-radius: 12px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-weight: 500;
-  cursor: pointer;
-}
-.cust-status.ok { background: #dcfce7; color: #166534; }
-.cust-status.err { background: #fee2e2; color: #dc2626; }
-
-.customer input, .customer textarea {
-  width: 100%; margin-bottom: 8px; padding: 8px 12px; 
-  border: 1px solid #cbd5e1; border-radius: 8px; 
-  font-family: inherit; font-size: 13px; transition: all 0.3s;
-  background: #f8fafc;
-}
-.customer input:focus, .customer textarea:focus {
-  border-color: #3F7D58; box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.15); 
-  outline: none; background: #fff;
-}
+.customer input, .customer textarea { width: 100%; margin-bottom: 8px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; background: #f8fafc; }
+.customer input:focus, .customer textarea:focus { border-color: #3F7D58; outline: none; background: #fff; }
 .customer textarea { resize: vertical; min-height: 55px; }
 
-/* AUTOCOMPLETE STYLES */
+/* AUTOCOMPLETE DROPDOWN (รองรับทั้งเมาส์และนิ้วสัมผัสบนมือถือ/แท็บเล็ต) */
 .autocomplete-wrapper { position: relative; width: 100%; }
-.suggestions-box {
-  position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
-  border: 1px solid #cbd5e1; border-radius: 8px; z-index: 9999; display: none;
-  max-height: 220px; overflow-y: auto; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.2);
-}
-.suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
-.suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
-.add-new-btn { 
-  background: #f0fdf4; color: #3F7D58; font-weight: 600; 
-  text-align: center; position: sticky; bottom: 0; border-top: 1px solid #a7f3d0;
-}
-.add-new-btn:hover { background: #d1fae5; }
+.input-with-arrow { position: relative; width: 100%; }
+.input-with-arrow::after { content: "▼"; font-size: 10px; color: #64748b; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.suggestions-box { position: absolute; top: calc(100% - 4px); left: 0; right: 0; background: #fff; border: 2px solid #3F7D58; border-radius: 12px; z-index: 9999; display: none; max-height: 250px; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 12px 30px rgba(0,0,0,0.22); }
+.suggestion-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; user-select: none; }
+.suggestion-item:hover, .suggestion-item:active { background: #f0fdf4; color: #3F7D58; }
+.add-new-btn { background: #f0fdf4; color: #3F7D58; font-weight: 600; text-align: center; position: sticky; bottom: 0; border-top: 1.5px solid #a7f3d0; padding: 12px; }
 
-/* CART */
-.cart { 
-  flex: 1; overflow-y: auto; padding: 14px 18px; 
-  display: flex; flex-direction: column; gap: 8px; 
-  background: #f8fafc;
-  min-height: 0;
-}
-.cart-item { 
-  background: #fff; padding: 10px 12px; border-radius: 12px; 
-  border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-.cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 600; font-size: 14px;}
+.cart { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; min-height: 0; }
+.cart-item { background: #fff; padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
+.cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
 .qty-controls { display: flex; flex-wrap: wrap; gap: 5px; }
-.qty-controls button {
-  padding: 4px 8px; border: 1px solid #e2e8f0; background: #f8fafc; 
-  border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px;
-  color: #475569; font-weight: 500; transition: 0.2s;
-}
-.qty-controls button:hover { background: #e2e8f0; color: #0f172a; }
+.qty-controls button { padding: 5px 9px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #475569; font-weight: 500; }
 .btn-remove { color: #ef4444 !important; border-color: #fca5a5 !important; background: #fef2f2 !important; }
-.btn-remove:hover { background: #fee2e2 !important; color: #dc2626 !important; }
 
-/* SUMMARY */
 .summary { padding: 14px 18px; border-top: 1px solid #e2e8f0; background: #fff; }
 .total { font-size: 22px; font-weight: 600; margin-bottom: 12px; text-align: right; color: #3F7D58; }
-
 .btn-group { display: flex; gap: 10px; }
-.btn-group button {
-  flex: 1; padding: 12px; border: none; border-radius: 12px; 
-  font-size: 15px; cursor: pointer; font-weight: 600; font-family: inherit;
-  transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
+.btn-group button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 15px; cursor: pointer; font-weight: 600; font-family: inherit; }
 .primary { background: #3F7D58; color: #fff; }
-.primary:hover { background: #2c593e; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(63, 125, 88, 0.2); }
 .danger { background: #ef4444; color: #fff; }
-.danger:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(239,68,68,0.2); }
 
-/* MODAL */
-.modal-overlay {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
-  align-items: center; justify-content: center; z-index: 1000;
-}
-.modal-content {
-  background: #fff; padding: 22px; border-radius: 16px; width: 90%; max-width: 420px;
-  display: flex; flex-direction: column; gap: 10px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  animation: modalFadeIn 0.3s ease;
-}
-@keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-.modal-content h3 { color: #0f172a; margin-bottom: 4px; }
-.modal-content input, .modal-content textarea, .modal-content select {
-  width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit;
-}
-.modal-content input:focus, .modal-content textarea:focus, .modal-content select:focus { border-color: #3F7D58; outline: none; }
-.modal-content textarea.bill-textarea {
-  height: 280px; resize: none; font-family: inherit; background: #f8fafc; font-size: 13.5px; line-height: 1.5;
-}
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
-.modal-actions button { 
-  padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; 
-  font-weight: 600; font-family: inherit; transition: 0.2s;
-}
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 10000; }
+.modal-content { background: #fff; padding: 22px; border-radius: 16px; width: 92%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+.modal-content h3 { color: #0f172a; margin: 0 0 4px; }
+.modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
+.modal-content textarea.bill-textarea { height: 280px; resize: none; background: #f8fafc; font-size: 13.5px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
+.modal-actions button { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; }
 .btn-cancel { background: #e2e8f0; color: #475569; }
-.btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
 .btn-confirm { background: #3F7D58; color: #fff; }
-.btn-confirm:hover { background: #2c593e; }
 .btn-copy { background: #EC5228; color: #fff; }
-.btn-copy:hover { background: #d4441c; }
+.pos-option-btn { width: 100%; padding: 12px 14px; margin-bottom: 6px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: #334155; cursor: pointer; text-align: left; }
 
-.pos-option-btn {
-  width: 100%; padding: 12px 14px; margin-bottom: 8px;
-  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px;
-  font-family: inherit; font-size: 14px; font-weight: 500; color: #334155;
-  cursor: pointer; transition: 0.2s; text-align: left;
-}
-.pos-option-btn:hover { background: #f0fdf4; border-color: #3F7D58; color: #166534; }
-
-/* ===== RESPONSIVE ===== */
 @media screen and (max-width: 1024px) {
-  .app {
-    display: flex; flex-direction: column; height: auto; min-height: 100vh;
-    margin: 0; border-radius: 0; box-shadow: none;
-    overflow: visible;
-  }
+  .app { display: flex; flex-direction: column; height: auto; min-height: 100vh; margin: 0; border-radius: 0; box-shadow: none; overflow: visible; }
   .right { display: contents; }
   .paste-order-box { order: 1; }
   .customer { order: 2; }
-  .left {
-    order: 3; height: auto; 
-    border-top: 4px solid #3F7D58; 
-    border-bottom: 4px solid #3F7D58; 
-    overflow: visible; 
-  }
+  .left { order: 3; height: auto; border-top: 4px solid #3F7D58; border-bottom: 4px solid #3F7D58; overflow: visible; }
   .cart { order: 4; min-height: 150px; max-height: none; }
-  .summary { 
-    order: 5; padding: 14px; 
-    position: sticky; bottom: 0; z-index: 10;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
-  }
-  .menu { 
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
-    padding: 14px; gap: 10px; overflow-y: visible; 
-  }
+  .summary { order: 5; padding: 14px; position: sticky; bottom: 0; z-index: 90; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); }
+  .menu { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 14px; gap: 10px; overflow-y: visible; }
 }
 </style>
 </head>
-
 <body>
 
 <div class="app">
-
-<!-- LEFT -->
-<div class="left">
-  <div class="category-bar">
-    <div id="categoryBar" style="display:flex; gap:8px; overflow-x:auto;"></div>
-    <button class="btn-refresh" onclick="loadMenuFromDB()">🔄 รีเฟรช</button>
-  </div>
-  
-  <div class="menu" id="menuList">
-    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>
-  </div>
-
-  <div class="custom-box">
-    <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
-    <div style="display: flex; gap: 10px;">
-      <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
-      <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
+  <div class="left">
+    <div class="category-bar">
+      <div id="categoryBar" style="display:flex; gap:8px; overflow-x:auto;"></div>
+      <button class="btn-refresh" onclick="loadMenuFromDB()">🔄 รีเฟรช</button>
     </div>
-    <button onclick="addCustom()" style="margin-top: 8px;">+ เพิ่มลงตะกร้า</button>
-  </div>
-</div>
-
-<!-- RIGHT -->
-<div class="right">
-
-  <div class="paste-order-box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-      <span style="font-size:12.5px; font-weight:600; color:#166534;">📥 วางข้อความที่ลูกค้าก๊อปมา (ระบบดึงยอดให้อัตโนมัติ):</span>
-      <button onclick="clearPasteBox()" style="background:none; border:none; font-size:11px; color:#64748b; cursor:pointer;">ล้างข้อความ</button>
+    <div class="menu" id="menuList">
+      <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>
     </div>
-    <textarea id="pasteOrderInput" placeholder="แตะค้างแล้วกด 'วาง' ข้อความที่ลูกค้าส่งมาที่นี่..." oninput="parseCustomerOrder(this.value)"></textarea>
-  </div>
-
-  <div class="customer">
-    <div class="customer-header">
-      <b style="color:#334155;">ข้อมูลลูกค้า</b>
-      <span id="custStatusBadge" class="cust-status" onclick="loadCustomersAllMethods()" title="คลิกเพื่อโหลดรายชื่อลูกค้าใหม่">⏳ กำลังโหลดรายชื่อลูกค้า...</span>
-    </div>
-
-    <!-- กล่องค้นหา / เดาชื่อลูกค้า -->
-    <div class="autocomplete-wrapper">
-      <input id="name" placeholder="ชื่อลูกค้า (แตะหรือพิมพ์เพื่อค้นหาอัตโนมัติ)" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" onclick="searchCustomer('name')" autocomplete="off">
-      <div id="nameSuggestions" class="suggestions-box"></div>
-    </div>
-    
-    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-      <!-- กล่องค้นหา / เดาจากเบอร์โทร -->
-      <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
-        <input id="phone" placeholder="เบอร์โทรศัพท์ (พิมพ์เพื่อค้นหา)" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" onclick="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
-        <div id="phoneSuggestions" class="suggestions-box"></div>
+    <div class="custom-box">
+      <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
+      <div style="display: flex; gap: 10px;">
+        <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
+        <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
       </div>
-      <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
-    </div>
-
-    <textarea id="address" placeholder="ที่อยู่จัดส่ง / จุดนัดรับ"></textarea>
-    
-    <div style="display: flex; gap: 10px;">
-      <input id="shipping" type="number" placeholder="ค่าจัดส่ง (฿)" oninput="renderCart()" style="flex: 1; min-width: 0;">
-      <input id="remark" placeholder="หมายเหตุ / รอบส่ง (11.00 หรือ 15.00)" style="flex: 2; min-width: 0;">
+      <button onclick="addCustom()" style="margin-top: 8px;">+ เพิ่มลงตะกร้า</button>
     </div>
   </div>
 
-  <div class="cart" id="cartList"></div>
+  <div class="right">
+    <div class="paste-order-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+        <span style="font-size:12.5px; font-weight:600; color:#166534;">📥 วางข้อความที่ลูกค้าก๊อปมา (ดึงยอดอัตโนมัติ):</span>
+        <button onclick="clearPasteBox()" style="background:none; border:none; font-size:11px; color:#64748b; cursor:pointer;">ล้างข้อความ</button>
+      </div>
+      <textarea id="pasteOrderInput" placeholder="แตะค้างแล้วกด 'วาง' ข้อความที่ลูกค้าส่งมาที่นี่..." oninput="parseCustomerOrder(this.value)"></textarea>
+    </div>
 
-  <div class="summary">
-    <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
-    <div class="btn-group">
-      <button class="primary" onclick="checkout()">สรุปบิล</button>
-      <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
+    <div class="customer">
+      <div class="customer-header">
+        <b style="color:#334155;">ข้อมูลลูกค้า (แตะเพื่อเลือกรายชื่อ หรือพิมพ์ค้นหา)</b>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <button class="btn-sync-sheet" onclick="openModal('importSheetModal')">📥 ซิงค์จากชีท</button>
+          <span id="custStatusBadge" class="cust-status" onclick="openAddCustomerModal('')">+ เพิ่มลูกค้าใหม่</span>
+        </div>
+      </div>
+
+      <div class="autocomplete-wrapper" id="nameWrap">
+        <div class="input-with-arrow">
+          <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อเลื่อนดูรายชื่อ หรือพิมพ์ค้นหา)" 
+                 oninput="showCustomerDropdown('name')" 
+                 onfocus="showCustomerDropdown('name')" 
+                 onclick="showCustomerDropdown('name')" 
+                 autocomplete="off">
+        </div>
+        <div id="nameSuggestions" class="suggestions-box"></div>
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+        <div class="autocomplete-wrapper" id="phoneWrap" style="flex: 1; min-width: 0;">
+          <div class="input-with-arrow">
+            <input id="phone" placeholder="เบอร์โทร (แตะหรือพิมพ์ค้นหา)" 
+                   oninput="showCustomerDropdown('phone')" 
+                   onfocus="showCustomerDropdown('phone')" 
+                   onclick="showCustomerDropdown('phone')" 
+                   autocomplete="off" style="margin-bottom: 0;">
+          </div>
+          <div id="phoneSuggestions" class="suggestions-box"></div>
+        </div>
+        <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
+      </div>
+
+      <textarea id="address" placeholder="ที่อยู่จัดส่ง / จุดนัดรับ"></textarea>
+      
+      <div style="display: flex; gap: 10px;">
+        <input id="shipping" type="number" placeholder="ค่าจัดส่ง (฿)" oninput="renderCart()" style="flex: 1; min-width: 0; margin-bottom:0;">
+        <input id="remark" placeholder="หมายเหตุ / รอบส่ง (11.00 หรือ 15.00)" style="flex: 2; min-width: 0; margin-bottom:0;">
+      </div>
+    </div>
+
+    <div class="cart" id="cartList"></div>
+
+    <div class="summary">
+      <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
+      <div class="btn-group">
+        <button class="primary" onclick="checkout()">สรุปบิล</button>
+        <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
+      </div>
     </div>
   </div>
-
 </div>
 
-</div>
-
-<!-- Modal: เลือกสูตรน้ำปลาหวานฝั่ง POS -->
+<!-- Modals -->
 <div id="posSauceModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 360px;">
-    <h3 style="margin-top:0;" id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
-    <p style="font-size:13px; color:#64748b; margin-bottom:8px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
-    
+    <h3 id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
+    <p style="font-size:13px; color:#64748b; margin:0 0 6px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรกุ้งแห้ง')">🦐 น้ำปลาหวานกุ้งแห้ง</button>
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาป่น')">🐟 น้ำปลาหวานปลาป่น</button>
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาร้าข้าวคั่ว')">🌾 น้ำปลาหวาน สูตรปลาร้าข้าวคั่ว</button>
-    
-    <div class="modal-actions" style="margin-top:6px;">
-      <button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button></div>
+  </div>
+</div>
+
+<div id="importSheetModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3>📥 ซิงค์รายชื่อจากชีทลูกค้า</h3>
+    <p style="font-size:12.5px; color:#475569; margin:0;">ก๊อปปี้คอลัมน์ A, B, C (ชื่อ, เบอร์โทร, ที่อยู่) จาก Google Sheets มาวางในช่องนี้เพื่ออัปเดตรายชื่อทั้งหมดได้ทันที:</p>
+    <textarea id="bulkCustomerText" placeholder="วางข้อมูลจากชีทที่นี่..." style="height:140px; font-size:12.5px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('importSheetModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="importBulkCustomers()">บันทึกรายชื่อทั้งหมด</button>
     </div>
   </div>
 </div>
 
-<!-- Modals อื่นๆ -->
 <div id="alertModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 300px; text-align: center;">
-    <h3 style="margin-top:0;">แจ้งเตือน</h3>
-    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;">ข้อความ</p>
-    <div class="modal-actions" style="justify-content: center;">
-      <button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button>
-    </div>
+    <h3>แจ้งเตือน</h3>
+    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;"></p>
+    <div class="modal-actions"><button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button></div>
   </div>
 </div>
 
 <div id="billModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0;">สรุปรายการสั่งซื้อ</h3>
+    <h3>สรุปรายการสั่งซื้อ</h3>
     <textarea id="billTextarea" class="bill-textarea" readonly></textarea>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('billModal')">ปิดหน้าต่าง</button>
@@ -478,19 +223,18 @@ body {
 
 <div id="confirmModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 320px; text-align: center;">
-    <h3 style="margin-top:0; color: #ef4444;">ยืนยันการทำรายการ</h3>
+    <h3 style="color: #ef4444;">ยืนยันการทำรายการ</h3>
     <p style="color: #475569;">ต้องการล้างตะกร้าและเริ่มบิลใหม่ใช่หรือไม่?</p>
-    <div class="modal-actions" style="justify-content: center;">
+    <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('confirmModal')" style="flex:1;">ยกเลิก</button>
       <button class="btn-confirm" onclick="executeNewOrder()" style="flex:1; background: #ef4444;">ตกลง</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: เพิ่มลูกค้าใหม่ -->
 <div id="addCustomerModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0;">เพิ่มข้อมูลลูกค้าใหม่</h3>
+    <h3>เพิ่มข้อมูลลูกค้าใหม่</h3>
     <input id="newCustName" placeholder="ชื่อลูกค้า">
     <input id="newCustPhone" placeholder="เบอร์โทรศัพท์">
     <textarea id="newCustAddress" placeholder="ที่อยู่จัดส่ง" style="resize:vertical; min-height:80px;"></textarea>
@@ -503,13 +247,11 @@ body {
 
 <div id="editItemModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0;" id="editItemTitle">แก้ไขสินค้า</h3>
+    <h3 id="editItemTitle">แก้ไขสินค้า</h3>
     <input type="hidden" id="editRowIndex">
-    
     <label style="font-size:13px; font-weight:600; color:#475569;">ราคา (บาท):</label>
     <input id="editItemPrice" type="number">
-
-    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่ (Category):</label>
+    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่:</label>
     <select id="editItemCategory">
       <option value="ผลไม้พร้อมส่งวันนี้ (ลูกค้ากดสั่งซื้อได้)">ผลไม้พร้อมส่งวันนี้</option>
       <option value="ใกล้หมดฤดูกาล (มีป้ายเตือนสีส้ม ลูกค้ากดสั่งได้)">ใกล้หมดฤดูกาล</option>
@@ -517,7 +259,6 @@ body {
       <option value="หมดฤดูกาลแล้ว (ป้ายสีเทา ปิดการสั่งซื้อ)">หมดฤดูกาลแล้ว</option>
       <option value="บริการการ์ด ริบบิ้น และปิ่นโตผลไม้">บริการการ์ด ริบบิ้น และปิ่นโตผลไม้</option>
     </select>
-
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('editItemModal')">ยกเลิก</button>
       <button class="btn-confirm" onclick="saveItemUpdate()">บันทึกข้อมูล</button>
@@ -529,238 +270,239 @@ body {
 const MENU_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyPQUcJ3lqv67b6nOJHgQMrFxowoPbiprYFbFOfH_yPLimMWAoneY_e2vS82yBIWSj/exec";
 const CUSTOMER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBBWTHCV3FCtlzm9dyczfB71m8paEZ5iXpwQO5FFL6mvB_H_QPpYnv4MDDjCQ/exec";
 
-const APP_CATEGORIES = [
-  "ทั้งหมด",
-  "ผลไม้พร้อมส่งวันนี้",
-  "ใกล้หมดฤดูกาล",
-  "หมดชั่วคราว",
-  "หมดฤดูกาลแล้ว",
-  "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"
+const APP_CATEGORIES = ["ทั้งหมด", "ผลไม้พร้อมส่งวันนี้", "ใกล้หมดฤดูกาล", "หมดชั่วคราว", "หมดฤดูกาลแล้ว", "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"];
+
+const INITIAL_CUSTOMERS = [
+  { name: "โอ๋", phone: "095-175-5553", address: "ธนาคารออมสินย่อยที่ 11" },
+  { name: "ตะเกียง", phone: "083-322-3003", address: "RS โฮลเซลล์" },
+  { name: "หยก", phone: "096-359-8978", address: "ศูนย์สร้างทางขอนแก่น" },
+  { name: "ดุษดาว", phone: "064-316-3630", address: "โพธิบัลลังก์" },
+  { name: "แอร์", phone: "097-351-4539", address: "ยงยุทธแอร์ ประดับยนต์ ฟิล์ม" },
+  { name: "อูม", phone: "084-974-6692", address: "ศูนย์สร้างทางขอนแก่น" },
+  { name: "ตาล", phone: "093-524-8998", address: "โมโตอิเลกทริค" },
+  { name: "Cheraim", phone: "095-894-4222", address: "Baby Shopping" },
+  { name: "Naan", phone: "081-535-6199", address: "ร้านกินเนื้อ กังสดาล (ติดกับเคียง)" },
+  { name: "มัด", phone: "094-259-3412", address: "ร้านบัง ขอนแก่น (ตรงข้าม ร.ร. สวนสนุก)" },
+  { name: "ส้ม", phone: "087-946-6391", address: "ร.พ. ขอนแก่นราม" },
+  { name: "แพน", phone: "089-631-4561", address: "Nissan KKT ศรีจันทร์" },
+  { name: "แตงโม", phone: "088-826-4242", address: "หมู่บ้านศิริชลวิลเลจ 111/22 รั้วน้ำเงิน" },
+  { name: "จิ๋ว", phone: "081-661-7465", address: "ร.พ. ศูนย์ขอนแก่น (ส่งประชาสัมพันธ์)" },
+  { name: "หมิง", phone: "089-132-1214", address: "หมู่บ้านพิมานชล 2 เฟส 2" },
+  { name: "Jjoy", phone: "N/A", address: "ร้าน HappyYum" },
+  { name: "หมิว", phone: "092-373-8509", address: "นพวรรณเรสซิเดนท์ ซอยมิตรภาพ 13" },
+  { name: "จิ๊บ", phone: "089-719-9998", address: "โรงแรมเลอเลิศ" },
+  { name: "Kwan", phone: "095-659-1947", address: "ธนาคารกรุงไทยมะลิวัลย์ สามเหลี่ยม" },
+  { name: "ซื่อจิน", phone: "061-994-9998", address: "ร้านรุ่งโรจน์เซียงกง (ที่มีร้านมอไซต์)" },
+  { name: "มุก", phone: "082-314-6101", address: "สำนักงานอัยการภาค 4 ข้างการไฟฟ้า" },
+  { name: "ปิง", phone: "080-606-9891", address: "ร้านผลไม้สดปั่น Good day!" },
+  { name: "นิก", phone: "097-302-4455", address: "ร.พ. กรุงเทพ" },
+  { name: "Mattana", phone: "084-704-2493", address: "โรงแรม KOSA" },
+  { name: "มด", phone: "096-732-0502", address: "เจ.เจ. สนุกเกอร์" },
+  { name: "Metta", phone: "N/A", address: "โทเดะโฟน" },
+  { name: "ก้อย", phone: "063-161-5941", address: "หมู่บ้านเป็นสุขเลคไซด์ 555/34" },
+  { name: "Y", phone: "061-965-0011", address: "หมู่บ้านชลพฤกษ์วิลล่า ซอย 1 598/56" },
+  { name: "อีฟ", phone: "081-554-2272", address: "กองกำกับการสืบสวนตำรวจภูธร ขอนแก่น" },
+  { name: "หญิง", phone: "083-342-9090", address: "วินน์ซอฟ โซลูชั่น หนองไผ่ (หลังโตโยต้าชัวร์)" },
+  { name: "GIFT", phone: "091-801-7238", address: "ร.พ. กรุงเทพ" }
 ];
 
 let menu = [];
 let active = "ทั้งหมด";
 let cart = [];
-let customersDB = [];
+let customersDB = [...INITIAL_CUSTOMERS];
 let pendingPOSItem = null;
 
-/* ===== ระบบแปลงข้อมูลลูกค้าทุกโครงสร้างให้เป็นมาตรฐานเดียว ===== */
+function initCustomersDB() {
+  try {
+    const saved = localStorage.getItem('pos_customers_v3');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) mergeCustomers(parsed);
+    }
+  } catch (e) {}
+  updateCustomerBadge();
+}
+
+function mergeCustomers(newList) {
+  const map = new Map();
+  customersDB.forEach(c => { if (c && c.name) map.set(c.name.trim().toLowerCase(), c); });
+  newList.forEach(raw => {
+    const norm = normalizeCustomerRecord(raw);
+    if (norm && norm.name) map.set(norm.name.trim().toLowerCase(), norm);
+  });
+  customersDB = Array.from(map.values());
+  try { localStorage.setItem('pos_customers_v3', JSON.stringify(customersDB)); } catch(e) {}
+  updateCustomerBadge();
+}
+
+function updateCustomerBadge() {
+  const badge = document.getElementById('custStatusBadge');
+  if (badge) badge.innerText = `+ เพิ่มลูกค้าใหม่ (${customersDB.length} รายชื่อ)`;
+}
+
 function normalizeCustomerRecord(raw) {
   if (!raw) return null;
-  // กรณีส่งมาเป็น Array แถวข้อมูล เช่น ["โอ๋", "095-175-5553", "ธนาคารออมสิน..."]
   if (Array.isArray(raw)) {
     const n = String(raw[0] || '').trim();
     if (!n || n.toLowerCase() === 'name' || n === 'ชื่อ') return null;
-    return {
-      name: n,
-      phone: String(raw[1] || '').trim(),
-      address: String(raw[2] || '').trim()
-    };
+    return { name: n, phone: String(raw[1] || '').trim(), address: String(raw[2] || '').trim() };
   }
-  // กรณีส่งมาเป็น Object ทั้งตัวพิมพ์เล็กหรือตัวพิมพ์ใหญ่ (Name / name, Phone / phone, Address / address)
   if (typeof raw === 'object') {
     const keys = Object.keys(raw);
-    let nameVal = raw.name || raw.Name || raw.NAME || raw['ชื่อ'] || raw['ชื่อลูกค้า'] || '';
-    let phoneVal = raw.phone || raw.Phone || raw.PHONE || raw.tel || raw['เบอร์โทร'] || raw['เบอร์โทรศัพท์'] || '';
+    let nameVal = raw.name || raw.Name || raw.NAME || raw['ชื่อ'] || '';
+    let phoneVal = raw.phone || raw.Phone || raw.PHONE || raw.tel || raw['เบอร์โทร'] || '';
     let addrVal = raw.address || raw.Address || raw.ADDRESS || raw['ที่อยู่'] || '';
-
-    // ถ้ายังหาไม่เจอ ให้ดึงตามลำดับคอลัมน์ 0, 1, 2
     if (!nameVal && keys.length > 0) nameVal = raw[keys[0]];
     if (!phoneVal && keys.length > 1) phoneVal = raw[keys[1]];
     if (!addrVal && keys.length > 2) addrVal = raw[keys[2]];
-
     const cleanName = String(nameVal || '').trim();
     if (!cleanName || cleanName.toLowerCase() === 'name' || cleanName === 'ชื่อ') return null;
-
-    return {
-      name: cleanName,
-      phone: String(phoneVal || '').trim(),
-      address: String(addrVal || '').trim()
-    };
+    return { name: cleanName, phone: String(phoneVal || '').trim(), address: String(addrVal || '').trim() };
   }
   return null;
 }
 
 window.onCustomersLoaded = function(json) {
   if (!json) return;
-  let rawList = [];
-  if (Array.isArray(json)) rawList = json;
-  else if (Array.isArray(json.data)) rawList = json.data;
-  else if (Array.isArray(json.customers)) rawList = json.customers;
-  else if (Array.isArray(json.result)) rawList = json.result;
-  else if (Array.isArray(json.items)) rawList = json.items;
-  else if (Array.isArray(json.values)) rawList = json.values;
-
-  const parsed = [];
-  rawList.forEach(item => {
-    const norm = normalizeCustomerRecord(item);
-    if (norm) parsed.push(norm);
-  });
-
-  if (parsed.length > 0) {
-    customersDB = parsed;
-    try { localStorage.setItem('pos_customers_cache', JSON.stringify(customersDB)); } catch(e) {}
-    updateCustomerStatusBadge(true, customersDB.length);
-  }
+  let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
+  if (Array.isArray(rawList) && rawList.length > 0) mergeCustomers(rawList);
 };
 
-function updateCustomerStatusBadge(isSuccess, count) {
-  const badge = document.getElementById('custStatusBadge');
-  if (!badge) return;
-  if (isSuccess && count > 0) {
-    badge.className = 'cust-status ok';
-    badge.innerText = `✓ โหลดรายชื่อลูกค้าแล้ว (${count} คน)`;
-  } else {
-    badge.className = 'cust-status err';
-    badge.innerText = `⚠️ ยังไม่พบรายชื่อลูกค้า (คลิกเพื่อลองใหม่)`;
-  }
-}
-
-function loadCustomersAllMethods() {
-  const badge = document.getElementById('custStatusBadge');
-  if (badge) {
-    badge.className = 'cust-status';
-    badge.innerText = '⏳ กำลังดึงข้อมูลลูกค้า...';
-  }
-
-  // 1. ดึงจากแคชในเครื่องขึ้นมาสำรองก่อนทันที
-  try {
-    const cached = localStorage.getItem('pos_customers_cache');
-    if (cached) {
-      const parsedCache = JSON.parse(cached);
-      if (Array.isArray(parsedCache) && parsedCache.length > 0 && customersDB.length === 0) {
-        customersDB = parsedCache;
-        updateCustomerStatusBadge(true, customersDB.length);
-      }
-    }
-  } catch(e) {}
-
-  // 2. ดึงผ่าน Fetch (กรณี Google Apps Script ส่ง JSON ปกติ)
-  fetch(`${CUSTOMER_SCRIPT_URL}?action=getCustomers&t=${Date.now()}`)
-    .then(res => res.text())
-    .then(text => {
-      let cleanText = text.trim();
-      // ถ้าติด callback(...) หุ้มมา ให้แกะออก
-      const match = cleanText.match(/^[\w$]+\(([\s\S]*)\);?$/);
-      if (match) cleanText = match[1];
-      const json = JSON.parse(cleanText);
-      window.onCustomersLoaded(json);
+function fetchRemoteCustomers() {
+  fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
+    .then(r => r.text())
+    .then(t => {
+      let clean = t.trim();
+      const m = clean.match(/^[\w$]+\(([\s\S]*)\);?$/);
+      if (m) clean = m[1];
+      window.onCustomersLoaded(JSON.parse(clean));
     })
-    .catch(() => {});
+    .catch(() => {
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(CUSTOMER_SCRIPT_URL)}`)
+        .then(r => r.json())
+        .then(j => window.onCustomersLoaded(j))
+        .catch(() => {});
+    });
 
-  // 3. ดึงผ่าน JSONP Script Tag ควบคู่กัน
-  const oldScript = document.getElementById('custJsonpScript');
-  if (oldScript) oldScript.remove();
-  const scriptCust = document.createElement('script');
-  scriptCust.id = 'custJsonpScript';
-  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
-  document.body.appendChild(scriptCust);
+  const old = document.getElementById('custJsonpScript');
+  if (old) old.remove();
+  const s = document.createElement('script');
+  s.id = 'custJsonpScript';
+  s.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+  document.body.appendChild(s);
 }
 
-/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ===== */
-function searchCustomer(field) {
-  const inputEl = document.getElementById(field);
-  let rawVal = inputEl.value.trim();
-  let keyword = rawVal.replace(/^คุณ\s*/, '').toLowerCase();
-  const suggestionsBox = document.getElementById(field + 'Suggestions');
-  
-  if (!suggestionsBox) return;
-
-  // ถ้าแตะช่องโดยยังไม่ได้พิมพ์อะไร ให้แสดงรายชื่อลูกค้า 30 คนแรกทันที
-  if (!keyword) {
-    if (customersDB.length > 0) {
-      renderSuggestions(customersDB.slice(0, 30), field, suggestionsBox, '');
-    } else {
-      suggestionsBox.style.display = 'none';
-    }
-    return;
+function importBulkCustomers() {
+  const raw = document.getElementById('bulkCustomerText').value;
+  if (!raw || !raw.trim()) return closeModal('importSheetModal');
+  const lines = raw.split(/\r?\n/);
+  const list = [];
+  lines.forEach(line => {
+    if (!line.trim()) return;
+    const cols = line.split('\t');
+    const name = (cols[0] || '').trim();
+    const phone = (cols[1] || '').trim();
+    const address = (cols[2] || '').trim();
+    if (name && name.toLowerCase() !== 'name') list.push({ name, phone, address });
+  });
+  if (list.length > 0) {
+    mergeCustomers(list);
+    document.getElementById('bulkCustomerText').value = '';
+    closeModal('importSheetModal');
+    customAlert(`ซิงค์รายชื่อสำเร็จ! มีทั้งหมด ${customersDB.length} รายชื่อ`);
   }
+}
 
-  const matched = [];
-  customersDB.forEach((c, idx) => {
-    let match = false;
-    if (field === 'phone') {
-      const cleanKeyword = keyword.replace(/\D/g, '');
-      const cleanPhone = String(c.phone || '').replace(/\D/g, '');
-      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
-      else if (String(c.phone || '').toLowerCase().includes(keyword)) match = true;
-    } else {
+/* ===== ดรอปดาวน์ลูกค้า: รองรับทั้งคลิกเมาส์และทัชสกรีนมือถือ/แท็บเล็ต ===== */
+function showCustomerDropdown(field) {
+  const nameBox = document.getElementById('nameSuggestions');
+  const phoneBox = document.getElementById('phoneSuggestions');
+  if (field === 'name' && phoneBox) phoneBox.style.display = 'none';
+  if (field === 'phone' && nameBox) nameBox.style.display = 'none';
+
+  const inputEl = document.getElementById(field);
+  const suggestionsBox = document.getElementById(field + 'Suggestions');
+  if (!inputEl || !suggestionsBox) return;
+
+  const rawVal = inputEl.value.trim();
+  const keyword = rawVal.replace(/^คุณ\s*/, '').toLowerCase();
+  let matched = [];
+
+  if (!keyword) {
+    matched = customersDB.map((c, idx) => ({ c, idx }));
+  } else {
+    customersDB.forEach((c, idx) => {
       const cName = String(c.name || '').toLowerCase();
       const cPhone = String(c.phone || '').toLowerCase();
-      if (cName.includes(keyword) || cPhone.includes(keyword)) match = true;
-    }
-    if (match) matched.push({ c, idx });
-  });
+      const cAddr = String(c.address || '').toLowerCase();
+      const cleanK = keyword.replace(/\D/g, '');
+      const cleanP = cPhone.replace(/\D/g, '');
+      if (cName.includes(keyword) || cPhone.includes(keyword) || cAddr.includes(keyword) || (cleanK && cleanP.includes(cleanK))) {
+        matched.push({ c, idx });
+      }
+    });
+  }
 
-  renderSuggestions(matched, field, suggestionsBox, rawVal);
-}
-
-function renderSuggestions(list, field, suggestionsBox, currentText) {
   let html = '';
-  
-  list.forEach(item => {
-    const c = item.c || item;
-    const idx = (item.idx !== undefined) ? item.idx : customersDB.indexOf(c);
+  matched.forEach(item => {
+    const c = item.c;
     html += `
-      <div class="suggestion-item" onmousedown="fillCustomer(${idx})">
-        <b>${c.name}</b> - <span style="color:#64748b;">${c.phone || 'ไม่ระบุเบอร์'}</span>
-        <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${c.address || 'ไม่ระบุที่อยู่'}</div>
-      </div>
-    `;
+      <div class="suggestion-item" onclick="fillCustomer(${item.idx})">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <b>${c.name}</b>
+          <span style="color:#3F7D58; font-weight:500; font-size:12.5px;">📞 ${c.phone || '-'}</span>
+        </div>
+        <div style="font-size:11.5px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;">
+          📍 ${c.address || 'ไม่ระบุที่อยู่'}
+        </div>
+      </div>`;
   });
 
-  if (field === 'name' && currentText) {
-    const safeText = currentText.replace(/'/g, "\\'");
-    html += `
-      <div class="suggestion-item add-new-btn" onmousedown="openAddCustomerModal('${safeText}')">
-        + เพิ่มข้อมูลลูกค้าใหม่ "${currentText}"
-      </div>`;
-  }
+  const safeText = rawVal.replace(/'/g, "\\'");
+  html += `
+    <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${safeText}')">
+      + เพิ่มข้อมูลลูกค้าใหม่ ${rawVal ? `"${rawVal}"` : ''}
+    </div>`;
 
-  if (html) {
-    suggestionsBox.innerHTML = html;
-    suggestionsBox.style.display = 'block';
-  } else {
-    suggestionsBox.style.display = 'none';
-  }
+  suggestionsBox.innerHTML = html;
+  suggestionsBox.style.display = 'block';
 }
 
 function fillCustomer(index) {
   const customer = customersDB[index];
   if (!customer) return;
   document.getElementById('name').value = customer.name || '';
-  document.getElementById('phone').value = customer.phone || '';
+  document.getElementById('phone').value = (customer.phone && customer.phone !== 'N/A') ? customer.phone : '';
   document.getElementById('address').value = customer.address || '';
   document.getElementById('nameSuggestions').style.display = 'none';
   document.getElementById('phoneSuggestions').style.display = 'none';
 }
 
 function openAddCustomerModal(nameValue = '') {
-  document.getElementById('newCustName').value = nameValue;
-  document.getElementById('newCustPhone').value = document.getElementById('phone').value;
-  document.getElementById('newCustAddress').value = document.getElementById('address').value;
+  document.getElementById('newCustName').value = nameValue || document.getElementById('name').value.trim();
+  document.getElementById('newCustPhone').value = document.getElementById('phone').value.trim();
+  document.getElementById('newCustAddress').value = document.getElementById('address').value.trim();
   openModal('addCustomerModal');
   document.getElementById('nameSuggestions').style.display = 'none';
+  document.getElementById('phoneSuggestions').style.display = 'none';
 }
 
 async function saveNewCustomer() {
   const name = document.getElementById('newCustName').value.trim();
   const phone = document.getElementById('newCustPhone').value.trim();
   const address = document.getElementById('newCustAddress').value.trim();
-
   if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
 
   const newCust = { name, phone, address };
   customersDB.unshift(newCust);
-  try { localStorage.setItem('pos_customers_cache', JSON.stringify(customersDB)); } catch(e) {}
-  updateCustomerStatusBadge(true, customersDB.length);
+  try { localStorage.setItem('pos_customers_v3', JSON.stringify(customersDB)); } catch(e) {}
+  updateCustomerBadge();
 
   document.getElementById('name').value = name;
   document.getElementById('phone').value = phone;
   document.getElementById('address').value = address;
-  
   closeModal('addCustomerModal');
-  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบเรียบร้อยแล้ว");
+  customAlert("เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว");
 
   try {
     await fetch(CUSTOMER_SCRIPT_URL, {
@@ -769,23 +511,15 @@ async function saveNewCustomer() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'addCustomer', name, phone, address, Name: name, Phone: phone, Address: address })
     });
-  } catch (error) {}
+  } catch (e) {}
 }
 
-/* ===== ระบบโหลดเมนูและลูกค้า ===== */
 function loadMenuFromDB() {
-  const menuList = document.getElementById('menuList');
-  if (menuList) {
-    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
-  }
-
-  // 1. โหลดเมนูผลไม้
+  initCustomersDB();
+  fetchRemoteCustomers();
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
-
-  // 2. โหลดรายชื่อลูกค้า
-  loadCustomersAllMethods();
 }
 
 window.onPOSMenuLoaded = function(json) {
@@ -798,15 +532,11 @@ window.onPOSMenuLoaded = function(json) {
     renderCategory();
     renderMenu();
   }
-  if (json && Array.isArray(json.customers) && json.customers.length > 0 && customersDB.length === 0) {
-    window.onCustomersLoaded(json.customers);
-  }
+  if (json && Array.isArray(json.customers)) window.onCustomersLoaded(json.customers);
 };
 
-/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (รองรับทั้งขีด ____ และ -----) ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
-
   const lines = rawText.split('\n');
   let parsedAny = false;
   let lastAddedItem = null;
@@ -815,7 +545,6 @@ function parseCustomerOrder(rawText) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.includes('____') || trimmed.includes('-----') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
-    // ตรวจจับสูตรน้ำปลาหวานบรรทัดย่อย เช่น "- สูตรกุ้งแห้ง"
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
       const optionText = trimmed.replace(/^[-•]\s*/, '').replace(/^\(|\)$/g, '').trim();
       if (lastAddedItem && optionText) {
@@ -829,21 +558,14 @@ function parseCustomerOrder(rawText) {
     if (itemMatch) {
       const fullItemName = itemMatch[1].trim();
       const itemQty = parseInt(itemMatch[2], 10) || 1;
-
       const baseName = fullItemName.replace(/\s*\(.*?\)\s*/g, '').trim();
-      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase());
-      if (!foundInMenu) {
-        foundInMenu = menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
-      }
-
+      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase()) ||
+                        menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
       let finalPrice = foundInMenu ? Number(foundInMenu.price) : 0;
 
       if (finalPrice === 0) {
         const priceMatch = trimmed.match(/\((\d+[\d,]*)\s*฿\)/) || trimmed.match(/=\s*(\d+[\d,]*)\s*฿/);
-        if (priceMatch) {
-          const totalLinePrice = parseFloat(priceMatch[1].replace(/,/g, ''));
-          finalPrice = Math.round(totalLinePrice / itemQty);
-        }
+        if (priceMatch) finalPrice = Math.round(parseFloat(priceMatch[1].replace(/,/g, '')) / itemQty);
       }
 
       const existingCart = cart.find(c => c.name.toLowerCase() === fullItemName.toLowerCase());
@@ -858,15 +580,10 @@ function parseCustomerOrder(rawText) {
       parsedAny = true;
     }
   });
-
-  if (parsedAny) {
-    renderCart();
-  }
+  if (parsedAny) renderCart();
 }
 
-function clearPasteBox() {
-  document.getElementById('pasteOrderInput').value = '';
-}
+function clearPasteBox() { document.getElementById('pasteOrderInput').value = ''; }
 
 function normalizeCategory(raw) {
   const text = String(raw || '').trim();
@@ -878,53 +595,38 @@ function normalizeCategory(raw) {
   return text;
 }
 
-function renderCategory(){
-  const categoryBar = document.getElementById('categoryBar');
-  categoryBar.innerHTML = "";
-  APP_CATEGORIES.forEach(c => {
-    categoryBar.innerHTML += `
-      <div class="category-btn ${c === active ? 'active' : ''}" onclick="selectCat('${c}')">
-        ${c === 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้' ? 'บริการ/ปิ่นโต' : c}
-      </div>`;
-  });
+function renderCategory() {
+  const bar = document.getElementById('categoryBar');
+  bar.innerHTML = APP_CATEGORIES.map(c => `
+    <div class="category-btn ${c === active ? 'active' : ''}" onclick="selectCat('${c}')">
+      ${c === 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้' ? 'บริการ/ปิ่นโต' : c}
+    </div>`).join('');
 }
 
-function selectCat(c){
-  active = c;
-  renderCategory();
-  renderMenu();
-}
+function selectCat(c) { active = c; renderCategory(); renderMenu(); }
 
-function renderMenu(){
+function renderMenu() {
   const menuList = document.getElementById('menuList');
-  menuList.innerHTML = "";
-
   const filtered = menu.filter(i => active === "ทั้งหมด" || i.normalizedCategory === active);
-
   if (filtered.length === 0) {
     menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8;">ไม่มีรายการในหมวดนี้</div>`;
     return;
   }
-
-  filtered.forEach(i => {
+  menuList.innerHTML = filtered.map(i => {
     const isOut = (i.normalizedCategory === 'หมดชั่วคราว' || i.normalizedCategory === 'หมดฤดูกาลแล้ว');
-    const isNearEnd = (i.normalizedCategory === 'ใกล้หมดฤดูกาล');
-
     let badge = '';
-    if (isNearEnd) badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
+    if (i.normalizedCategory === 'ใกล้หมดฤดูกาล') badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
     if (i.normalizedCategory === 'หมดชั่วคราว') badge = `<span class="item-badge badge-danger">หมดชั่วคราว</span>`;
     if (i.normalizedCategory === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
-
-    menuList.innerHTML += `
-      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${i.name}', ${i.price})`}">
-        <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${i.name}', ${i.price}, '${i.category}')" title="แก้ไขราคา/สถานะ">⚙️</button>
-        <div>
-          ${badge}
-          <div class="menu-title">${i.name}</div>
-        </div>
+    const safeName = i.name.replace(/'/g, "\\'");
+    const safeCat = (i.category || '').replace(/'/g, "\\'");
+    return `
+      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${safeName}', ${i.price})`}">
+        <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${safeName}', ${i.price}, '${safeCat}')">⚙️</button>
+        <div>${badge}<div class="menu-title">${i.name}</div></div>
         <div class="menu-price">${i.price > 0 ? `฿${i.price}` : 'ฟรี/พิเศษ'}</div>
       </div>`;
-  });
+  }).join('');
 }
 
 function handlePOSItemClick(name, price) {
@@ -938,10 +640,7 @@ function handlePOSItemClick(name, price) {
 }
 
 function confirmSauceSelection(sauceName) {
-  if (pendingPOSItem) {
-    const fullName = `${pendingPOSItem.name} (${sauceName})`;
-    addItem(fullName, pendingPOSItem.price);
-  }
+  if (pendingPOSItem) addItem(`${pendingPOSItem.name} (${sauceName})`, pendingPOSItem.price);
   closeModal('posSauceModal');
   pendingPOSItem = null;
 }
@@ -951,15 +650,10 @@ function openEditItem(event, rowIndex, name, price, category) {
   document.getElementById('editItemTitle').innerText = `แก้ไข: ${name}`;
   document.getElementById('editRowIndex').value = rowIndex;
   document.getElementById('editItemPrice').value = price;
-  
   const catSelect = document.getElementById('editItemCategory');
   for (let opt of catSelect.options) {
-    if (category.includes(opt.text)) {
-      catSelect.value = opt.value;
-      break;
-    }
+    if (category.includes(opt.text)) { catSelect.value = opt.value; break; }
   }
-
   openModal('editItemModal');
 }
 
@@ -967,114 +661,71 @@ async function saveItemUpdate() {
   const rowIndex = Number(document.getElementById('editRowIndex').value);
   const price = Number(document.getElementById('editItemPrice').value);
   const category = document.getElementById('editItemCategory').value;
-
   closeModal('editItemModal');
   customAlert("กำลังบันทึกการแก้ไขลงชีท...");
-
   try {
     await fetch(MENU_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'updateItem',
-        rowIndex: rowIndex,
-        price: price,
-        category: category
-      })
+      body: JSON.stringify({ action: 'updateItem', rowIndex, price, category })
     });
-
-    setTimeout(() => {
-      closeModal('alertModal');
-      loadMenuFromDB();
-    }, 1500);
-
-  } catch (error) {
-    customAlert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-  }
+    setTimeout(() => { closeModal('alertModal'); loadMenuFromDB(); }, 1400);
+  } catch (e) { customAlert("เกิดข้อผิดพลาดในการบันทึก"); }
 }
 
-function addItem(name, price){
+function addItem(name, price) {
   let f = cart.find(i => i.name === name);
-  if(f) f.qty++;
+  if (f) f.qty++;
   else cart.push({ name, price: Number(price) || 0, qty: 1 });
   renderCart();
 }
 
-function renderCart(){
+function renderCart() {
   let total = 0;
   const cartList = document.getElementById('cartList');
-  if(!cartList) return;
-  cartList.innerHTML = "";
-
-  cart.forEach((i, idx) => {
+  cartList.innerHTML = cart.map((i, idx) => {
     let p = Number(i.price) || 0;
     let sum = p * i.qty;
     total += sum;
-
-    cartList.innerHTML += `
-    <div class="cart-item">
-      <div style="margin-bottom: 8px; font-weight: 500;">${i.name}</div>
-      <div class="cart-row">
-        <span style="color:#64748b; font-weight: 400;">${p} x ${i.qty}</span>
-        <span style="color:#0f172a;">฿${sum}</span>
-      </div>
-      <div class="qty-controls">
-        <button onclick="change(${idx},-1)">-1</button>
-        <button onclick="change(${idx},1)">+1</button>
-        <button onclick="change(${idx},10)">+10</button>
-        <button onclick="setQty(${idx},10)">=10</button>
-        <button onclick="setQty(${idx},20)">=20</button>
-        <button onclick="setQty(${idx},30)">=30</button>
-        <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
-      </div>
-    </div>`;
-  });
-
-  const shippingInput = document.getElementById('shipping');
-  const shippingCost = Number(shippingInput ? shippingInput.value : 0) || 0;
-  total += shippingCost;
-  
-  const totalEl = document.getElementById('totalEl');
-  if(totalEl) totalEl.innerText = total.toLocaleString();
+    return `
+      <div class="cart-item">
+        <div style="margin-bottom: 6px; font-weight: 500;">${i.name}</div>
+        <div class="cart-row">
+          <span style="color:#64748b; font-weight: 400;">${p} x ${i.qty}</span>
+          <span style="color:#0f172a;">฿${sum}</span>
+        </div>
+        <div class="qty-controls">
+          <button onclick="change(${idx},-1)">-1</button>
+          <button onclick="change(${idx},1)">+1</button>
+          <button onclick="change(${idx},10)">+10</button>
+          <button onclick="setQty(${idx},10)">=10</button>
+          <button onclick="setQty(${idx},20)">=20</button>
+          <button onclick="setQty(${idx},30)">=30</button>
+          <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
+        </div>
+      </div>`;
+  }).join('');
+  total += Number(document.getElementById('shipping').value || 0);
+  document.getElementById('totalEl').innerText = total.toLocaleString();
 }
 
-function change(i, d){
-  cart[i].qty += d;
-  if(cart[i].qty <= 0) cart.splice(i, 1);
-  renderCart();
-}
+function change(i, d) { cart[i].qty += d; if (cart[i].qty <= 0) cart.splice(i, 1); renderCart(); }
+function setQty(i, q) { if (q <= 0) cart.splice(i, 1); else cart[i].qty = q; renderCart(); }
 
-function setQty(i, q){
-  if(q <= 0) cart.splice(i, 1);
-  else cart[i].qty = q;
-  renderCart();
-}
-
-function addCustom(){
+function addCustom() {
   const name = document.getElementById('customName').value.trim();
   const price = parseFloat(document.getElementById('customPrice').value);
-  if(!name || isNaN(price)) {
-    customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
-    return;
-  }
-
+  if (!name || isNaN(price)) return customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
   let f = cart.find(i => i.name === name && i.price === price);
-  if(f) f.qty++;
-  else cart.push({ name, price, qty: 1 });
-  
+  if (f) f.qty++; else cart.push({ name, price, qty: 1 });
   renderCart();
   document.getElementById('customName').value = "";
   document.getElementById('customPrice').value = "";
 }
 
-/* ===== สรุปบิล (ใช้เส้นคั่น --------------------- และตัวเลือกพิเศษเยื้องบรรทัดล่าง) ===== */
 function checkout() {
-  if (cart.length === 0) {
-    customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
-    return;
-  }
-
+  if (cart.length === 0) return customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนสรุปบิล');
   const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
   const cleanName = nameVal.startsWith('คุณ') ? nameVal.replace(/^คุณ\s*/, '') : nameVal;
   const phone = document.getElementById('phone').value.trim() || 'ไม่ระบุ';
@@ -1092,102 +743,70 @@ function checkout() {
     dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
   
-  let billText = `${dateStr}\n`;
-  billText += `ออเดอร์คุณ ${cleanName}\n`;
-  billText += `(${phone})\n\n`;
-  
-  billText += `รายการคำสั่งซื้อ\n`;
-  billText += `---------------------\n`;
+  let billText = `${dateStr}\nออเดอร์คุณ ${cleanName}\n(${phone})\n\nรายการคำสั่งซื้อ\n---------------------\n`;
   
   cart.forEach((item, idx) => {
     const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
     const itemTotal = (item.price * item.qty).toLocaleString();
-
     const optionMatch = cleanItemName.match(/^(.*?)\s*\((.*?)\)$/);
 
     if (optionMatch) {
       const baseName = optionMatch[1].trim();
       let optionText = optionMatch[2].trim();
-
       if (!optionText.startsWith('สูตร')) {
         optionText = optionText.replace(/^น้ำปลาหวาน\s*/, '');
-        if (!optionText.startsWith('สูตร')) {
-          optionText = 'สูตร' + optionText;
-        }
+        if (!optionText.startsWith('สูตร')) optionText = 'สูตร' + optionText;
       }
-
-      billText += `${idx + 1}. ${baseName}\n`;
-      billText += `  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
+      billText += `${idx + 1}. ${baseName}\n  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
     } else {
       billText += `${idx + 1}. ${cleanItemName} ×${item.qty} (${itemTotal}฿)\n`;
     }
   });
   
-  billText += `---------------------\n\n`;
-  billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
-  billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
-  billText += `📍 ${address}`;
-  
-  if (remark) {
-    billText += `\nหมายเหตุ: ${remark}`;
-  }
+  billText += `---------------------\n\nค่าส่ง ${shipping.toLocaleString()}฿\nรวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n📍 ${address}`;
+  if (remark) billText += `\nหมายเหตุ: ${remark}`;
 
   document.getElementById('billTextarea').value = billText.trim();
   openModal('billModal');
 }
 
-function newOrder(){
-  if(cart.length > 0) openModal('confirmModal');
-  else executeNewOrder();
-}
+function newOrder() { if (cart.length > 0) openModal('confirmModal'); else executeNewOrder(); }
 
 function executeNewOrder() {
   closeModal('confirmModal');
   cart = [];
-  document.getElementById('pasteOrderInput').value = "";
-  document.getElementById('name').value = "";
-  document.getElementById('phone').value = "";
-  document.getElementById('address').value = "";
-  document.getElementById('shipping').value = ""; 
-  document.getElementById('remark').value = "";
-  document.getElementById('customName').value = "";
-  document.getElementById('customPrice').value = "";
+  ['pasteOrderInput', 'name', 'phone', 'address', 'shipping', 'remark', 'customName', 'customPrice'].forEach(id => {
+    document.getElementById(id).value = "";
+  });
   setDefaultDate();
   renderCart();
 }
 
 function setDefaultDate() {
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const orderDateEl = document.getElementById('orderDate');
-  if (orderDateEl) orderDateEl.value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('orderDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function customAlert(msg) { 
-  document.getElementById('alertMessage').innerText = msg; 
-  openModal('alertModal'); 
-}
+function customAlert(msg) { document.getElementById('alertMessage').innerText = msg; openModal('alertModal'); }
 
 function copyBillText() {
   const copyText = document.getElementById("billTextarea");
   copyText.select();
   copyText.setSelectionRange(0, 99999);
-  document.execCommand("copy");
-  
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(copyText.value);
+  } else {
+    document.execCommand("copy");
+  }
   const btn = document.getElementById('copyBtn');
-  const originalText = btn.innerText;
   btn.innerText = 'คัดลอกสำเร็จ!';
   btn.style.background = '#0ea5e9';
-  setTimeout(() => { 
-    btn.innerText = originalText; 
-    btn.style.background = '#EC5228';
-  }, 2000);
+  setTimeout(() => { btn.innerText = 'คัดลอกข้อความ'; btn.style.background = '#EC5228'; }, 2000);
 }
 
+// ปิดดรอปดาวน์เมื่อแตะพื้นที่อื่นนอกกล่อง (รองรับทั้งคลิกและทัชสกรีน)
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) {
     document.getElementById('nameSuggestions').style.display = 'none';
@@ -1198,6 +817,5 @@ document.addEventListener('click', function(e) {
 setDefaultDate();
 loadMenuFromDB();
 </script>
-
 </body>
 </html>
