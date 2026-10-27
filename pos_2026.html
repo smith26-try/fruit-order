@@ -183,4 +183,489 @@ body {
   background: #f0fdf4;
   border-bottom: 2px dashed #bbf7d0;
 }
-.paste-
+.paste-order-box textarea {
+  width: 100%;
+  height: 65px;
+  padding: 8px 12px;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12.5px;
+  resize: vertical;
+  background: #fff;
+}
+.paste-order-box textarea:focus {
+  border-color: #3F7D58;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(63, 125, 88, 0.15);
+}
+
+.customer { 
+  padding: 14px 18px; 
+  background: #fff; 
+  border-bottom: 1px solid #e2e8f0; 
+}
+.customer input, .customer textarea {
+  width: 100%; margin-bottom: 8px; padding: 8px 12px; 
+  border: 1px solid #cbd5e1; border-radius: 8px; 
+  font-family: inherit; font-size: 13px; transition: all 0.3s;
+  background: #f8fafc;
+}
+.customer input:focus, .customer textarea:focus {
+  border-color: #3F7D58; box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.15); 
+  outline: none; background: #fff;
+}
+.customer textarea { resize: vertical; min-height: 55px; }
+
+/* AUTOCOMPLETE */
+.autocomplete-wrapper { position: relative; width: 100%; }
+.suggestions-box {
+  position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
+  border: 1px solid #e2e8f0; border-radius: 8px; z-index: 99; display: none;
+  max-height: 180px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+.suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
+.suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
+.add-new-btn { 
+  background: #f0fdf4; color: #3F7D58; font-weight: 600; 
+  text-align: center; position: sticky; bottom: 0; border-top: 1px solid #a7f3d0;
+}
+.add-new-btn:hover { background: #d1fae5; }
+
+/* CART */
+.cart { 
+  flex: 1; overflow-y: auto; padding: 14px 18px; 
+  display: flex; flex-direction: column; gap: 8px; 
+  background: #f8fafc;
+  min-height: 0;
+}
+.cart-item { 
+  background: #fff; padding: 10px 12px; border-radius: 12px; 
+  border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 600; font-size: 14px;}
+.qty-controls { display: flex; flex-wrap: wrap; gap: 5px; }
+.qty-controls button {
+  padding: 4px 8px; border: 1px solid #e2e8f0; background: #f8fafc; 
+  border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px;
+  color: #475569; font-weight: 500; transition: 0.2s;
+}
+.qty-controls button:hover { background: #e2e8f0; color: #0f172a; }
+.btn-remove { color: #ef4444 !important; border-color: #fca5a5 !important; background: #fef2f2 !important; }
+.btn-remove:hover { background: #fee2e2 !important; color: #dc2626 !important; }
+
+/* SUMMARY */
+.summary { padding: 14px 18px; border-top: 1px solid #e2e8f0; background: #fff; }
+.total { font-size: 22px; font-weight: 600; margin-bottom: 12px; text-align: right; color: #3F7D58; }
+
+.btn-group { display: flex; gap: 10px; }
+.btn-group button {
+  flex: 1; padding: 12px; border: none; border-radius: 12px; 
+  font-size: 15px; cursor: pointer; font-weight: 600; font-family: inherit;
+  transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.primary { background: #3F7D58; color: #fff; }
+.primary:hover { background: #2c593e; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(63, 125, 88, 0.2); }
+.danger { background: #ef4444; color: #fff; }
+.danger:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(239,68,68,0.2); }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-content {
+  background: #fff; padding: 22px; border-radius: 16px; width: 90%; max-width: 420px;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-content h3 { color: #0f172a; margin-bottom: 4px; }
+.modal-content input, .modal-content textarea, .modal-content select {
+  width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit;
+}
+.modal-content input:focus, .modal-content textarea:focus, .modal-content select:focus { border-color: #3F7D58; outline: none; }
+.modal-content textarea.bill-textarea {
+  height: 280px; resize: none; font-family: inherit; background: #f8fafc; font-size: 13.5px; line-height: 1.5;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.modal-actions button { 
+  padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; 
+  font-weight: 600; font-family: inherit; transition: 0.2s;
+}
+.btn-cancel { background: #e2e8f0; color: #475569; }
+.btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
+.btn-confirm { background: #3F7D58; color: #fff; }
+.btn-confirm:hover { background: #2c593e; }
+.btn-copy { background: #EC5228; color: #fff; }
+.btn-copy:hover { background: #d4441c; }
+
+.pos-option-btn {
+  width: 100%; padding: 12px 14px; margin-bottom: 8px;
+  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 500; color: #334155;
+  cursor: pointer; transition: 0.2s; text-align: left;
+}
+.pos-option-btn:hover { background: #f0fdf4; border-color: #3F7D58; color: #166534; }
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 1024px) {
+  .app {
+    display: flex; flex-direction: column; height: auto; min-height: 100vh;
+    margin: 0; border-radius: 0; box-shadow: none;
+    overflow: visible;
+  }
+  .right { display: contents; }
+  .paste-order-box { order: 1; }
+  .customer { order: 2; }
+  .left {
+    order: 3; height: auto; 
+    border-top: 4px solid #3F7D58; 
+    border-bottom: 4px solid #3F7D58; 
+    overflow: visible; 
+  }
+  .cart { order: 4; min-height: 150px; max-height: none; }
+  .summary { 
+    order: 5; padding: 14px; 
+    position: sticky; bottom: 0; z-index: 10;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+  }
+  .menu { 
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    padding: 14px; gap: 10px; overflow-y: visible; 
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- LEFT -->
+<div class="left">
+  <div class="category-bar">
+    <div id="categoryBar" style="display:flex; gap:8px; overflow-x:auto;"></div>
+    <button class="btn-refresh" onclick="loadMenuFromDB()">🔄 รีเฟรช</button>
+  </div>
+  
+  <div class="menu" id="menuList">
+    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>
+  </div>
+
+  <div class="custom-box">
+    <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
+    <div style="display: flex; gap: 10px;">
+      <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
+      <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
+    </div>
+    <button onclick="addCustom()" style="margin-top: 8px;">+ เพิ่มลงตะกร้า</button>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+
+  <div class="paste-order-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+      <span style="font-size:12.5px; font-weight:600; color:#166534;">📥 วางข้อความที่ลูกค้าก๊อปมา (ระบบดึงยอดให้อัตโนมัติ):</span>
+      <button onclick="clearPasteBox()" style="background:none; border:none; font-size:11px; color:#64748b; cursor:pointer;">ล้างข้อความ</button>
+    </div>
+    <textarea id="pasteOrderInput" placeholder="แตะค้างแล้วกด 'วาง' ข้อความที่ลูกค้าส่งมาที่นี่..." oninput="parseCustomerOrder(this.value)"></textarea>
+  </div>
+
+  <div class="customer">
+    <div class="autocomplete-wrapper">
+      <input id="name" placeholder="ชื่อลูกค้า" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
+      <div id="nameSuggestions" class="suggestions-box"></div>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+      <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
+        <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
+        <div id="phoneSuggestions" class="suggestions-box"></div>
+      </div>
+      <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
+    </div>
+
+    <textarea id="address" placeholder="ที่อยู่จัดส่ง / จุดนัดรับ"></textarea>
+    
+    <div style="display: flex; gap: 10px;">
+      <input id="shipping" type="number" placeholder="ค่าจัดส่ง (฿)" oninput="renderCart()" style="flex: 1; min-width: 0;">
+      <input id="remark" placeholder="หมายเหตุ / รอบส่ง (11.00 หรือ 15.00)" style="flex: 2; min-width: 0;">
+    </div>
+  </div>
+
+  <div class="cart" id="cartList"></div>
+
+  <div class="summary">
+    <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
+    <div class="btn-group">
+      <button class="primary" onclick="checkout()">สรุปบิล</button>
+      <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- Modal: เลือกสูตรน้ำปลาหวานฝั่ง POS -->
+<div id="posSauceModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 360px;">
+    <h3 style="margin-top:0;" id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
+    <p style="font-size:13px; color:#64748b; margin-bottom:8px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
+    
+    <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรกุ้งแห้ง')">🦐 น้ำปลาหวานกุ้งแห้ง</button>
+    <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาป่น')">🐟 น้ำปลาหวานปลาป่น</button>
+    <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาร้าข้าวคั่ว')">🌾 น้ำปลาหวาน สูตรปลาร้าข้าวคั่ว</button>
+    
+    <div class="modal-actions" style="margin-top:6px;">
+      <button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modals อื่นๆ -->
+<div id="alertModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 300px; text-align: center;">
+    <h3 style="margin-top:0;">แจ้งเตือน</h3>
+    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;">ข้อความ</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<div id="billModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">สรุปรายการสั่งซื้อ</h3>
+    <textarea id="billTextarea" class="bill-textarea" readonly></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('billModal')">ปิดหน้าต่าง</button>
+      <button class="btn-copy" id="copyBtn" onclick="copyBillText()">คัดลอกข้อความ</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 320px; text-align: center;">
+    <h3 style="margin-top:0; color: #ef4444;">ยืนยันการทำรายการ</h3>
+    <p style="color: #475569;">ต้องการล้างตะกร้าและเริ่มบิลใหม่ใช่หรือไม่?</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn-cancel" onclick="closeModal('confirmModal')" style="flex:1;">ยกเลิก</button>
+      <button class="btn-confirm" onclick="executeNewOrder()" style="flex:1; background: #ef4444;">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<div id="addCustomerModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">เพิ่มข้อมูลลูกค้าใหม่</h3>
+    <input id="newCustName" placeholder="ชื่อลูกค้า">
+    <input id="newCustPhone" placeholder="เบอร์โทรศัพท์">
+    <textarea id="newCustAddress" placeholder="ที่อยู่จัดส่ง" style="resize:vertical; min-height:80px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addCustomerModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveNewCustomer()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<div id="editItemModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;" id="editItemTitle">แก้ไขสินค้า</h3>
+    <input type="hidden" id="editRowIndex">
+    
+    <label style="font-size:13px; font-weight:600; color:#475569;">ราคา (บาท):</label>
+    <input id="editItemPrice" type="number">
+
+    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่ (Category):</label>
+    <select id="editItemCategory">
+      <option value="ผลไม้พร้อมส่งวันนี้ (ลูกค้ากดสั่งซื้อได้)">ผลไม้พร้อมส่งวันนี้</option>
+      <option value="ใกล้หมดฤดูกาล (มีป้ายเตือนสีส้ม ลูกค้ากดสั่งได้)">ใกล้หมดฤดูกาล</option>
+      <option value="หมดชั่วคราว (ปุ่มสั่งซื้อจะถูกปิดการใช้งานชั่วคราว)">หมดชั่วคราว</option>
+      <option value="หมดฤดูกาลแล้ว (ป้ายสีเทา ปิดการสั่งซื้อ)">หมดฤดูกาลแล้ว</option>
+      <option value="บริการการ์ด ริบบิ้น และปิ่นโตผลไม้">บริการการ์ด ริบบิ้น และปิ่นโตผลไม้</option>
+    </select>
+
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('editItemModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveItemUpdate()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// แยก URL ชัดเจน: 1. ลิงก์เมนูผลไม้  2. ลิงก์ชีทลูกค้า
+const MENU_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyPQUcJ3lqv67b6nOJHgQMrFxowoPbiprYFbFOfH_yPLimMWAoneY_e2vS82yBIWSj/exec";
+const CUSTOMER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBBWTHCV3FCtlzm9dyczfB71m8paEZ5iXpwQO5FFL6mvB_H_QPpYnv4MDDjCQ/exec";
+
+const APP_CATEGORIES = [
+  "ทั้งหมด",
+  "ผลไม้พร้อมส่งวันนี้",
+  "ใกล้หมดฤดูกาล",
+  "หมดชั่วคราว",
+  "หมดฤดูกาลแล้ว",
+  "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"
+];
+
+let menu = [];
+let active = "ทั้งหมด";
+let cart = [];
+let customersDB = [];
+let pendingPOSItem = null;
+
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (รองรับสูตรน้ำปลาหวานแบบเคาะบรรทัด) ===== */
+function parseCustomerOrder(rawText) {
+  if (!rawText || !rawText.trim()) return;
+
+  const lines = rawText.split('\n');
+  let parsedAny = false;
+  let lastAddedItem = null;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.includes('____') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
+
+    // ตรวจจับสูตรน้ำปลาหวานบรรทัดย่อย เช่น "- สูตรกุ้งแห้ง"
+    if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
+      const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
+      if (lastAddedItem && optionText) {
+        lastAddedItem.name = `${lastAddedItem.name} (${optionText})`;
+      }
+      return;
+    }
+
+    // ตรวจจับรายการสินค้า เช่น "1. ฝรั่งแช่บ๊วย ×2 (110฿)" หรือ "1. ฝรั่งแช่บ๊วย x 2 = 110 ฿"
+    const itemMatch = trimmed.match(/^\d+\.\s*(.+?)\s+[xX×]\s*(\d+)/);
+    if (itemMatch) {
+      const fullItemName = itemMatch[1].trim();
+      const itemQty = parseInt(itemMatch[2], 10) || 1;
+
+      const baseName = fullItemName.replace(/\s*\(.*?\)\s*/g, '').trim();
+      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase());
+      if (!foundInMenu) {
+        foundInMenu = menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
+      }
+
+      let finalPrice = foundInMenu ? Number(foundInMenu.price) : 0;
+
+      if (finalPrice === 0) {
+        const priceMatch = trimmed.match(/\((\d+[\d,]*)\s*฿\)/) || trimmed.match(/=\s*(\d+[\d,]*)\s*฿/);
+        if (priceMatch) {
+          const totalLinePrice = parseFloat(priceMatch[1].replace(/,/g, ''));
+          finalPrice = Math.round(totalLinePrice / itemQty);
+        }
+      }
+
+      const existingCart = cart.find(c => c.name.toLowerCase() === fullItemName.toLowerCase());
+      if (existingCart) {
+        existingCart.qty = itemQty;
+        lastAddedItem = existingCart;
+      } else {
+        const newItem = { name: fullItemName, price: finalPrice, qty: itemQty };
+        cart.push(newItem);
+        lastAddedItem = newItem;
+      }
+      parsedAny = true;
+    }
+  });
+
+  if (parsedAny) {
+    renderCart();
+  }
+}
+
+function clearPasteBox() {
+  document.getElementById('pasteOrderInput').value = '';
+}
+
+function normalizeCategory(raw) {
+  const text = String(raw || '').trim();
+  if (text.includes('ผลไม้พร้อมส่งวันนี้')) return 'ผลไม้พร้อมส่งวันนี้';
+  if (text.includes('ใกล้หมดฤดูกาล')) return 'ใกล้หมดฤดูกาล';
+  if (text.includes('หมดชั่วคราว')) return 'หมดชั่วคราว';
+  if (text.includes('หมดฤดูกาลแล้ว')) return 'หมดฤดูกาลแล้ว';
+  if (text.includes('บริการการ์ด') || text.includes('ปิ่นโต') || text.includes('ริบบิ้น')) return 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้';
+  return text;
+}
+
+function loadMenuFromDB() {
+  const menuList = document.getElementById('menuList');
+  menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
+
+  // 1. โหลดเมนู
+  const scriptMenu = document.createElement('script');
+  scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
+  document.body.appendChild(scriptMenu);
+
+  // 2. โหลดข้อมูลลูกค้าจากชีทลูกค้า
+  const scriptCust = document.createElement('script');
+  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+  document.body.appendChild(scriptCust);
+}
+
+window.onPOSMenuLoaded = function(json) {
+  if (json && Array.isArray(json.data) && json.data.length > 0) {
+    menu = json.data.map(item => ({
+      ...item,
+      price: Number(item.price) || 0,
+      normalizedCategory: normalizeCategory(item.category)
+    }));
+    renderCategory();
+    renderMenu();
+  }
+};
+
+window.onCustomersLoaded = function(json) {
+  if (json) {
+    if (Array.isArray(json.customers)) {
+      customersDB = json.customers;
+    } else if (Array.isArray(json.data)) {
+      customersDB = json.data;
+    }
+  }
+};
+
+function renderCategory(){
+  const categoryBar = document.getElementById('categoryBar');
+  categoryBar.innerHTML = "";
+  APP_CATEGORIES.forEach(c => {
+    categoryBar.innerHTML += `
+      <div class="category-btn ${c === active ? 'active' : ''}" onclick="selectCat('${c}')">
+        ${c === 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้' ? 'บริการ/ปิ่นโต' : c}
+      </div>`;
+  });
+}
+
+function selectCat(c){
+  active = c;
+  renderCategory();
+  renderMenu();
+}
+
+function renderMenu(){
+  const menuList = document.getElementById('menuList');
+  menuList.innerHTML = "";
+
+  const filtered = menu.filter(i => active === "ทั้งหมด" || i.normalizedCategory === active);
+
+  if (filtered.length === 0) {
+    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8;">ไม่มีรายการในหมวดนี้</div>`;
+    return;
+  }
+
+  filtered.forEach(i => {
+    const isOut = (i.normalizedCategory === 'หมดชั่วคราว' || i.normalizedCategory === 'หมดฤดูกาลแล้ว');
+    const isNearEnd = (i.normalizedCategory === 'ใกล้หมดฤดูกาล');
+
+    let badge = '';
+    if (isNearEnd) badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
+    if (i.normalizedCategory === 'หมดชั่วคราว') badge = `<span class="item-badge badge-danger">หมดชั่วคราว</span>`;
+    if (i.normalizedCategory === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
+
+    menuList.innerHTML += `
+      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${i.name}', ${i.price})`}">
