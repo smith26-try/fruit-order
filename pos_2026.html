@@ -217,12 +217,12 @@ body {
 }
 .customer textarea { resize: vertical; min-height: 55px; }
 
-/* AUTOCOMPLETE */
+/* AUTOCOMPLETE STYLES */
 .autocomplete-wrapper { position: relative; width: 100%; }
 .suggestions-box {
   position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
   border: 1px solid #e2e8f0; border-radius: 8px; z-index: 99; display: none;
-  max-height: 180px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  max-height: 200px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
 }
 .suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
 .suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
@@ -377,14 +377,16 @@ body {
   </div>
 
   <div class="customer">
+    <!-- กล่องค้นหา / เดาชื่อลูกค้า -->
     <div class="autocomplete-wrapper">
-      <input id="name" placeholder="ชื่อลูกค้า" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
+      <input id="name" placeholder="ชื่อลูกค้า (พิมพ์เพื่อค้นหาอัตโนมัติ)" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
       <div id="nameSuggestions" class="suggestions-box"></div>
     </div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+      <!-- กล่องค้นหา / เดาจากเบอร์โทร -->
       <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
-        <input id="phone" placeholder="เบอร์โทรศัพท์" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
+        <input id="phone" placeholder="เบอร์โทรศัพท์ (พิมพ์เพื่อค้นหา)" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
         <div id="phoneSuggestions" class="suggestions-box"></div>
       </div>
       <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
@@ -461,6 +463,7 @@ body {
   </div>
 </div>
 
+<!-- Modal: เพิ่มลูกค้าใหม่ -->
 <div id="addCustomerModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="margin-top:0;">เพิ่มข้อมูลลูกค้าใหม่</h3>
@@ -499,7 +502,6 @@ body {
 </div>
 
 <script>
-// แยก URL ชัดเจน: 1. ลิงก์เมนูผลไม้  2. ลิงก์ชีทลูกค้า
 const MENU_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyPQUcJ3lqv67b6nOJHgQMrFxowoPbiprYFbFOfH_yPLimMWAoneY_e2vS82yBIWSj/exec";
 const CUSTOMER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBBWTHCV3FCtlzm9dyczfB71m8paEZ5iXpwQO5FFL6mvB_H_QPpYnv4MDDjCQ/exec";
 
@@ -518,7 +520,99 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (รองรับสูตรน้ำปลาหวานแบบเคาะบรรทัด) ===== */
+/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ===== */
+function searchCustomer(field) {
+  const inputEl = document.getElementById(field);
+  const keyword = inputEl.value.trim().toLowerCase();
+  const suggestionsBox = document.getElementById(field + 'Suggestions');
+  
+  if (!keyword) {
+    suggestionsBox.style.display = 'none';
+    return;
+  }
+
+  const matched = [];
+  customersDB.forEach((c, idx) => {
+    let match = false;
+    if (field === 'phone') {
+      const cleanKeyword = keyword.replace(/\D/g, '');
+      const cleanPhone = (c.phone || '').replace(/\D/g, '');
+      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
+    } else {
+      if (c.name && c.name.toLowerCase().includes(keyword)) match = true;
+    }
+    if (match) matched.push({ c, idx });
+  });
+
+  let html = matched.map(m => `
+    <div class="suggestion-item" onclick="fillCustomer(${m.idx})">
+      <b>${m.c.name}</b> - <span style="color:#64748b;">${m.c.phone || 'ไม่ระบุเบอร์'}</span>
+      <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${m.c.address || 'ไม่ระบุที่อยู่'}</div>
+    </div>
+  `).join('');
+
+  // ปุ่มเพิ่มลูกค้าใหม่ หากค้นหาชื่อแล้วไม่เจอ
+  if (field === 'name') {
+    html += `
+      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${inputEl.value.trim()}')">
+        + เพิ่มข้อมูลลูกค้าใหม่ "${inputEl.value.trim()}"
+      </div>`;
+  }
+
+  if (html) {
+    suggestionsBox.innerHTML = html;
+    suggestionsBox.style.display = 'block';
+  } else {
+    suggestionsBox.style.display = 'none';
+  }
+}
+
+function fillCustomer(index) {
+  const customer = customersDB[index];
+  if (!customer) return;
+  document.getElementById('name').value = customer.name || '';
+  document.getElementById('phone').value = customer.phone || '';
+  document.getElementById('address').value = customer.address || '';
+  document.getElementById('nameSuggestions').style.display = 'none';
+  document.getElementById('phoneSuggestions').style.display = 'none';
+}
+
+function openAddCustomerModal(nameValue = '') {
+  document.getElementById('newCustName').value = nameValue;
+  document.getElementById('newCustPhone').value = document.getElementById('phone').value;
+  document.getElementById('newCustAddress').value = document.getElementById('address').value;
+  openModal('addCustomerModal');
+  document.getElementById('nameSuggestions').style.display = 'none';
+}
+
+async function saveNewCustomer() {
+  const name = document.getElementById('newCustName').value.trim();
+  const phone = document.getElementById('newCustPhone').value.trim();
+  const address = document.getElementById('newCustAddress').value.trim();
+
+  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
+
+  const newCust = { name, phone, address };
+  customersDB.push(newCust);
+
+  document.getElementById('name').value = name;
+  document.getElementById('phone').value = phone;
+  document.getElementById('address').value = address;
+  
+  closeModal('addCustomerModal');
+  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบเรียบร้อยแล้ว");
+
+  try {
+    await fetch(CUSTOMER_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCust)
+    });
+  } catch (error) {}
+}
+
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
 
@@ -530,7 +624,6 @@ function parseCustomerOrder(rawText) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.includes('____') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
-    // ตรวจจับสูตรน้ำปลาหวานบรรทัดย่อย เช่น "- สูตรกุ้งแห้ง"
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
       const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
       if (lastAddedItem && optionText) {
@@ -539,7 +632,6 @@ function parseCustomerOrder(rawText) {
       return;
     }
 
-    // ตรวจจับรายการสินค้า เช่น "1. ฝรั่งแช่บ๊วย ×2 (110฿)" หรือ "1. ฝรั่งแช่บ๊วย x 2 = 110 ฿"
     const itemMatch = trimmed.match(/^\d+\.\s*(.+?)\s+[xX×]\s*(\d+)/);
     if (itemMatch) {
       const fullItemName = itemMatch[1].trim();
@@ -602,7 +694,7 @@ function loadMenuFromDB() {
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
 
-  // 2. โหลดข้อมูลลูกค้าจากชีทลูกค้า
+  // 2. โหลดฐานข้อมูลลูกค้า
   const scriptCust = document.createElement('script');
   scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptCust);
@@ -939,93 +1031,7 @@ function copyBillText() {
   }, 2000);
 }
 
-function searchCustomer(field) {
-  const inputEl = document.getElementById(field);
-  const keyword = inputEl.value.trim().toLowerCase();
-  const suggestionsBox = document.getElementById(field + 'Suggestions');
-  
-  if (!keyword) {
-    suggestionsBox.style.display = 'none';
-    return;
-  }
-
-  const matched = [];
-  customersDB.forEach((c, idx) => {
-    let match = false;
-    if (field === 'phone') {
-      const cleanKeyword = keyword.replace(/\D/g, '').replace(/^0/, '');
-      const cleanPhone = (c.phone || '').replace(/\D/g, '').replace(/^0/, '');
-      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
-    } else {
-      if (c[field] && c[field].toLowerCase().includes(keyword)) match = true;
-    }
-    if (match) matched.push({ c, idx });
-  });
-
-  let html = matched.map(m => `
-    <div class="suggestion-item" onclick="fillCustomer(${m.idx})">
-      <b>${m.c.name}</b> - <span style="color:#64748b;">${m.c.phone}</span>
-    </div>
-  `).join('');
-
-  if (field === 'name') {
-    html += `
-      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${inputEl.value.trim()}')">
-        + เพิ่มข้อมูลลูกค้าใหม่ "${inputEl.value.trim()}"
-      </div>`;
-  }
-
-  if (html) {
-    suggestionsBox.innerHTML = html;
-    suggestionsBox.style.display = 'block';
-  } else {
-    suggestionsBox.style.display = 'none';
-  }
-}
-
-function fillCustomer(index) {
-  const customer = customersDB[index];
-  document.getElementById('name').value = customer.name;
-  document.getElementById('phone').value = customer.phone;
-  document.getElementById('address').value = customer.address;
-  document.getElementById('nameSuggestions').style.display = 'none';
-  document.getElementById('phoneSuggestions').style.display = 'none';
-}
-
-function openAddCustomerModal(nameValue = '') {
-  document.getElementById('newCustName').value = nameValue;
-  document.getElementById('newCustPhone').value = document.getElementById('phone').value;
-  document.getElementById('newCustAddress').value = document.getElementById('address').value;
-  openModal('addCustomerModal');
-  document.getElementById('nameSuggestions').style.display = 'none';
-}
-
-async function saveNewCustomer() {
-  const name = document.getElementById('newCustName').value.trim();
-  const phone = document.getElementById('newCustPhone').value.trim();
-  const address = document.getElementById('newCustAddress').value.trim();
-
-  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
-
-  customersDB.push({ name, phone, address });
-  document.getElementById('name').value = name;
-  document.getElementById('phone').value = phone;
-  document.getElementById('address').value = address;
-  
-  closeModal('addCustomerModal');
-  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบแล้ว");
-
-  try {
-    // ส่งข้อมูลไปบันทึกลงชีทลูกค้าโดยตรง
-    await fetch(CUSTOMER_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, phone, address })
-    });
-  } catch (error) {}
-}
-
+// ซ่อนกล่องตัวเลือกเมื่อแตะพื้นที่อื่น
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) {
     document.getElementById('nameSuggestions').style.display = 'none';
