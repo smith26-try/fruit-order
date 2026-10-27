@@ -117,7 +117,7 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
 
     <div class="customer">
       <div class="autocomplete-wrapper">
-        <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อเลื่อนดูรายชื่อ หรือพิมพ์ค้นหา)" 
+        <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหา)" 
                oninput="showCustomerDropdown('name')" 
                onfocus="showCustomerDropdown('name')" 
                onclick="showCustomerDropdown('name')" 
@@ -232,7 +232,6 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-// โหลดรายชื่อลูกค้าจากชีตโดยตรงแบบง่าย
 function loadCustomersFromSheet() {
   fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
     .then(r => r.text())
@@ -249,7 +248,21 @@ function loadCustomersFromSheet() {
         }).filter(c => c.name && c.name.toLowerCase() !== 'name');
       }
     })
-    .catch(() => {});
+    .catch(() => {
+      // ดึงสำรองผ่าน AllOrigins หากติด CORS
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(CUSTOMER_SCRIPT_URL)}`)
+        .then(r => r.json())
+        .then(json => {
+          let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
+          if (rawList.length > 0) {
+            customersDB = rawList.map(c => {
+              if (Array.isArray(c)) return { name: c[0] || '', phone: c[1] || '', address: c[2] || '' };
+              return { name: c.name || c.Name || '', phone: c.phone || c.Phone || '', address: c.address || c.Address || '' };
+            }).filter(c => c.name && c.name.toLowerCase() !== 'name');
+          }
+        })
+        .catch(() => {});
+    });
 }
 
 function showCustomerDropdown(field) {
