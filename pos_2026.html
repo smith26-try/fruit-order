@@ -689,37 +689,37 @@ function loadMenuFromDB() {
   const menuList = document.getElementById('menuList');
   menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
 
-  // 1. โหลดเมนู
+  // 1. โหลดเมนูผลไม้
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
 
-  // 2. โหลดฐานข้อมูลลูกค้า
-  const scriptCust = document.createElement('script');
-  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
-  document.body.appendChild(scriptCust);
+  // 2. โหลดฐานข้อมูลลูกค้า (ใช้ fetch ควบคู่ jsonp กันเหนียว)
+  fetch(CUSTOMER_SCRIPT_URL)
+    .then(res => res.json())
+    .then(json => {
+      onCustomersLoaded(json);
+    })
+    .catch(() => {
+      // ถ้า fetch ติด CORS ให้ fallback ใช้ JSONP
+      const scriptCust = document.createElement('script');
+      scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+      document.body.appendChild(scriptCust);
+    });
 }
 
-window.onPOSMenuLoaded = function(json) {
-  if (json && Array.isArray(json.data) && json.data.length > 0) {
-    menu = json.data.map(item => ({
-      ...item,
-      price: Number(item.price) || 0,
-      normalizedCategory: normalizeCategory(item.category)
-    }));
-    renderCategory();
-    renderMenu();
-  }
-};
-
 window.onCustomersLoaded = function(json) {
-  if (json) {
-    if (Array.isArray(json.customers)) {
-      customersDB = json.customers;
-    } else if (Array.isArray(json.data)) {
-      customersDB = json.data;
-    }
+  if (!json) return;
+  
+  // รองรับโครงสร้างข้อมูลทุกรูปแบบที่อาจส่งกลับมา
+  if (Array.isArray(json)) {
+    customersDB = json;
+  } else if (Array.isArray(json.data)) {
+    customersDB = json.data;
+  } else if (Array.isArray(json.customers)) {
+    customersDB = json.customers;
   }
+  console.log("โหลดข้อมูลลูกค้าสำเร็จแล้ว จำนวน:", customersDB.length, "คน");
 };
 
 function renderCategory(){
