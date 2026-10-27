@@ -201,10 +201,29 @@ body {
 }
 
 .customer { 
-  padding: 14px 18px; 
+  padding: 12px 18px 14px; 
   background: #fff; 
   border-bottom: 1px solid #e2e8f0; 
 }
+.customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.cust-status {
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 500;
+  cursor: pointer;
+}
+.cust-status.ok { background: #dcfce7; color: #166534; }
+.cust-status.err { background: #fee2e2; color: #dc2626; }
+
 .customer input, .customer textarea {
   width: 100%; margin-bottom: 8px; padding: 8px 12px; 
   border: 1px solid #cbd5e1; border-radius: 8px; 
@@ -221,8 +240,8 @@ body {
 .autocomplete-wrapper { position: relative; width: 100%; }
 .suggestions-box {
   position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
-  border: 1px solid #cbd5e1; border-radius: 8px; z-index: 999; display: none;
-  max-height: 220px; overflow-y: auto; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.18);
+  border: 1px solid #cbd5e1; border-radius: 8px; z-index: 9999; display: none;
+  max-height: 220px; overflow-y: auto; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.2);
 }
 .suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
 .suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
@@ -377,16 +396,21 @@ body {
   </div>
 
   <div class="customer">
+    <div class="customer-header">
+      <b style="color:#334155;">ข้อมูลลูกค้า</b>
+      <span id="custStatusBadge" class="cust-status" onclick="loadCustomersAllMethods()" title="คลิกเพื่อโหลดรายชื่อลูกค้าใหม่">⏳ กำลังโหลดรายชื่อลูกค้า...</span>
+    </div>
+
     <!-- กล่องค้นหา / เดาชื่อลูกค้า -->
     <div class="autocomplete-wrapper">
-      <input id="name" placeholder="ชื่อลูกค้า (พิมพ์เพื่อค้นหาอัตโนมัติ)" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
+      <input id="name" placeholder="ชื่อลูกค้า (แตะหรือพิมพ์เพื่อค้นหาอัตโนมัติ)" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" onclick="searchCustomer('name')" autocomplete="off">
       <div id="nameSuggestions" class="suggestions-box"></div>
     </div>
     
     <div style="display: flex; gap: 10px; margin-bottom: 8px;">
       <!-- กล่องค้นหา / เดาจากเบอร์โทร -->
       <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
-        <input id="phone" placeholder="เบอร์โทรศัพท์ (พิมพ์เพื่อค้นหา)" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
+        <input id="phone" placeholder="เบอร์โทรศัพท์ (พิมพ์เพื่อค้นหา)" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" onclick="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
         <div id="phoneSuggestions" class="suggestions-box"></div>
       </div>
       <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
@@ -520,19 +544,135 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ดักจับทุกเงื่อนไข ===== */
+/* ===== ระบบแปลงข้อมูลลูกค้าทุกโครงสร้างให้เป็นมาตรฐานเดียว ===== */
+function normalizeCustomerRecord(raw) {
+  if (!raw) return null;
+  // กรณีส่งมาเป็น Array แถวข้อมูล เช่น ["โอ๋", "095-175-5553", "ธนาคารออมสิน..."]
+  if (Array.isArray(raw)) {
+    const n = String(raw[0] || '').trim();
+    if (!n || n.toLowerCase() === 'name' || n === 'ชื่อ') return null;
+    return {
+      name: n,
+      phone: String(raw[1] || '').trim(),
+      address: String(raw[2] || '').trim()
+    };
+  }
+  // กรณีส่งมาเป็น Object ทั้งตัวพิมพ์เล็กหรือตัวพิมพ์ใหญ่ (Name / name, Phone / phone, Address / address)
+  if (typeof raw === 'object') {
+    const keys = Object.keys(raw);
+    let nameVal = raw.name || raw.Name || raw.NAME || raw['ชื่อ'] || raw['ชื่อลูกค้า'] || '';
+    let phoneVal = raw.phone || raw.Phone || raw.PHONE || raw.tel || raw['เบอร์โทร'] || raw['เบอร์โทรศัพท์'] || '';
+    let addrVal = raw.address || raw.Address || raw.ADDRESS || raw['ที่อยู่'] || '';
+
+    // ถ้ายังหาไม่เจอ ให้ดึงตามลำดับคอลัมน์ 0, 1, 2
+    if (!nameVal && keys.length > 0) nameVal = raw[keys[0]];
+    if (!phoneVal && keys.length > 1) phoneVal = raw[keys[1]];
+    if (!addrVal && keys.length > 2) addrVal = raw[keys[2]];
+
+    const cleanName = String(nameVal || '').trim();
+    if (!cleanName || cleanName.toLowerCase() === 'name' || cleanName === 'ชื่อ') return null;
+
+    return {
+      name: cleanName,
+      phone: String(phoneVal || '').trim(),
+      address: String(addrVal || '').trim()
+    };
+  }
+  return null;
+}
+
+window.onCustomersLoaded = function(json) {
+  if (!json) return;
+  let rawList = [];
+  if (Array.isArray(json)) rawList = json;
+  else if (Array.isArray(json.data)) rawList = json.data;
+  else if (Array.isArray(json.customers)) rawList = json.customers;
+  else if (Array.isArray(json.result)) rawList = json.result;
+  else if (Array.isArray(json.items)) rawList = json.items;
+  else if (Array.isArray(json.values)) rawList = json.values;
+
+  const parsed = [];
+  rawList.forEach(item => {
+    const norm = normalizeCustomerRecord(item);
+    if (norm) parsed.push(norm);
+  });
+
+  if (parsed.length > 0) {
+    customersDB = parsed;
+    try { localStorage.setItem('pos_customers_cache', JSON.stringify(customersDB)); } catch(e) {}
+    updateCustomerStatusBadge(true, customersDB.length);
+  }
+};
+
+function updateCustomerStatusBadge(isSuccess, count) {
+  const badge = document.getElementById('custStatusBadge');
+  if (!badge) return;
+  if (isSuccess && count > 0) {
+    badge.className = 'cust-status ok';
+    badge.innerText = `✓ โหลดรายชื่อลูกค้าแล้ว (${count} คน)`;
+  } else {
+    badge.className = 'cust-status err';
+    badge.innerText = `⚠️ ยังไม่พบรายชื่อลูกค้า (คลิกเพื่อลองใหม่)`;
+  }
+}
+
+function loadCustomersAllMethods() {
+  const badge = document.getElementById('custStatusBadge');
+  if (badge) {
+    badge.className = 'cust-status';
+    badge.innerText = '⏳ กำลังดึงข้อมูลลูกค้า...';
+  }
+
+  // 1. ดึงจากแคชในเครื่องขึ้นมาสำรองก่อนทันที
+  try {
+    const cached = localStorage.getItem('pos_customers_cache');
+    if (cached) {
+      const parsedCache = JSON.parse(cached);
+      if (Array.isArray(parsedCache) && parsedCache.length > 0 && customersDB.length === 0) {
+        customersDB = parsedCache;
+        updateCustomerStatusBadge(true, customersDB.length);
+      }
+    }
+  } catch(e) {}
+
+  // 2. ดึงผ่าน Fetch (กรณี Google Apps Script ส่ง JSON ปกติ)
+  fetch(`${CUSTOMER_SCRIPT_URL}?action=getCustomers&t=${Date.now()}`)
+    .then(res => res.text())
+    .then(text => {
+      let cleanText = text.trim();
+      // ถ้าติด callback(...) หุ้มมา ให้แกะออก
+      const match = cleanText.match(/^[\w$]+\(([\s\S]*)\);?$/);
+      if (match) cleanText = match[1];
+      const json = JSON.parse(cleanText);
+      window.onCustomersLoaded(json);
+    })
+    .catch(() => {});
+
+  // 3. ดึงผ่าน JSONP Script Tag ควบคู่กัน
+  const oldScript = document.getElementById('custJsonpScript');
+  if (oldScript) oldScript.remove();
+  const scriptCust = document.createElement('script');
+  scriptCust.id = 'custJsonpScript';
+  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+  document.body.appendChild(scriptCust);
+}
+
+/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ===== */
 function searchCustomer(field) {
   const inputEl = document.getElementById(field);
-  const keyword = inputEl.value.trim().toLowerCase();
+  let rawVal = inputEl.value.trim();
+  let keyword = rawVal.replace(/^คุณ\s*/, '').toLowerCase();
   const suggestionsBox = document.getElementById(field + 'Suggestions');
   
+  if (!suggestionsBox) return;
+
+  // ถ้าแตะช่องโดยยังไม่ได้พิมพ์อะไร ให้แสดงรายชื่อลูกค้า 30 คนแรกทันที
   if (!keyword) {
     if (customersDB.length > 0) {
-      let previewList = customersDB.slice(0, 15);
-      renderSuggestions(previewList, field, suggestionsBox, '');
-      return;
+      renderSuggestions(customersDB.slice(0, 30), field, suggestionsBox, '');
+    } else {
+      suggestionsBox.style.display = 'none';
     }
-    suggestionsBox.style.display = 'none';
     return;
   }
 
@@ -541,24 +681,28 @@ function searchCustomer(field) {
     let match = false;
     if (field === 'phone') {
       const cleanKeyword = keyword.replace(/\D/g, '');
-      const cleanPhone = (c.phone || '').replace(/\D/g, '');
+      const cleanPhone = String(c.phone || '').replace(/\D/g, '');
       if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
+      else if (String(c.phone || '').toLowerCase().includes(keyword)) match = true;
     } else {
-      if (c.name && c.name.toLowerCase().includes(keyword)) match = true;
+      const cName = String(c.name || '').toLowerCase();
+      const cPhone = String(c.phone || '').toLowerCase();
+      if (cName.includes(keyword) || cPhone.includes(keyword)) match = true;
     }
     if (match) matched.push({ c, idx });
   });
 
-  renderSuggestions(matched, field, suggestionsBox, inputEl.value.trim());
+  renderSuggestions(matched, field, suggestionsBox, rawVal);
 }
 
 function renderSuggestions(list, field, suggestionsBox, currentText) {
   let html = '';
+  
   list.forEach(item => {
     const c = item.c || item;
     const idx = (item.idx !== undefined) ? item.idx : customersDB.indexOf(c);
     html += `
-      <div class="suggestion-item" onclick="fillCustomer(${idx})">
+      <div class="suggestion-item" onmousedown="fillCustomer(${idx})">
         <b>${c.name}</b> - <span style="color:#64748b;">${c.phone || 'ไม่ระบุเบอร์'}</span>
         <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${c.address || 'ไม่ระบุที่อยู่'}</div>
       </div>
@@ -566,8 +710,9 @@ function renderSuggestions(list, field, suggestionsBox, currentText) {
   });
 
   if (field === 'name' && currentText) {
+    const safeText = currentText.replace(/'/g, "\\'");
     html += `
-      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${currentText}')">
+      <div class="suggestion-item add-new-btn" onmousedown="openAddCustomerModal('${safeText}')">
         + เพิ่มข้อมูลลูกค้าใหม่ "${currentText}"
       </div>`;
   }
@@ -607,6 +752,8 @@ async function saveNewCustomer() {
 
   const newCust = { name, phone, address };
   customersDB.unshift(newCust);
+  try { localStorage.setItem('pos_customers_cache', JSON.stringify(customersDB)); } catch(e) {}
+  updateCustomerStatusBadge(true, customersDB.length);
 
   document.getElementById('name').value = name;
   document.getElementById('phone').value = phone;
@@ -620,33 +767,25 @@ async function saveNewCustomer() {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newCust)
+      body: JSON.stringify({ action: 'addCustomer', name, phone, address, Name: name, Phone: phone, Address: address })
     });
   } catch (error) {}
 }
 
-/* ===== โหลดข้อมูลคู่ขนานทั้ง JSONP และ Fetch ป้องกันบล็อก 100% ===== */
+/* ===== ระบบโหลดเมนูและลูกค้า ===== */
 function loadMenuFromDB() {
   const menuList = document.getElementById('menuList');
   if (menuList) {
     menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
   }
 
-  // 1. โหลดเมนู
+  // 1. โหลดเมนูผลไม้
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
 
-  // 2. โหลดลูกค้าผ่าน JSONP
-  const scriptCust = document.createElement('script');
-  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
-  document.body.appendChild(scriptCust);
-
-  // 3. โหลดลูกค้าสำรองผ่าน Fetch (fallback)
-  fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
-    .then(r => r.json())
-    .then(j => onCustomersLoaded(j))
-    .catch(() => {});
+  // 2. โหลดรายชื่อลูกค้า
+  loadCustomersAllMethods();
 }
 
 window.onPOSMenuLoaded = function(json) {
@@ -659,25 +798,12 @@ window.onPOSMenuLoaded = function(json) {
     renderCategory();
     renderMenu();
   }
-};
-
-window.onCustomersLoaded = function(json) {
-  if (!json) return;
-  let list = [];
-  if (Array.isArray(json)) list = json;
-  else if (Array.isArray(json.data)) list = json.data;
-  else if (Array.isArray(json.customers)) list = json.customers;
-
-  if (list.length > 0) {
-    customersDB = list.map(c => ({
-      name: String(c.name || '').trim(),
-      phone: String(c.phone || '').trim(),
-      address: String(c.address || '').trim()
-    }));
+  if (json && Array.isArray(json.customers) && json.customers.length > 0 && customersDB.length === 0) {
+    window.onCustomersLoaded(json.customers);
   }
 };
 
-/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ ===== */
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ (รองรับทั้งขีด ____ และ -----) ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
 
@@ -687,12 +813,14 @@ function parseCustomerOrder(rawText) {
 
   lines.forEach(line => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.includes('---------------------') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
+    if (!trimmed || trimmed.includes('____') || trimmed.includes('-----') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
+    // ตรวจจับสูตรน้ำปลาหวานบรรทัดย่อย เช่น "- สูตรกุ้งแห้ง"
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-      const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
+      const optionText = trimmed.replace(/^[-•]\s*/, '').replace(/^\(|\)$/g, '').trim();
       if (lastAddedItem && optionText) {
-        lastAddedItem.name = `${lastAddedItem.name} (${optionText})`;
+        const cleanBase = lastAddedItem.name.replace(/\s*\(.*?\)\s*$/, '').trim();
+        lastAddedItem.name = `${cleanBase} (${optionText})`;
       }
       return;
     }
@@ -940,6 +1068,7 @@ function addCustom(){
   document.getElementById('customPrice').value = "";
 }
 
+/* ===== สรุปบิล (ใช้เส้นคั่น --------------------- และตัวเลือกพิเศษเยื้องบรรทัดล่าง) ===== */
 function checkout() {
   if (cart.length === 0) {
     customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
@@ -994,7 +1123,7 @@ function checkout() {
     }
   });
   
-  billText += `____________\n\n`;
+  billText += `---------------------\n\n`;
   billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
   billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
   billText += `📍 ${address}`;
