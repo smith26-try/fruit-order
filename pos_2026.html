@@ -2,184 +2,449 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>POS ร้านผลไม้ - น้องเอิน ฝรั่งแช่บ๊วย</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: #333; }
+/* ===== GLOBAL ===== */
+* { box-sizing: border-box; }
+body { 
+  margin: 0; 
+  font-family: 'Kanit', sans-serif; 
+  background: #eef2f6; 
+  color: #333;
+}
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-.app { max-width: 1380px; margin: 20px auto; height: calc(100vh - 40px); display: grid; grid-template-columns: 1.45fr 1fr; background: #fff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; }
+/* ===== APP ===== */
+.app {
+  max-width: 1380px;
+  margin: 20px auto; 
+  height: calc(100vh - 40px);
+  display: grid; 
+  grid-template-columns: 1.45fr 1fr; 
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+/* ===== LEFT ===== */
 .left { display: flex; flex-direction: column; background: #f8fafc; overflow: hidden; }
-.category-bar { display: flex; overflow-x: auto; background: linear-gradient(135deg, #3F7D58, #2c593e); padding: 14px 18px; gap: 8px; align-items: center; }
-.category-btn { background: rgba(255,255,255,0.2); color: #fff; padding: 7px 14px; border-radius: 30px; cursor: pointer; white-space: nowrap; user-select: none; font-weight: 500; font-size: 13.5px; border: 1px solid rgba(255,255,255,0.1); }
-.active { background: #fff !important; color: #2c593e !important; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.btn-refresh { margin-left: auto; background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
 
-.menu { flex: 1; overflow-y: auto; padding: 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; align-content: start; min-height: 0; }
-.menu-item { background: #fff; border-radius: 16px; padding: 10px; text-align: center; cursor: pointer; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: 0.2s; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+/* CATEGORY */
+.category-bar {
+  display: flex; 
+  overflow-x: auto; 
+  background: linear-gradient(135deg, #3F7D58, #2c593e);
+  padding: 14px 18px; 
+  gap: 8px;
+  align-items: center;
+}
+.category-btn {
+  background: rgba(255, 255, 255, 0.2); 
+  color: #fff;
+  padding: 7px 14px; 
+  border-radius: 30px; 
+  cursor: pointer; 
+  white-space: nowrap;
+  user-select: none;
+  font-weight: 500;
+  font-size: 13.5px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.category-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.active { 
+  background: #ffffff !important; 
+  color: #2c593e !important; 
+  font-weight: 600; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+}
+.btn-refresh {
+  margin-left: auto;
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-refresh:hover { background: rgba(255,255,255,0.4); }
+
+/* MENU */
+.menu {
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 18px;
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+  gap: 14px;
+  align-content: start;
+  min-height: 0;
+}
+.menu-item {
+  background: #fff; 
+  border-radius: 16px; 
+  padding: 10px; 
+  text-align: center; 
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.menu-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px rgba(63, 125, 88, 0.15);
+  border-color: #3F7D58;
+}
 .menu-item:active { transform: scale(0.96); }
-.menu-item.unavailable { opacity: 0.55; background: #f1f5f9; border-color: #cbd5e1; }
-.item-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 6px; margin-bottom: 6px; display: inline-block; }
+.menu-item.unavailable {
+  opacity: 0.55;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.item-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  display: inline-block;
+}
 .badge-warning { background: #ffedd5; color: #ea580c; }
 .badge-danger { background: #fee2e2; color: #dc2626; }
+
 .menu-title { font-size: 13.5px; margin-bottom: 6px; line-height: 1.3; font-weight: 500; }
 .menu-price { color: #3F7D58; font-weight: 600; font-size: 15.5px; }
-.btn-edit-item { position: absolute; top: 6px; right: 6px; background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0; border-radius: 50%; width: 24px; height: 24px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-.custom-box { padding: 14px 18px; border-top: 1px solid #e2e8f0; background: #fff; }
-.custom-box input { width: 100%; margin-bottom: 8px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
-.custom-box button { width: 100%; padding: 9px; background: #0ea5e9; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: 14px; }
+.btn-edit-item {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+.btn-edit-item:hover { background: #3F7D58; color: #fff; }
 
-.right { display: flex; flex-direction: column; border-left: 1px solid #e2e8f0; background: #fff; overflow: hidden; }
-.paste-order-box { padding: 12px 18px; background: #f0fdf4; border-bottom: 2px dashed #bbf7d0; }
-.paste-order-box textarea { width: 100%; height: 60px; padding: 8px 12px; border: 1px solid #86efac; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; background: #fff; }
+/* CUSTOM */
+.custom-box {
+  padding: 14px 18px; 
+  border-top: 1px solid #e2e8f0; 
+  background: #fff;
+}
+.custom-box input {
+  width: 100%; margin-bottom: 8px; padding: 8px 12px; 
+  border: 1px solid #cbd5e1; border-radius: 8px; 
+  font-family: inherit; transition: all 0.3s;
+}
+.custom-box input:focus {
+  border-color: #3F7D58; box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.15); outline: none;
+}
+.custom-box button {
+  width: 100%; padding: 9px; background: #0ea5e9; color: #fff; 
+  border: none; border-radius: 8px; cursor: pointer; 
+  font-weight: 600; font-family: inherit; font-size: 14px; transition: 0.2s;
+}
+.custom-box button:hover { background: #0284c7; }
 
-.customer { padding: 12px 18px 14px; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.customer input, .customer textarea { width: 100%; margin-bottom: 8px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; background: #f8fafc; }
-.customer input:focus, .customer textarea:focus { border-color: #3F7D58; outline: none; background: #fff; }
+/* ===== RIGHT ===== */
+.right { 
+  display: flex; flex-direction: column; 
+  border-left: 1px solid #e2e8f0; 
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.paste-order-box {
+  padding: 12px 18px;
+  background: #f0fdf4;
+  border-bottom: 2px dashed #bbf7d0;
+}
+.paste-order-box textarea {
+  width: 100%;
+  height: 65px;
+  padding: 8px 12px;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12.5px;
+  resize: vertical;
+  background: #fff;
+}
+.paste-order-box textarea:focus {
+  border-color: #3F7D58;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(63, 125, 88, 0.15);
+}
+
+.customer { 
+  padding: 14px 18px; 
+  background: #fff; 
+  border-bottom: 1px solid #e2e8f0; 
+}
+.customer input, .customer textarea {
+  width: 100%; margin-bottom: 8px; padding: 8px 12px; 
+  border: 1px solid #cbd5e1; border-radius: 8px; 
+  font-family: inherit; font-size: 13px; transition: all 0.3s;
+  background: #f8fafc;
+}
+.customer input:focus, .customer textarea:focus {
+  border-color: #3F7D58; box-shadow: 0 0 0 3px rgba(63, 125, 88, 0.15); 
+  outline: none; background: #fff;
+}
 .customer textarea { resize: vertical; min-height: 55px; }
 
+/* AUTOCOMPLETE STYLES */
 .autocomplete-wrapper { position: relative; width: 100%; }
-.suggestions-box { position: absolute; top: calc(100% - 4px); left: 0; right: 0; background: #fff; border: 2px solid #3F7D58; border-radius: 12px; z-index: 9999; display: none; max-height: 250px; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 12px 30px rgba(0,0,0,0.22); }
-.suggestion-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.suggestions-box {
+  position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
+  border: 1px solid #cbd5e1; border-radius: 8px; z-index: 999; display: none;
+  max-height: 220px; overflow-y: auto; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.18);
+}
+.suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
 .suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
+.add-new-btn { 
+  background: #f0fdf4; color: #3F7D58; font-weight: 600; 
+  text-align: center; position: sticky; bottom: 0; border-top: 1px solid #a7f3d0;
+}
+.add-new-btn:hover { background: #d1fae5; }
 
-.cart { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; min-height: 0; }
-.cart-item { background: #fff; padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
-.cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+/* CART */
+.cart { 
+  flex: 1; overflow-y: auto; padding: 14px 18px; 
+  display: flex; flex-direction: column; gap: 8px; 
+  background: #f8fafc;
+  min-height: 0;
+}
+.cart-item { 
+  background: #fff; padding: 10px 12px; border-radius: 12px; 
+  border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.cart-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-weight: 600; font-size: 14px;}
 .qty-controls { display: flex; flex-wrap: wrap; gap: 5px; }
-.qty-controls button { padding: 5px 9px; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12.5px; color: #475569; font-weight: 500; }
+.qty-controls button {
+  padding: 4px 8px; border: 1px solid #e2e8f0; background: #f8fafc; 
+  border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px;
+  color: #475569; font-weight: 500; transition: 0.2s;
+}
+.qty-controls button:hover { background: #e2e8f0; color: #0f172a; }
 .btn-remove { color: #ef4444 !important; border-color: #fca5a5 !important; background: #fef2f2 !important; }
+.btn-remove:hover { background: #fee2e2 !important; color: #dc2626 !important; }
 
+/* SUMMARY */
 .summary { padding: 14px 18px; border-top: 1px solid #e2e8f0; background: #fff; }
 .total { font-size: 22px; font-weight: 600; margin-bottom: 12px; text-align: right; color: #3F7D58; }
+
 .btn-group { display: flex; gap: 10px; }
-.btn-group button { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 15px; cursor: pointer; font-weight: 600; font-family: inherit; }
+.btn-group button {
+  flex: 1; padding: 12px; border: none; border-radius: 12px; 
+  font-size: 15px; cursor: pointer; font-weight: 600; font-family: inherit;
+  transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
 .primary { background: #3F7D58; color: #fff; }
+.primary:hover { background: #2c593e; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(63, 125, 88, 0.2); }
 .danger { background: #ef4444; color: #fff; }
+.danger:hover { background: #dc2626; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(239,68,68,0.2); }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 10000; }
-.modal-content { background: #fff; padding: 22px; border-radius: 16px; width: 92%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
-.modal-content h3 { color: #0f172a; margin: 0 0 4px; }
-.modal-content input, .modal-content textarea, .modal-content select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; }
-.modal-content textarea.bill-textarea { height: 280px; resize: none; background: #f8fafc; font-size: 13.5px; line-height: 1.5; }
-.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px; }
-.modal-actions button { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; }
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-content {
+  background: #fff; padding: 22px; border-radius: 16px; width: 90%; max-width: 420px;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.3s ease;
+}
+@keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-content h3 { color: #0f172a; margin-bottom: 4px; }
+.modal-content input, .modal-content textarea, .modal-content select {
+  width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit;
+}
+.modal-content input:focus, .modal-content textarea:focus, .modal-content select:focus { border-color: #3F7D58; outline: none; }
+.modal-content textarea.bill-textarea {
+  height: 280px; resize: none; font-family: inherit; background: #f8fafc; font-size: 13.5px; line-height: 1.5;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px; }
+.modal-actions button { 
+  padding: 9px 16px; border: none; border-radius: 8px; cursor: pointer; 
+  font-weight: 600; font-family: inherit; transition: 0.2s;
+}
 .btn-cancel { background: #e2e8f0; color: #475569; }
+.btn-cancel:hover { background: #cbd5e1; color: #1e293b; }
 .btn-confirm { background: #3F7D58; color: #fff; }
+.btn-confirm:hover { background: #2c593e; }
 .btn-copy { background: #EC5228; color: #fff; }
-.pos-option-btn { width: 100%; padding: 12px 14px; margin-bottom: 6px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 500; color: #334155; cursor: pointer; text-align: left; }
+.btn-copy:hover { background: #d4441c; }
 
+.pos-option-btn {
+  width: 100%; padding: 12px 14px; margin-bottom: 8px;
+  background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px;
+  font-family: inherit; font-size: 14px; font-weight: 500; color: #334155;
+  cursor: pointer; transition: 0.2s; text-align: left;
+}
+.pos-option-btn:hover { background: #f0fdf4; border-color: #3F7D58; color: #166534; }
+
+/* ===== RESPONSIVE ===== */
 @media screen and (max-width: 1024px) {
-  .app { display: flex; flex-direction: column; height: auto; min-height: 100vh; margin: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+  .app {
+    display: flex; flex-direction: column; height: auto; min-height: 100vh;
+    margin: 0; border-radius: 0; box-shadow: none;
+    overflow: visible;
+  }
   .right { display: contents; }
   .paste-order-box { order: 1; }
   .customer { order: 2; }
-  .left { order: 3; height: auto; border-top: 4px solid #3F7D58; border-bottom: 4px solid #3F7D58; overflow: visible; }
+  .left {
+    order: 3; height: auto; 
+    border-top: 4px solid #3F7D58; 
+    border-bottom: 4px solid #3F7D58; 
+    overflow: visible; 
+  }
   .cart { order: 4; min-height: 150px; max-height: none; }
-  .summary { order: 5; padding: 14px; position: sticky; bottom: 0; z-index: 90; box-shadow: 0 -4px 15px rgba(0,0,0,0.08); }
-  .menu { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 14px; gap: 10px; overflow-y: visible; }
+  .summary { 
+    order: 5; padding: 14px; 
+    position: sticky; bottom: 0; z-index: 10;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+  }
+  .menu { 
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); 
+    padding: 14px; gap: 10px; overflow-y: visible; 
+  }
 }
 </style>
 </head>
+
 <body>
 
 <div class="app">
-  <div class="left">
-    <div class="category-bar">
-      <div id="categoryBar" style="display:flex; gap:8px; overflow-x:auto;"></div>
-      <button class="btn-refresh" onclick="loadMenuFromDB()">🔄 รีเฟรช</button>
-    </div>
-    <div class="menu" id="menuList">
-      <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>
-    </div>
-    <div class="custom-box">
-      <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
-      <div style="display: flex; gap: 10px;">
-        <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
-        <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
-      </div>
-      <button onclick="addCustom()" style="margin-top: 8px;">+ เพิ่มลงตะกร้า</button>
-    </div>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="category-bar">
+    <div id="categoryBar" style="display:flex; gap:8px; overflow-x:auto;"></div>
+    <button class="btn-refresh" onclick="loadMenuFromDB()">🔄 รีเฟรช</button>
+  </div>
+  
+  <div class="menu" id="menuList">
+    <div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>
   </div>
 
-  <div class="right">
-    <div class="paste-order-box">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <span style="font-size:12.5px; font-weight:600; color:#166534;">📥 วางข้อความที่ลูกค้าก๊อปมา (ดึงยอดอัตโนมัติ):</span>
-        <button onclick="clearPasteBox()" style="background:none; border:none; font-size:11px; color:#64748b; cursor:pointer;">ล้างข้อความ</button>
-      </div>
-      <textarea id="pasteOrderInput" placeholder="แตะค้างแล้วกด 'วาง' ข้อความที่ลูกค้าส่งมาที่นี่..." oninput="parseCustomerOrder(this.value)"></textarea>
+  <div class="custom-box">
+    <b style="display:block; margin-bottom:8px; color:#0f172a; font-size:14px;">เพิ่มสินค้าอื่น (นอกเมนู)</b>
+    <div style="display: flex; gap: 10px;">
+      <input id="customName" placeholder="ชื่อสินค้า" style="flex: 2; margin-bottom: 0;">
+      <input id="customPrice" type="number" placeholder="ราคา" style="flex: 1; margin-bottom: 0;">
     </div>
-
-    <div class="customer">
-      <div class="autocomplete-wrapper">
-        <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อดูรายชื่อทั้งหมด หรือพิมพ์ค้นหา)" 
-               oninput="showCustomerDropdown('name')" 
-               onfocus="showCustomerDropdown('name')" 
-               onclick="showCustomerDropdown('name')" 
-               autocomplete="off">
-        <div id="nameSuggestions" class="suggestions-box"></div>
-      </div>
-      
-      <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-        <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
-          <input id="phone" placeholder="เบอร์โทร (แตะหรือพิมพ์ค้นหา)" 
-                 oninput="showCustomerDropdown('phone')" 
-                 onfocus="showCustomerDropdown('phone')" 
-                 onclick="showCustomerDropdown('phone')" 
-                 autocomplete="off" style="margin-bottom: 0;">
-          <div id="phoneSuggestions" class="suggestions-box"></div>
-        </div>
-        <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
-      </div>
-
-      <textarea id="address" placeholder="ที่อยู่จัดส่ง / จุดนัดรับ"></textarea>
-      
-      <div style="display: flex; gap: 10px;">
-        <input id="shipping" type="number" placeholder="ค่าจัดส่ง (฿)" oninput="renderCart()" style="flex: 1; min-width: 0; margin-bottom:0;">
-        <input id="remark" placeholder="หมายเหตุ / รอบส่ง (11.00 หรือ 15.00)" style="flex: 2; min-width: 0; margin-bottom:0;">
-      </div>
-    </div>
-
-    <div class="cart" id="cartList"></div>
-
-    <div class="summary">
-      <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
-      <div class="btn-group">
-        <button class="primary" onclick="checkout()">สรุปบิล</button>
-        <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
-      </div>
-    </div>
+    <button onclick="addCustom()" style="margin-top: 8px;">+ เพิ่มลงตะกร้า</button>
   </div>
 </div>
 
-<!-- Modals -->
+<!-- RIGHT -->
+<div class="right">
+
+  <div class="paste-order-box">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+      <span style="font-size:12.5px; font-weight:600; color:#166534;">📥 วางข้อความที่ลูกค้าก๊อปมา (ระบบดึงยอดให้อัตโนมัติ):</span>
+      <button onclick="clearPasteBox()" style="background:none; border:none; font-size:11px; color:#64748b; cursor:pointer;">ล้างข้อความ</button>
+    </div>
+    <textarea id="pasteOrderInput" placeholder="แตะค้างแล้วกด 'วาง' ข้อความที่ลูกค้าส่งมาที่นี่..." oninput="parseCustomerOrder(this.value)"></textarea>
+  </div>
+
+  <div class="customer">
+    <!-- กล่องค้นหา / เดาชื่อลูกค้า -->
+    <div class="autocomplete-wrapper">
+      <input id="name" placeholder="ชื่อลูกค้า (พิมพ์เพื่อค้นหาอัตโนมัติ)" oninput="searchCustomer('name')" onfocus="searchCustomer('name')" autocomplete="off">
+      <div id="nameSuggestions" class="suggestions-box"></div>
+    </div>
+    <div id="custStatus" style="font-size:11.5px; color:#94a3b8; margin:-4px 0 8px 2px;">กำลังโหลดรายชื่อลูกค้า...</div>
+    
+    <div style="display: flex; gap: 10px; margin-bottom: 8px;">
+      <!-- กล่องค้นหา / เดาจากเบอร์โทร -->
+      <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
+        <input id="phone" placeholder="เบอร์โทรศัพท์ (พิมพ์เพื่อค้นหา)" oninput="searchCustomer('phone')" onfocus="searchCustomer('phone')" autocomplete="off" style="margin-bottom: 0;">
+        <div id="phoneSuggestions" class="suggestions-box"></div>
+      </div>
+      <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
+    </div>
+
+    <textarea id="address" placeholder="ที่อยู่จัดส่ง / จุดนัดรับ"></textarea>
+    
+    <div style="display: flex; gap: 10px;">
+      <input id="shipping" type="number" placeholder="ค่าจัดส่ง (฿)" oninput="renderCart()" style="flex: 1; min-width: 0;">
+      <input id="remark" placeholder="หมายเหตุ / รอบส่ง (11.00 หรือ 15.00)" style="flex: 2; min-width: 0;">
+    </div>
+  </div>
+
+  <div class="cart" id="cartList"></div>
+
+  <div class="summary">
+    <div class="total">ยอดรวม: ฿ <span id="totalEl">0</span></div>
+    <div class="btn-group">
+      <button class="primary" onclick="checkout()">สรุปบิล</button>
+      <button class="danger" onclick="newOrder()">เริ่มบิลใหม่</button>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+<!-- Modal: เลือกสูตรน้ำปลาหวานฝั่ง POS -->
 <div id="posSauceModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 360px;">
-    <h3 id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
-    <p style="font-size:13px; color:#64748b; margin:0 0 6px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
+    <h3 style="margin-top:0;" id="posSauceTitle">เลือกสูตรน้ำปลาหวาน</h3>
+    <p style="font-size:13px; color:#64748b; margin-bottom:8px;">ระบุสูตรน้ำปลาหวานที่ต้องการเพิ่ม:</p>
+    
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรกุ้งแห้ง')">🦐 น้ำปลาหวานกุ้งแห้ง</button>
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาป่น')">🐟 น้ำปลาหวานปลาป่น</button>
     <button class="pos-option-btn" onclick="confirmSauceSelection('สูตรปลาร้าข้าวคั่ว')">🌾 น้ำปลาหวาน สูตรปลาร้าข้าวคั่ว</button>
-    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button></div>
+    
+    <div class="modal-actions" style="margin-top:6px;">
+      <button class="btn-cancel" onclick="closeModal('posSauceModal')">ยกเลิก</button>
+    </div>
   </div>
 </div>
 
+<!-- Modals อื่นๆ -->
 <div id="alertModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 300px; text-align: center;">
-    <h3>แจ้งเตือน</h3>
-    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;"></p>
-    <div class="modal-actions"><button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button></div>
+    <h3 style="margin-top:0;">แจ้งเตือน</h3>
+    <p id="alertMessage" style="color: #475569; margin-bottom: 10px;">ข้อความ</p>
+    <div class="modal-actions" style="justify-content: center;">
+      <button class="btn-confirm" onclick="closeModal('alertModal')" style="width: 100%;">ตกลง</button>
+    </div>
   </div>
 </div>
 
 <div id="billModal" class="modal-overlay">
   <div class="modal-content">
-    <h3>สรุปรายการสั่งซื้อ</h3>
+    <h3 style="margin-top:0;">สรุปรายการสั่งซื้อ</h3>
     <textarea id="billTextarea" class="bill-textarea" readonly></textarea>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('billModal')">ปิดหน้าต่าง</button>
@@ -190,22 +455,38 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
 
 <div id="confirmModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 320px; text-align: center;">
-    <h3 style="color: #ef4444;">ยืนยันการทำรายการ</h3>
+    <h3 style="margin-top:0; color: #ef4444;">ยืนยันการทำรายการ</h3>
     <p style="color: #475569;">ต้องการล้างตะกร้าและเริ่มบิลใหม่ใช่หรือไม่?</p>
-    <div class="modal-actions">
+    <div class="modal-actions" style="justify-content: center;">
       <button class="btn-cancel" onclick="closeModal('confirmModal')" style="flex:1;">ยกเลิก</button>
       <button class="btn-confirm" onclick="executeNewOrder()" style="flex:1; background: #ef4444;">ตกลง</button>
     </div>
   </div>
 </div>
 
+<!-- Modal: เพิ่มลูกค้าใหม่ -->
+<div id="addCustomerModal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="margin-top:0;">เพิ่มข้อมูลลูกค้าใหม่</h3>
+    <input id="newCustName" placeholder="ชื่อลูกค้า">
+    <input id="newCustPhone" placeholder="เบอร์โทรศัพท์">
+    <textarea id="newCustAddress" placeholder="ที่อยู่จัดส่ง" style="resize:vertical; min-height:80px;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('addCustomerModal')">ยกเลิก</button>
+      <button class="btn-confirm" onclick="saveNewCustomer()">บันทึกข้อมูล</button>
+    </div>
+  </div>
+</div>
+
 <div id="editItemModal" class="modal-overlay">
   <div class="modal-content">
-    <h3 id="editItemTitle">แก้ไขสินค้า</h3>
+    <h3 style="margin-top:0;" id="editItemTitle">แก้ไขสินค้า</h3>
     <input type="hidden" id="editRowIndex">
+    
     <label style="font-size:13px; font-weight:600; color:#475569;">ราคา (บาท):</label>
     <input id="editItemPrice" type="number">
-    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่:</label>
+
+    <label style="font-size:13px; font-weight:600; color:#475569; margin-top:4px;">สถานะ / หมวดหมู่ (Category):</label>
     <select id="editItemCategory">
       <option value="ผลไม้พร้อมส่งวันนี้ (ลูกค้ากดสั่งซื้อได้)">ผลไม้พร้อมส่งวันนี้</option>
       <option value="ใกล้หมดฤดูกาล (มีป้ายเตือนสีส้ม ลูกค้ากดสั่งได้)">ใกล้หมดฤดูกาล</option>
@@ -213,6 +494,7 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
       <option value="หมดฤดูกาลแล้ว (ป้ายสีเทา ปิดการสั่งซื้อ)">หมดฤดูกาลแล้ว</option>
       <option value="บริการการ์ด ริบบิ้น และปิ่นโตผลไม้">บริการการ์ด ริบบิ้น และปิ่นโตผลไม้</option>
     </select>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('editItemModal')">ยกเลิก</button>
       <button class="btn-confirm" onclick="saveItemUpdate()">บันทึกข้อมูล</button>
@@ -224,7 +506,14 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
 const MENU_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwyPQUcJ3lqv67b6nOJHgQMrFxowoPbiprYFbFOfH_yPLimMWAoneY_e2vS82yBIWSj/exec";
 const CUSTOMER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBBWTHCV3FCtlzm9dyczfB71m8paEZ5iXpwQO5FFL6mvB_H_QPpYnv4MDDjCQ/exec";
 
-const APP_CATEGORIES = ["ทั้งหมด", "ผลไม้พร้อมส่งวันนี้", "ใกล้หมดฤดูกาล", "หมดชั่วคราว", "หมดฤดูกาลแล้ว", "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"];
+const APP_CATEGORIES = [
+  "ทั้งหมด",
+  "ผลไม้พร้อมส่งวันนี้",
+  "ใกล้หมดฤดูกาล",
+  "หมดชั่วคราว",
+  "หมดฤดูกาลแล้ว",
+  "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"
+];
 
 let menu = [];
 let active = "ทั้งหมด";
@@ -232,95 +521,169 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-function loadCustomersFromSheet() {
-  fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
-    .then(r => r.text())
-    .then(t => {
-      let clean = t.trim();
-      const m = clean.match(/^[\w$]+\(([\s\S]*)\);?$/);
-      if (m) clean = m[1];
-      const json = JSON.parse(clean);
-      let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
-      if (rawList.length > 0) {
-        customersDB = rawList.map(c => {
-          if (Array.isArray(c)) return { name: c[0] || '', phone: c[1] || '', address: c[2] || '' };
-          return { name: c.name || c.Name || '', phone: c.phone || c.Phone || '', address: c.address || c.Address || '' };
-        }).filter(c => c.name && c.name.toLowerCase() !== 'name');
-      }
-    })
-    .catch(() => {
-      // ดึงสำรองผ่าน AllOrigins หากติด CORS
-      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(CUSTOMER_SCRIPT_URL)}`)
-        .then(r => r.json())
-        .then(json => {
-          let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
-          if (rawList.length > 0) {
-            customersDB = rawList.map(c => {
-              if (Array.isArray(c)) return { name: c[0] || '', phone: c[1] || '', address: c[2] || '' };
-              return { name: c.name || c.Name || '', phone: c.phone || c.Phone || '', address: c.address || c.Address || '' };
-            }).filter(c => c.name && c.name.toLowerCase() !== 'name');
-          }
-        })
-        .catch(() => {});
-    });
+/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ===== */
+let pendingNewCustText = '';
+
+function escHTML(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function showCustomerDropdown(field) {
-  const nameBox = document.getElementById('nameSuggestions');
-  const phoneBox = document.getElementById('phoneSuggestions');
-  if (field === 'name' && phoneBox) phoneBox.style.display = 'none';
-  if (field === 'phone' && nameBox) nameBox.style.display = 'none';
+// เบอร์ที่เก็บใน Sheet เป็นตัวเลขจะหาย 0 ข้างหน้า (0812345678 -> 812345678) เติมกลับให้
+function normalizePhone(v) {
+  let p = String(v == null ? '' : v).trim();
+  const digits = p.replace(/\D/g, '');
+  if (/^[1-9]\d{7,8}$/.test(digits) && digits === p) p = '0' + digits;
+  return p;
+}
 
+function searchCustomer(field) {
   const inputEl = document.getElementById(field);
+  const raw = inputEl.value.trim();
+  const keyword = raw.toLowerCase();
   const suggestionsBox = document.getElementById(field + 'Suggestions');
-  if (!inputEl || !suggestionsBox) return;
 
-  const keyword = inputEl.value.trim().toLowerCase();
-  let matched = [];
+  // ปิดกล่องของอีกช่อง ไม่ให้ซ้อนกัน
+  const other = field === 'name' ? 'phoneSuggestions' : 'nameSuggestions';
+  document.getElementById(other).style.display = 'none';
 
   if (!keyword) {
-    matched = customersDB.map((c, idx) => ({ c, idx }));
-  } else {
-    customersDB.forEach((c, idx) => {
-      if (String(c.name).toLowerCase().includes(keyword) || String(c.phone).includes(keyword) || String(c.address).toLowerCase().includes(keyword)) {
-        matched.push({ c, idx });
-      }
-    });
+    renderSuggestions(customersDB.slice(0, 15).map((c, idx) => ({ c, idx })), field, suggestionsBox, '');
+    return;
   }
 
-  let html = '';
-  matched.forEach(item => {
-    const c = item.c;
-    html += `
-      <div class="suggestion-item" onclick="fillCustomer(${item.idx})">
-        <b>${c.name}</b> <span style="color:#64748b; font-size:12px;">(${c.phone || '-'})</span>
-        <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${c.address || 'ไม่มีที่อยู่'}</div>
-      </div>`;
+  const cleanKeyword = keyword.replace(/\D/g, '');
+  const matched = [];
+  customersDB.forEach((c, idx) => {
+    let match = false;
+    if (field === 'phone') {
+      const cleanPhone = (c.phone || '').replace(/\D/g, '');
+      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
+    } else {
+      if (c.name && c.name.toLowerCase().includes(keyword)) match = true;
+    }
+    if (match) matched.push({ c, idx });
   });
 
-  if (html === '') {
-    html = `<div style="padding:10px; text-align:center; color:#888; font-size:13px;">ไม่พบรายชื่อในระบบ</div>`;
+  renderSuggestions(matched.slice(0, 30), field, suggestionsBox, raw);
+}
+
+function renderSuggestions(list, field, suggestionsBox, currentText) {
+  let html = '';
+  list.forEach(({ c, idx }) => {
+    html += `
+      <div class="suggestion-item" onclick="fillCustomer(${idx})">
+        <b>${escHTML(c.name) || '(ไม่มีชื่อ)'}</b> - <span style="color:#64748b;">${escHTML(c.phone) || 'ไม่ระบุเบอร์'}</span>
+        <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${escHTML(c.address) || 'ไม่ระบุที่อยู่'}</div>
+      </div>
+    `;
+  });
+
+  // ปุ่มเพิ่มลูกค้าใหม่: แสดงทั้งช่องชื่อและช่องเบอร์ เมื่อพิมพ์แล้ว
+  if (currentText) {
+    pendingNewCustText = currentText;
+    html += `
+      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${field}')">
+        + เพิ่มลูกค้าใหม่ "${escHTML(currentText)}"
+      </div>`;
   }
 
-  suggestionsBox.innerHTML = html;
-  suggestionsBox.style.display = 'block';
+  if (html) {
+    suggestionsBox.innerHTML = html;
+    suggestionsBox.style.display = 'block';
+  } else {
+    suggestionsBox.style.display = 'none';
+  }
 }
 
 function fillCustomer(index) {
   const customer = customersDB[index];
   if (!customer) return;
   document.getElementById('name').value = customer.name || '';
-  document.getElementById('phone').value = (customer.phone && customer.phone !== 'N/A') ? customer.phone : '';
+  document.getElementById('phone').value = customer.phone || '';
   document.getElementById('address').value = customer.address || '';
   document.getElementById('nameSuggestions').style.display = 'none';
   document.getElementById('phoneSuggestions').style.display = 'none';
 }
 
+function openAddCustomerModal(field) {
+  const text = pendingNewCustText;
+  const isPhone = field === 'phone';
+  document.getElementById('newCustName').value = isPhone ? document.getElementById('name').value : text;
+  document.getElementById('newCustPhone').value = isPhone ? text : document.getElementById('phone').value;
+  document.getElementById('newCustAddress').value = document.getElementById('address').value;
+  openModal('addCustomerModal');
+  document.getElementById('nameSuggestions').style.display = 'none';
+  document.getElementById('phoneSuggestions').style.display = 'none';
+}
+
+function setCustStatus(msg, color) {
+  const el = document.getElementById('custStatus');
+  if (el) { el.textContent = msg; el.style.color = color || '#94a3b8'; }
+}
+
+async function saveNewCustomer() {
+  const name = document.getElementById('newCustName').value.trim();
+  const phone = document.getElementById('newCustPhone').value.trim();
+  const address = document.getElementById('newCustAddress').value.trim();
+
+  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
+
+  const newCust = { name, phone, address };
+  customersDB.unshift(newCust); // ใส่ไว้ลำดับแรกสุดทันที
+  customersLoaded = true;
+  setCustStatus(`ลูกค้าในระบบ ${customersDB.length} รายชื่อ`);
+
+  document.getElementById('name').value = name;
+  document.getElementById('phone').value = phone;
+  document.getElementById('address').value = address;
+  
+  closeModal('addCustomerModal');
+  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบเรียบร้อยแล้ว");
+
+  try {
+    await fetch(CUSTOMER_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(newCust)
+    });
+  } catch (error) {}
+}
+
+/* ===== ดึงข้อมูลคู่ขนานทั้ง JSONP และ Fetch กันพลาด 100% ===== */
 function loadMenuFromDB() {
-  loadCustomersFromSheet();
+  const menuList = document.getElementById('menuList');
+  if (menuList) {
+    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดและฐานข้อมูลลูกค้า...</div>`;
+  }
+
+  // 1. โหลดเมนูผลไม้
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
+
+  // 2. โหลดฐานข้อมูลลูกค้าทางที่ 1 (JSONP)
+  const scriptCust = document.createElement('script');
+  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+  scriptCust.onerror = () => console.warn('[ลูกค้า] JSONP โหลดไม่สำเร็จ');
+  document.body.appendChild(scriptCust);
+
+  // 3. โหลดฐานข้อมูลลูกค้าทางที่ 2 (Fetch เผื่อ JSONP โดนบล็อก)
+  fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
+    .then(res => res.text())
+    .then(text => {
+      try { onCustomersLoaded(JSON.parse(text)); }
+      catch (e) { console.warn('[ลูกค้า] Apps Script ไม่ได้ส่ง JSON กลับมา:', text.slice(0, 300)); }
+    })
+    .catch(err => console.warn('[ลูกค้า] fetch ไม่สำเร็จ:', err));
+
+  setTimeout(() => {
+    if (!customersLoaded) {
+      setCustStatus('โหลดรายชื่อลูกค้าไม่สำเร็จ: ตรวจ Apps Script (Deploy เป็น Anyone และมี doGet) / ยังพิมพ์แล้วกดเพิ่มลูกค้าใหม่ได้', '#ef4444');
+    }
+  }, 12000);
 }
 
 window.onPOSMenuLoaded = function(json) {
@@ -335,21 +698,81 @@ window.onPOSMenuLoaded = function(json) {
   }
 };
 
+let customersLoaded = false;
+
+// รับได้หลายรูปแบบ: [{name,phone,address}], {data:[...]}, {customers:[...]},
+// หัวคอลัมน์ภาษาไทย (ชื่อ/เบอร์โทร/ที่อยู่) หรือ getValues() แบบ 2 มิติ
+window.onCustomersLoaded = function(json) {
+  if (!json) return;
+  let list = [];
+  if (Array.isArray(json)) list = json;
+  else if (Array.isArray(json.data)) list = json.data;
+  else if (Array.isArray(json.customers)) list = json.customers;
+  else if (Array.isArray(json.values)) list = json.values;
+
+  const pick = (obj, keys) => {
+    for (const k of Object.keys(obj)) {
+      const nk = String(k).trim().toLowerCase().replace(/\s+/g, '');
+      if (keys.some(x => nk === x || nk.includes(x))) return obj[k];
+    }
+    return '';
+  };
+  const NAME_KEYS = ['name', 'ชื่อ', 'customer', 'ลูกค้า'];
+  const PHONE_KEYS = ['phone', 'tel', 'mobile', 'เบอร์', 'โทร'];
+  const ADDR_KEYS = ['address', 'addr', 'ที่อยู่', 'จัดส่ง'];
+
+  // 2D array: ถ้าแถวแรกเป็นหัวคอลัมน์ ให้แปลงเป็น object
+  if (list.length && Array.isArray(list[0])) {
+    const head = list[0].map(h => String(h).trim().toLowerCase().replace(/\s+/g, ''));
+    const find = keys => head.findIndex(h => keys.some(x => h === x || h.includes(x)));
+    let ni = find(NAME_KEYS), pi = find(PHONE_KEYS), ai = find(ADDR_KEYS);
+    let rows = list.slice(1);
+    if (ni < 0 && pi < 0) { ni = 0; pi = 1; ai = 2; rows = list; }
+    list = rows.map(r => ({ name: r[ni], phone: pi >= 0 ? r[pi] : '', address: ai >= 0 ? r[ai] : '' }));
+  }
+
+  const mapped = list
+    .filter(c => c && typeof c === 'object')
+    .map(c => {
+      const name = c.name !== undefined ? c.name : pick(c, NAME_KEYS);
+      const phone = c.phone !== undefined ? c.phone : pick(c, PHONE_KEYS);
+      const address = c.address !== undefined ? c.address : pick(c, ADDR_KEYS);
+      return {
+        name: String(name == null ? '' : name).trim(),
+        phone: normalizePhone(phone),
+        address: String(address == null ? '' : address).trim()
+      };
+    })
+    .filter(c => c.name || c.phone);
+
+  if (mapped.length > 0) {
+    // เก็บลูกค้าที่เพิ่งเพิ่มในหน้านี้ไว้ ไม่ให้ถูกข้อมูลจาก Sheet ทับหาย
+    const local = customersDB.filter(lc => !mapped.some(m => m.name === lc.name && m.phone === lc.phone));
+    customersDB = local.concat(mapped);
+    customersLoaded = true;
+    setCustStatus(`ลูกค้าในระบบ ${customersDB.length} รายชื่อ`);
+  } else if (!customersLoaded) {
+    console.warn('[ลูกค้า] ได้ข้อมูลกลับมาแต่อ่านชื่อ/เบอร์ไม่ได้:', json);
+    setCustStatus('ได้ข้อมูลจาก Sheet แต่ไม่พบคอลัมน์ชื่อ/เบอร์', '#ef4444');
+  }
+};
+
+/* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ ===== */
 function parseCustomerOrder(rawText) {
   if (!rawText || !rawText.trim()) return;
+
   const lines = rawText.split('\n');
   let parsedAny = false;
   let lastAddedItem = null;
 
   lines.forEach(line => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.includes('____') || trimmed.includes('-----') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
+    if (!trimmed || trimmed.includes('____') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-      const optionText = trimmed.replace(/^[-•]\s*/, '').replace(/^\(|\)$/g, '').trim();
+      const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
       if (lastAddedItem && optionText) {
-        const cleanBase = lastAddedItem.name.replace(/\s*\(.*?\)\s*$/, '').trim();
-        lastAddedItem.name = `${cleanBase} (${optionText})`;
+        lastAddedItem.name = `${lastAddedItem.name} (${optionText})`;
       }
       return;
     }
@@ -358,14 +781,21 @@ function parseCustomerOrder(rawText) {
     if (itemMatch) {
       const fullItemName = itemMatch[1].trim();
       const itemQty = parseInt(itemMatch[2], 10) || 1;
+
       const baseName = fullItemName.replace(/\s*\(.*?\)\s*/g, '').trim();
-      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase()) ||
-                        menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
+      let foundInMenu = menu.find(m => m.name.trim().toLowerCase() === fullItemName.toLowerCase());
+      if (!foundInMenu) {
+        foundInMenu = menu.find(m => m.name.trim().toLowerCase() === baseName.toLowerCase() || m.name.includes(baseName));
+      }
+
       let finalPrice = foundInMenu ? Number(foundInMenu.price) : 0;
 
       if (finalPrice === 0) {
         const priceMatch = trimmed.match(/\((\d+[\d,]*)\s*฿\)/) || trimmed.match(/=\s*(\d+[\d,]*)\s*฿/);
-        if (priceMatch) finalPrice = Math.round(parseFloat(priceMatch[1].replace(/,/g, '')) / itemQty);
+        if (priceMatch) {
+          const totalLinePrice = parseFloat(priceMatch[1].replace(/,/g, ''));
+          finalPrice = Math.round(totalLinePrice / itemQty);
+        }
       }
 
       const existingCart = cart.find(c => c.name.toLowerCase() === fullItemName.toLowerCase());
@@ -380,10 +810,15 @@ function parseCustomerOrder(rawText) {
       parsedAny = true;
     }
   });
-  if (parsedAny) renderCart();
+
+  if (parsedAny) {
+    renderCart();
+  }
 }
 
-function clearPasteBox() { document.getElementById('pasteOrderInput').value = ''; }
+function clearPasteBox() {
+  document.getElementById('pasteOrderInput').value = '';
+}
 
 function normalizeCategory(raw) {
   const text = String(raw || '').trim();
@@ -395,38 +830,53 @@ function normalizeCategory(raw) {
   return text;
 }
 
-function renderCategory() {
-  const bar = document.getElementById('categoryBar');
-  bar.innerHTML = APP_CATEGORIES.map(c => `
-    <div class="category-btn ${c === active ? 'active' : ''}" onclick="selectCat('${c}')">
-      ${c === 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้' ? 'บริการ/ปิ่นโต' : c}
-    </div>`).join('');
+function renderCategory(){
+  const categoryBar = document.getElementById('categoryBar');
+  categoryBar.innerHTML = "";
+  APP_CATEGORIES.forEach(c => {
+    categoryBar.innerHTML += `
+      <div class="category-btn ${c === active ? 'active' : ''}" onclick="selectCat('${c}')">
+        ${c === 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้' ? 'บริการ/ปิ่นโต' : c}
+      </div>`;
+  });
 }
 
-function selectCat(c) { active = c; renderCategory(); renderMenu(); }
+function selectCat(c){
+  active = c;
+  renderCategory();
+  renderMenu();
+}
 
-function renderMenu() {
+function renderMenu(){
   const menuList = document.getElementById('menuList');
+  menuList.innerHTML = "";
+
   const filtered = menu.filter(i => active === "ทั้งหมด" || i.normalizedCategory === active);
+
   if (filtered.length === 0) {
     menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#94a3b8;">ไม่มีรายการในหมวดนี้</div>`;
     return;
   }
-  menuList.innerHTML = filtered.map(i => {
+
+  filtered.forEach(i => {
     const isOut = (i.normalizedCategory === 'หมดชั่วคราว' || i.normalizedCategory === 'หมดฤดูกาลแล้ว');
+    const isNearEnd = (i.normalizedCategory === 'ใกล้หมดฤดูกาล');
+
     let badge = '';
-    if (i.normalizedCategory === 'ใกล้หมดฤดูกาล') badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
+    if (isNearEnd) badge = `<span class="item-badge badge-warning">ใกล้หมด</span>`;
     if (i.normalizedCategory === 'หมดชั่วคราว') badge = `<span class="item-badge badge-danger">หมดชั่วคราว</span>`;
     if (i.normalizedCategory === 'หมดฤดูกาลแล้ว') badge = `<span class="item-badge badge-danger">หมดฤดูกาล</span>`;
-    const safeName = i.name.replace(/'/g, "\\'");
-    const safeCat = (i.category || '').replace(/'/g, "\\'");
-    return `
-      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${safeName}', ${i.price})`}">
-        <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${safeName}', ${i.price}, '${safeCat}')">⚙️</button>
-        <div>${badge}<div class="menu-title">${i.name}</div></div>
+
+    menuList.innerHTML += `
+      <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${i.name}', ${i.price})`}">
+        <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${i.name}', ${i.price}, '${i.category}')" title="แก้ไขราคา/สถานะ">⚙️</button>
+        <div>
+          ${badge}
+          <div class="menu-title">${i.name}</div>
+        </div>
         <div class="menu-price">${i.price > 0 ? `฿${i.price}` : 'ฟรี/พิเศษ'}</div>
       </div>`;
-  }).join('');
+  });
 }
 
 function handlePOSItemClick(name, price) {
@@ -440,7 +890,10 @@ function handlePOSItemClick(name, price) {
 }
 
 function confirmSauceSelection(sauceName) {
-  if (pendingPOSItem) addItem(`${pendingPOSItem.name} (${sauceName})`, pendingPOSItem.price);
+  if (pendingPOSItem) {
+    const fullName = `${pendingPOSItem.name} (${sauceName})`;
+    addItem(fullName, pendingPOSItem.price);
+  }
   closeModal('posSauceModal');
   pendingPOSItem = null;
 }
@@ -450,10 +903,15 @@ function openEditItem(event, rowIndex, name, price, category) {
   document.getElementById('editItemTitle').innerText = `แก้ไข: ${name}`;
   document.getElementById('editRowIndex').value = rowIndex;
   document.getElementById('editItemPrice').value = price;
+  
   const catSelect = document.getElementById('editItemCategory');
   for (let opt of catSelect.options) {
-    if (category.includes(opt.text)) { catSelect.value = opt.value; break; }
+    if (category.includes(opt.text)) {
+      catSelect.value = opt.value;
+      break;
+    }
   }
+
   openModal('editItemModal');
 }
 
@@ -461,71 +919,113 @@ async function saveItemUpdate() {
   const rowIndex = Number(document.getElementById('editRowIndex').value);
   const price = Number(document.getElementById('editItemPrice').value);
   const category = document.getElementById('editItemCategory').value;
+
   closeModal('editItemModal');
   customAlert("กำลังบันทึกการแก้ไขลงชีท...");
+
   try {
     await fetch(MENU_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'updateItem', rowIndex, price, category })
+      body: JSON.stringify({
+        action: 'updateItem',
+        rowIndex: rowIndex,
+        price: price,
+        category: category
+      })
     });
-    setTimeout(() => { closeModal('alertModal'); loadMenuFromDB(); }, 1400);
-  } catch (e) { customAlert("เกิดข้อผิดพลาดในการบันทึก"); }
+
+    setTimeout(() => {
+      closeModal('alertModal');
+      loadMenuFromDB();
+    }, 1500);
+
+  } catch (error) {
+    customAlert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+  }
 }
 
-function addItem(name, price) {
+function addItem(name, price){
   let f = cart.find(i => i.name === name);
-  if (f) f.qty++;
+  if(f) f.qty++;
   else cart.push({ name, price: Number(price) || 0, qty: 1 });
   renderCart();
 }
 
-function renderCart() {
+function renderCart(){
   let total = 0;
   const cartList = document.getElementById('cartList');
-  cartList.innerHTML = cart.map((i, idx) => {
+  if(!cartList) return;
+  cartList.innerHTML = "";
+
+  cart.forEach((i, idx) => {
     let p = Number(i.price) || 0;
     let sum = p * i.qty;
     total += sum;
-    return `
-      <div class="cart-item">
-        <div style="margin-bottom: 6px; font-weight: 500;">${i.name}</div>
-        <div class="cart-row">
-          <span style="color:#64748b; font-weight: 400;">${p} x ${i.qty}</span>
-          <span style="color:#0f172a;">฿${sum}</span>
-        </div>
-        <div class="qty-controls">
-          <button onclick="change(${idx},-1)">-1</button>
-          <button onclick="change(${idx},1)">+1</button>
-          <button onclick="change(${idx},10)">+10</button>
-          <button onclick="setQty(${idx},10)">=10</button>
-          <button onclick="setQty(${idx},20)">=20</button>
-          <button onclick="setQty(${idx},30)">=30</button>
-          <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
-        </div>
-      </div>`;
-  }).join('');
-  total += Number(document.getElementById('shipping').value || 0);
-  document.getElementById('totalEl').innerText = total.toLocaleString();
+
+    cartList.innerHTML += `
+    <div class="cart-item">
+      <div style="margin-bottom: 8px; font-weight: 500;">${i.name}</div>
+      <div class="cart-row">
+        <span style="color:#64748b; font-weight: 400;">${p} x ${i.qty}</span>
+        <span style="color:#0f172a;">฿${sum}</span>
+      </div>
+      <div class="qty-controls">
+        <button onclick="change(${idx},-1)">-1</button>
+        <button onclick="change(${idx},1)">+1</button>
+        <button onclick="change(${idx},10)">+10</button>
+        <button onclick="setQty(${idx},10)">=10</button>
+        <button onclick="setQty(${idx},20)">=20</button>
+        <button onclick="setQty(${idx},30)">=30</button>
+        <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
+      </div>
+    </div>`;
+  });
+
+  const shippingInput = document.getElementById('shipping');
+  const shippingCost = Number(shippingInput ? shippingInput.value : 0) || 0;
+  total += shippingCost;
+  
+  const totalEl = document.getElementById('totalEl');
+  if(totalEl) totalEl.innerText = total.toLocaleString();
 }
 
-function change(i, d) { cart[i].qty += d; if (cart[i].qty <= 0) cart.splice(i, 1); renderCart(); }
-function setQty(i, q) { if (q <= 0) cart.splice(i, 1); else cart[i].qty = q; renderCart(); }
+function change(i, d){
+  cart[i].qty += d;
+  if(cart[i].qty <= 0) cart.splice(i, 1);
+  renderCart();
+}
 
-function addCustom() {
+function setQty(i, q){
+  if(q <= 0) cart.splice(i, 1);
+  else cart[i].qty = q;
+  renderCart();
+}
+
+function addCustom(){
   const name = document.getElementById('customName').value.trim();
   const price = parseFloat(document.getElementById('customPrice').value);
-  if (!name || isNaN(price)) return customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
+  if(!name || isNaN(price)) {
+    customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
+    return;
+  }
+
   let f = cart.find(i => i.name === name && i.price === price);
-  if (f) f.qty++; else cart.push({ name, price, qty: 1 });
+  if(f) f.qty++;
+  else cart.push({ name, price, qty: 1 });
+  
   renderCart();
   document.getElementById('customName').value = "";
   document.getElementById('customPrice').value = "";
 }
 
 function checkout() {
-  if (cart.length === 0) return customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนสรุปบิล');
+  if (cart.length === 0) {
+    customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
+    return;
+  }
+
   const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
   const cleanName = nameVal.startsWith('คุณ') ? nameVal.replace(/^คุณ\s*/, '') : nameVal;
   const phone = document.getElementById('phone').value.trim() || 'ไม่ระบุ';
@@ -543,67 +1043,100 @@ function checkout() {
     dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
   }
   
-  let billText = `${dateStr}\nออเดอร์คุณ ${cleanName}\n(${phone})\n\nรายการคำสั่งซื้อ\n---------------------\n`;
+  let billText = `${dateStr}\n`;
+  billText += `ออเดอร์คุณ ${cleanName}\n`;
+  billText += `(${phone})\n\n`;
+  
+  billText += `รายการคำสั่งซื้อ\n`;
+  billText += `____________\n`;
   
   cart.forEach((item, idx) => {
     const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
     const itemTotal = (item.price * item.qty).toLocaleString();
+
     const optionMatch = cleanItemName.match(/^(.*?)\s*\((.*?)\)$/);
 
     if (optionMatch) {
       const baseName = optionMatch[1].trim();
       let optionText = optionMatch[2].trim();
+
       if (!optionText.startsWith('สูตร')) {
         optionText = optionText.replace(/^น้ำปลาหวาน\s*/, '');
-        if (!optionText.startsWith('สูตร')) optionText = 'สูตร' + optionText;
+        if (!optionText.startsWith('สูตร')) {
+          optionText = 'สูตร' + optionText;
+        }
       }
-      billText += `${idx + 1}. ${baseName}\n  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
+
+      billText += `${idx + 1}. ${baseName}\n`;
+      billText += `  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
     } else {
       billText += `${idx + 1}. ${cleanItemName} ×${item.qty} (${itemTotal}฿)\n`;
     }
   });
   
-  billText += `---------------------\n\nค่าส่ง ${shipping.toLocaleString()}฿\nรวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n📍 ${address}`;
-  if (remark) billText += `\nหมายเหตุ: ${remark}`;
+  billText += `____________\n\n`;
+  billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
+  billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
+  billText += `📍 ${address}`;
+  
+  if (remark) {
+    billText += `\nหมายเหตุ: ${remark}`;
+  }
 
   document.getElementById('billTextarea').value = billText.trim();
   openModal('billModal');
 }
 
-function newOrder() { if (cart.length > 0) openModal('confirmModal'); else executeNewOrder(); }
+function newOrder(){
+  if(cart.length > 0) openModal('confirmModal');
+  else executeNewOrder();
+}
 
 function executeNewOrder() {
   closeModal('confirmModal');
   cart = [];
-  ['pasteOrderInput', 'name', 'phone', 'address', 'shipping', 'remark', 'customName', 'customPrice'].forEach(id => {
-    document.getElementById(id).value = "";
-  });
+  document.getElementById('pasteOrderInput').value = "";
+  document.getElementById('name').value = "";
+  document.getElementById('phone').value = "";
+  document.getElementById('address').value = "";
+  document.getElementById('shipping').value = ""; 
+  document.getElementById('remark').value = "";
+  document.getElementById('customName').value = "";
+  document.getElementById('customPrice').value = "";
   setDefaultDate();
   renderCart();
 }
 
 function setDefaultDate() {
   const d = new Date();
-  document.getElementById('orderDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const orderDateEl = document.getElementById('orderDate');
+  if (orderDateEl) orderDateEl.value = `${yyyy}-${mm}-${dd}`;
 }
 
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function customAlert(msg) { document.getElementById('alertMessage').innerText = msg; openModal('alertModal'); }
+function customAlert(msg) { 
+  document.getElementById('alertMessage').innerText = msg; 
+  openModal('alertModal'); 
+}
 
 function copyBillText() {
   const copyText = document.getElementById("billTextarea");
   copyText.select();
   copyText.setSelectionRange(0, 99999);
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(copyText.value);
-  } else {
-    document.execCommand("copy");
-  }
+  document.execCommand("copy");
+  
   const btn = document.getElementById('copyBtn');
+  const originalText = btn.innerText;
   btn.innerText = 'คัดลอกสำเร็จ!';
   btn.style.background = '#0ea5e9';
-  setTimeout(() => { btn.innerText = 'คัดลอกข้อความ'; btn.style.background = '#EC5228'; }, 2000);
+  setTimeout(() => { 
+    btn.innerText = originalText; 
+    btn.style.background = '#EC5228';
+  }, 2000);
 }
 
 document.addEventListener('click', function(e) {
@@ -616,5 +1149,6 @@ document.addEventListener('click', function(e) {
 setDefaultDate();
 loadMenuFromDB();
 </script>
+
 </body>
 </html>
