@@ -968,7 +968,7 @@ function checkout() {
   billText += `(${phone})\n\n`;
   
   billText += `รายการคำสั่งซื้อ\n`;
-  billText += `____________\n`;
+  billText += `---------------------\n`;
   
   cart.forEach((item, idx) => {
     const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
