@@ -669,3 +669,373 @@ function renderMenu(){
 
     menuList.innerHTML += `
       <div class="menu-item ${isOut ? 'unavailable' : ''}" onclick="${isOut ? '' : `handlePOSItemClick('${i.name}', ${i.price})`}">
+        <button class="btn-edit-item" onclick="openEditItem(event, ${i.rowIndex}, '${i.name}', ${i.price}, '${i.category}')" title="แก้ไขราคา/สถานะ">⚙️</button>
+        <div>
+          ${badge}
+          <div class="menu-title">${i.name}</div>
+        </div>
+        <div class="menu-price">${i.price > 0 ? `฿${i.price}` : 'ฟรี/พิเศษ'}</div>
+      </div>`;
+  });
+}
+
+function handlePOSItemClick(name, price) {
+  if (name.includes('น้ำปลาหวาน')) {
+    pendingPOSItem = { name, price };
+    document.getElementById('posSauceTitle').innerText = name;
+    openModal('posSauceModal');
+  } else {
+    addItem(name, price);
+  }
+}
+
+function confirmSauceSelection(sauceName) {
+  if (pendingPOSItem) {
+    const fullName = `${pendingPOSItem.name} (${sauceName})`;
+    addItem(fullName, pendingPOSItem.price);
+  }
+  closeModal('posSauceModal');
+  pendingPOSItem = null;
+}
+
+function openEditItem(event, rowIndex, name, price, category) {
+  event.stopPropagation();
+  document.getElementById('editItemTitle').innerText = `แก้ไข: ${name}`;
+  document.getElementById('editRowIndex').value = rowIndex;
+  document.getElementById('editItemPrice').value = price;
+  
+  const catSelect = document.getElementById('editItemCategory');
+  for (let opt of catSelect.options) {
+    if (category.includes(opt.text)) {
+      catSelect.value = opt.value;
+      break;
+    }
+  }
+
+  openModal('editItemModal');
+}
+
+async function saveItemUpdate() {
+  const rowIndex = Number(document.getElementById('editRowIndex').value);
+  const price = Number(document.getElementById('editItemPrice').value);
+  const category = document.getElementById('editItemCategory').value;
+
+  closeModal('editItemModal');
+  customAlert("กำลังบันทึกการแก้ไขลงชีท...");
+
+  try {
+    await fetch(MENU_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updateItem',
+        rowIndex: rowIndex,
+        price: price,
+        category: category
+      })
+    });
+
+    setTimeout(() => {
+      closeModal('alertModal');
+      loadMenuFromDB();
+    }, 1500);
+
+  } catch (error) {
+    customAlert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+  }
+}
+
+function addItem(name, price){
+  let f = cart.find(i => i.name === name);
+  if(f) f.qty++;
+  else cart.push({ name, price: Number(price) || 0, qty: 1 });
+  renderCart();
+}
+
+function renderCart(){
+  let total = 0;
+  const cartList = document.getElementById('cartList');
+  if(!cartList) return;
+  cartList.innerHTML = "";
+
+  cart.forEach((i, idx) => {
+    let p = Number(i.price) || 0;
+    let sum = p * i.qty;
+    total += sum;
+
+    cartList.innerHTML += `
+    <div class="cart-item">
+      <div style="margin-bottom: 8px; font-weight: 500;">${i.name}</div>
+      <div class="cart-row">
+        <span style="color:#64748b; font-weight: 400;">${p} x ${i.qty}</span>
+        <span style="color:#0f172a;">฿${sum}</span>
+      </div>
+      <div class="qty-controls">
+        <button onclick="change(${idx},-1)">-1</button>
+        <button onclick="change(${idx},1)">+1</button>
+        <button onclick="change(${idx},10)">+10</button>
+        <button onclick="setQty(${idx},10)">=10</button>
+        <button onclick="setQty(${idx},20)">=20</button>
+        <button onclick="setQty(${idx},30)">=30</button>
+        <button onclick="setQty(${idx},0)" class="btn-remove" style="margin-left:auto;">ลบ</button>
+      </div>
+    </div>`;
+  });
+
+  const shippingInput = document.getElementById('shipping');
+  const shippingCost = Number(shippingInput ? shippingInput.value : 0) || 0;
+  total += shippingCost;
+  
+  const totalEl = document.getElementById('totalEl');
+  if(totalEl) totalEl.innerText = total.toLocaleString();
+}
+
+function change(i, d){
+  cart[i].qty += d;
+  if(cart[i].qty <= 0) cart.splice(i, 1);
+  renderCart();
+}
+
+function setQty(i, q){
+  if(q <= 0) cart.splice(i, 1);
+  else cart[i].qty = q;
+  renderCart();
+}
+
+function addCustom(){
+  const name = document.getElementById('customName').value.trim();
+  const price = parseFloat(document.getElementById('customPrice').value);
+  if(!name || isNaN(price)) {
+    customAlert('กรุณากรอกชื่อและราคาสินค้าให้ครบถ้วน');
+    return;
+  }
+
+  let f = cart.find(i => i.name === name && i.price === price);
+  if(f) f.qty++;
+  else cart.push({ name, price, qty: 1 });
+  
+  renderCart();
+  document.getElementById('customName').value = "";
+  document.getElementById('customPrice').value = "";
+}
+
+function checkout() {
+  if (cart.length === 0) {
+    customAlert('ตะกร้าสินค้าว่างเปล่า กรุณาเลือกสินค้าก่อนทำการสรุปบิล');
+    return;
+  }
+
+  const nameVal = document.getElementById('name').value.trim() || 'ไม่ระบุ';
+  const cleanName = nameVal.startsWith('คุณ') ? nameVal.replace(/^คุณ\s*/, '') : nameVal;
+  const phone = document.getElementById('phone').value.trim() || 'ไม่ระบุ';
+  const address = document.getElementById('address').value.trim() || 'ไม่ระบุ';
+  const shipping = Number(document.getElementById('shipping').value) || 0;
+  const remark = document.getElementById('remark').value.trim();
+  
+  let dateStr = "";
+  const dateInput = document.getElementById('orderDate').value;
+  if (dateInput) {
+    const [y, m, d] = dateInput.split('-');
+    dateStr = `${d}/${m}/${y}`;
+  } else {
+    const d = new Date();
+    dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  }
+  
+  let billText = `${dateStr}\n`;
+  billText += `ออเดอร์คุณ ${cleanName}\n`;
+  billText += `(${phone})\n\n`;
+  
+  billText += `รายการคำสั่งซื้อ\n`;
+  billText += `____________\n`;
+  
+  cart.forEach((item, idx) => {
+    const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
+    const itemTotal = (item.price * item.qty).toLocaleString();
+
+    const optionMatch = cleanItemName.match(/^(.*?)\s*\((.*?)\)$/);
+
+    if (optionMatch) {
+      const baseName = optionMatch[1].trim();
+      let optionText = optionMatch[2].trim();
+
+      if (!optionText.startsWith('สูตร')) {
+        optionText = optionText.replace(/^น้ำปลาหวาน\s*/, '');
+        if (!optionText.startsWith('สูตร')) {
+          optionText = 'สูตร' + optionText;
+        }
+      }
+
+      billText += `${idx + 1}. ${baseName}\n`;
+      billText += `  - (${optionText}) ×${item.qty} (${itemTotal}฿)\n`;
+    } else {
+      billText += `${idx + 1}. ${cleanItemName} ×${item.qty} (${itemTotal}฿)\n`;
+    }
+  });
+  
+  billText += `____________\n\n`;
+  billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
+  billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
+  billText += `📍 ${address}`;
+  
+  if (remark) {
+    billText += `\nหมายเหตุ: ${remark}`;
+  }
+
+  document.getElementById('billTextarea').value = billText.trim();
+  openModal('billModal');
+}
+
+function newOrder(){
+  if(cart.length > 0) openModal('confirmModal');
+  else executeNewOrder();
+}
+
+function executeNewOrder() {
+  closeModal('confirmModal');
+  cart = [];
+  document.getElementById('pasteOrderInput').value = "";
+  document.getElementById('name').value = "";
+  document.getElementById('phone').value = "";
+  document.getElementById('address').value = "";
+  document.getElementById('shipping').value = ""; 
+  document.getElementById('remark').value = "";
+  document.getElementById('customName').value = "";
+  document.getElementById('customPrice').value = "";
+  setDefaultDate();
+  renderCart();
+}
+
+function setDefaultDate() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const orderDateEl = document.getElementById('orderDate');
+  if (orderDateEl) orderDateEl.value = `${yyyy}-${mm}-${dd}`;
+}
+
+function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function customAlert(msg) { 
+  document.getElementById('alertMessage').innerText = msg; 
+  openModal('alertModal'); 
+}
+
+function copyBillText() {
+  const copyText = document.getElementById("billTextarea");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+  
+  const btn = document.getElementById('copyBtn');
+  const originalText = btn.innerText;
+  btn.innerText = 'คัดลอกสำเร็จ!';
+  btn.style.background = '#0ea5e9';
+  setTimeout(() => { 
+    btn.innerText = originalText; 
+    btn.style.background = '#EC5228';
+  }, 2000);
+}
+
+function searchCustomer(field) {
+  const inputEl = document.getElementById(field);
+  const keyword = inputEl.value.trim().toLowerCase();
+  const suggestionsBox = document.getElementById(field + 'Suggestions');
+  
+  if (!keyword) {
+    suggestionsBox.style.display = 'none';
+    return;
+  }
+
+  const matched = [];
+  customersDB.forEach((c, idx) => {
+    let match = false;
+    if (field === 'phone') {
+      const cleanKeyword = keyword.replace(/\D/g, '').replace(/^0/, '');
+      const cleanPhone = (c.phone || '').replace(/\D/g, '').replace(/^0/, '');
+      if (cleanKeyword && cleanPhone.includes(cleanKeyword)) match = true;
+    } else {
+      if (c[field] && c[field].toLowerCase().includes(keyword)) match = true;
+    }
+    if (match) matched.push({ c, idx });
+  });
+
+  let html = matched.map(m => `
+    <div class="suggestion-item" onclick="fillCustomer(${m.idx})">
+      <b>${m.c.name}</b> - <span style="color:#64748b;">${m.c.phone}</span>
+    </div>
+  `).join('');
+
+  if (field === 'name') {
+    html += `
+      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${inputEl.value.trim()}')">
+        + เพิ่มข้อมูลลูกค้าใหม่ "${inputEl.value.trim()}"
+      </div>`;
+  }
+
+  if (html) {
+    suggestionsBox.innerHTML = html;
+    suggestionsBox.style.display = 'block';
+  } else {
+    suggestionsBox.style.display = 'none';
+  }
+}
+
+function fillCustomer(index) {
+  const customer = customersDB[index];
+  document.getElementById('name').value = customer.name;
+  document.getElementById('phone').value = customer.phone;
+  document.getElementById('address').value = customer.address;
+  document.getElementById('nameSuggestions').style.display = 'none';
+  document.getElementById('phoneSuggestions').style.display = 'none';
+}
+
+function openAddCustomerModal(nameValue = '') {
+  document.getElementById('newCustName').value = nameValue;
+  document.getElementById('newCustPhone').value = document.getElementById('phone').value;
+  document.getElementById('newCustAddress').value = document.getElementById('address').value;
+  openModal('addCustomerModal');
+  document.getElementById('nameSuggestions').style.display = 'none';
+}
+
+async function saveNewCustomer() {
+  const name = document.getElementById('newCustName').value.trim();
+  const phone = document.getElementById('newCustPhone').value.trim();
+  const address = document.getElementById('newCustAddress').value.trim();
+
+  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
+
+  customersDB.push({ name, phone, address });
+  document.getElementById('name').value = name;
+  document.getElementById('phone').value = phone;
+  document.getElementById('address').value = address;
+  
+  closeModal('addCustomerModal');
+  customAlert("เพิ่มข้อมูลลูกค้าเข้าสู่ระบบแล้ว");
+
+  try {
+    // ส่งข้อมูลไปบันทึกลงชีทลูกค้าโดยตรง
+    await fetch(CUSTOMER_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, address })
+    });
+  } catch (error) {}
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.autocomplete-wrapper')) {
+    document.getElementById('nameSuggestions').style.display = 'none';
+    document.getElementById('phoneSuggestions').style.display = 'none';
+  }
+});
+
+setDefaultDate();
+loadMenuFromDB();
+</script>
+
+</body>
+</html>
