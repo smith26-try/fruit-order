@@ -520,14 +520,13 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ดักทางทุกเงื่อนไข ===== */
+/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ดักจับทุกเงื่อนไข ===== */
 function searchCustomer(field) {
   const inputEl = document.getElementById(field);
   const keyword = inputEl.value.trim().toLowerCase();
   const suggestionsBox = document.getElementById(field + 'Suggestions');
   
   if (!keyword) {
-    // ถ้ายังไม่พิมพ์อะไร แต่แตะช่อง ให้โชว์ลูกค้า 15 คนแรกขึ้นมาให้เลือกทันที
     if (customersDB.length > 0) {
       let previewList = customersDB.slice(0, 15);
       renderSuggestions(previewList, field, suggestionsBox, '');
@@ -607,7 +606,7 @@ async function saveNewCustomer() {
   if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
 
   const newCust = { name, phone, address };
-  customersDB.unshift(newCust); // ใส่ไว้ลำดับแรกสุดทันที
+  customersDB.unshift(newCust);
 
   document.getElementById('name').value = name;
   document.getElementById('phone').value = phone;
@@ -626,29 +625,27 @@ async function saveNewCustomer() {
   } catch (error) {}
 }
 
-/* ===== ดึงข้อมูลคู่ขนานทั้ง JSONP และ Fetch กันพลาด 100% ===== */
+/* ===== โหลดข้อมูลคู่ขนานทั้ง JSONP และ Fetch ป้องกันบล็อก 100% ===== */
 function loadMenuFromDB() {
   const menuList = document.getElementById('menuList');
   if (menuList) {
-    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดและฐานข้อมูลลูกค้า...</div>`;
+    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
   }
 
-  // 1. โหลดเมนูผลไม้
+  // 1. โหลดเมนู
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
 
-  // 2. โหลดฐานข้อมูลลูกค้าทางที่ 1 (JSONP)
+  // 2. โหลดลูกค้าผ่าน JSONP
   const scriptCust = document.createElement('script');
   scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptCust);
 
-  // 3. โหลดฐานข้อมูลลูกค้าทางที่ 2 (Fetch เผื่อ JSONP โดนบล็อก)
+  // 3. โหลดลูกค้าสำรองผ่าน Fetch (fallback)
   fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
-    .then(res => res.json())
-    .then(json => {
-      onCustomersLoaded(json);
-    })
+    .then(r => r.json())
+    .then(j => onCustomersLoaded(j))
     .catch(() => {});
 }
 
