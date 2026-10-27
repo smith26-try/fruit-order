@@ -9,13 +9,12 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: #333; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
 .app { max-width: 1380px; margin: 20px auto; height: calc(100vh - 40px); display: grid; grid-template-columns: 1.45fr 1fr; background: #fff; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; }
 .left { display: flex; flex-direction: column; background: #f8fafc; overflow: hidden; }
 .category-bar { display: flex; overflow-x: auto; background: linear-gradient(135deg, #3F7D58, #2c593e); padding: 14px 18px; gap: 8px; align-items: center; }
-.category-btn { background: rgba(255,255,255,0.2); color: #fff; padding: 7px 14px; border-radius: 30px; cursor: pointer; white-space: nowrap; user-select: none; font-weight: 500; font-size: 13.5px; transition: 0.2s; border: 1px solid rgba(255,255,255,0.1); }
+.category-btn { background: rgba(255,255,255,0.2); color: #fff; padding: 7px 14px; border-radius: 30px; cursor: pointer; white-space: nowrap; user-select: none; font-weight: 500; font-size: 13.5px; border: 1px solid rgba(255,255,255,0.1); }
 .active { background: #fff !important; color: #2c593e !important; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 .btn-refresh { margin-left: auto; background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-family: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
 
@@ -39,22 +38,14 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
 .paste-order-box textarea { width: 100%; height: 60px; padding: 8px 12px; border: 1px solid #86efac; border-radius: 8px; font-family: inherit; font-size: 13px; resize: vertical; background: #fff; }
 
 .customer { padding: 12px 18px 14px; background: #fff; border-bottom: 1px solid #e2e8f0; }
-.customer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12px; gap: 6px; flex-wrap: wrap; }
-.cust-status { font-size: 11.5px; padding: 4px 10px; border-radius: 12px; background: #dcfce7; color: #166534; font-weight: 600; cursor: pointer; border: 1px solid #bbf7d0; }
-.btn-sync-sheet { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px; font-size: 11.5px; font-family: inherit; cursor: pointer; }
-
 .customer input, .customer textarea { width: 100%; margin-bottom: 8px; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 14px; background: #f8fafc; }
 .customer input:focus, .customer textarea:focus { border-color: #3F7D58; outline: none; background: #fff; }
 .customer textarea { resize: vertical; min-height: 55px; }
 
-/* AUTOCOMPLETE DROPDOWN (รองรับทั้งเมาส์และนิ้วสัมผัสบนมือถือ/แท็บเล็ต) */
 .autocomplete-wrapper { position: relative; width: 100%; }
-.input-with-arrow { position: relative; width: 100%; }
-.input-with-arrow::after { content: "▼"; font-size: 10px; color: #64748b; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; }
 .suggestions-box { position: absolute; top: calc(100% - 4px); left: 0; right: 0; background: #fff; border: 2px solid #3F7D58; border-radius: 12px; z-index: 9999; display: none; max-height: 250px; overflow-y: auto; -webkit-overflow-scrolling: touch; box-shadow: 0 12px 30px rgba(0,0,0,0.22); }
-.suggestion-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; user-select: none; }
-.suggestion-item:hover, .suggestion-item:active { background: #f0fdf4; color: #3F7D58; }
-.add-new-btn { background: #f0fdf4; color: #3F7D58; font-weight: 600; text-align: center; position: sticky; bottom: 0; border-top: 1.5px solid #a7f3d0; padding: 12px; }
+.suggestion-item { padding: 11px 14px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+.suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
 
 .cart { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; min-height: 0; }
 .cart-item { background: #fff; padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
@@ -125,34 +116,22 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
     </div>
 
     <div class="customer">
-      <div class="customer-header">
-        <b style="color:#334155;">ข้อมูลลูกค้า (แตะเพื่อเลือกรายชื่อ หรือพิมพ์ค้นหา)</b>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <button class="btn-sync-sheet" onclick="openModal('importSheetModal')">📥 ซิงค์จากชีท</button>
-          <span id="custStatusBadge" class="cust-status" onclick="openAddCustomerModal('')">+ เพิ่มลูกค้าใหม่</span>
-        </div>
-      </div>
-
-      <div class="autocomplete-wrapper" id="nameWrap">
-        <div class="input-with-arrow">
-          <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อเลื่อนดูรายชื่อ หรือพิมพ์ค้นหา)" 
-                 oninput="showCustomerDropdown('name')" 
-                 onfocus="showCustomerDropdown('name')" 
-                 onclick="showCustomerDropdown('name')" 
-                 autocomplete="off">
-        </div>
+      <div class="autocomplete-wrapper">
+        <input id="name" placeholder="ชื่อลูกค้า (แตะเพื่อเลื่อนดูรายชื่อ หรือพิมพ์ค้นหา)" 
+               oninput="showCustomerDropdown('name')" 
+               onfocus="showCustomerDropdown('name')" 
+               onclick="showCustomerDropdown('name')" 
+               autocomplete="off">
         <div id="nameSuggestions" class="suggestions-box"></div>
       </div>
       
       <div style="display: flex; gap: 10px; margin-bottom: 8px;">
-        <div class="autocomplete-wrapper" id="phoneWrap" style="flex: 1; min-width: 0;">
-          <div class="input-with-arrow">
-            <input id="phone" placeholder="เบอร์โทร (แตะหรือพิมพ์ค้นหา)" 
-                   oninput="showCustomerDropdown('phone')" 
-                   onfocus="showCustomerDropdown('phone')" 
-                   onclick="showCustomerDropdown('phone')" 
-                   autocomplete="off" style="margin-bottom: 0;">
-          </div>
+        <div class="autocomplete-wrapper" style="flex: 1; min-width: 0;">
+          <input id="phone" placeholder="เบอร์โทร (แตะหรือพิมพ์ค้นหา)" 
+                 oninput="showCustomerDropdown('phone')" 
+                 onfocus="showCustomerDropdown('phone')" 
+                 onclick="showCustomerDropdown('phone')" 
+                 autocomplete="off" style="margin-bottom: 0;">
           <div id="phoneSuggestions" class="suggestions-box"></div>
         </div>
         <input type="date" id="orderDate" style="flex: 1; min-width: 0; color: #475569; cursor: pointer; margin-bottom: 0;">
@@ -190,18 +169,6 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
   </div>
 </div>
 
-<div id="importSheetModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3>📥 ซิงค์รายชื่อจากชีทลูกค้า</h3>
-    <p style="font-size:12.5px; color:#475569; margin:0;">ก๊อปปี้คอลัมน์ A, B, C (ชื่อ, เบอร์โทร, ที่อยู่) จาก Google Sheets มาวางในช่องนี้เพื่ออัปเดตรายชื่อทั้งหมดได้ทันที:</p>
-    <textarea id="bulkCustomerText" placeholder="วางข้อมูลจากชีทที่นี่..." style="height:140px; font-size:12.5px;"></textarea>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('importSheetModal')">ยกเลิก</button>
-      <button class="btn-confirm" onclick="importBulkCustomers()">บันทึกรายชื่อทั้งหมด</button>
-    </div>
-  </div>
-</div>
-
 <div id="alertModal" class="modal-overlay">
   <div class="modal-content" style="max-width: 300px; text-align: center;">
     <h3>แจ้งเตือน</h3>
@@ -228,19 +195,6 @@ body { margin: 0; font-family: 'Kanit', sans-serif; background: #eef2f6; color: 
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('confirmModal')" style="flex:1;">ยกเลิก</button>
       <button class="btn-confirm" onclick="executeNewOrder()" style="flex:1; background: #ef4444;">ตกลง</button>
-    </div>
-  </div>
-</div>
-
-<div id="addCustomerModal" class="modal-overlay">
-  <div class="modal-content">
-    <h3>เพิ่มข้อมูลลูกค้าใหม่</h3>
-    <input id="newCustName" placeholder="ชื่อลูกค้า">
-    <input id="newCustPhone" placeholder="เบอร์โทรศัพท์">
-    <textarea id="newCustAddress" placeholder="ที่อยู่จัดส่ง" style="resize:vertical; min-height:80px;"></textarea>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('addCustomerModal')">ยกเลิก</button>
-      <button class="btn-confirm" onclick="saveNewCustomer()">บันทึกข้อมูล</button>
     </div>
   </div>
 </div>
@@ -272,148 +226,32 @@ const CUSTOMER_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTW0q_MTBB
 
 const APP_CATEGORIES = ["ทั้งหมด", "ผลไม้พร้อมส่งวันนี้", "ใกล้หมดฤดูกาล", "หมดชั่วคราว", "หมดฤดูกาลแล้ว", "บริการการ์ด ริบบิ้น และปิ่นโตผลไม้"];
 
-const INITIAL_CUSTOMERS = [
-  { name: "โอ๋", phone: "095-175-5553", address: "ธนาคารออมสินย่อยที่ 11" },
-  { name: "ตะเกียง", phone: "083-322-3003", address: "RS โฮลเซลล์" },
-  { name: "หยก", phone: "096-359-8978", address: "ศูนย์สร้างทางขอนแก่น" },
-  { name: "ดุษดาว", phone: "064-316-3630", address: "โพธิบัลลังก์" },
-  { name: "แอร์", phone: "097-351-4539", address: "ยงยุทธแอร์ ประดับยนต์ ฟิล์ม" },
-  { name: "อูม", phone: "084-974-6692", address: "ศูนย์สร้างทางขอนแก่น" },
-  { name: "ตาล", phone: "093-524-8998", address: "โมโตอิเลกทริค" },
-  { name: "Cheraim", phone: "095-894-4222", address: "Baby Shopping" },
-  { name: "Naan", phone: "081-535-6199", address: "ร้านกินเนื้อ กังสดาล (ติดกับเคียง)" },
-  { name: "มัด", phone: "094-259-3412", address: "ร้านบัง ขอนแก่น (ตรงข้าม ร.ร. สวนสนุก)" },
-  { name: "ส้ม", phone: "087-946-6391", address: "ร.พ. ขอนแก่นราม" },
-  { name: "แพน", phone: "089-631-4561", address: "Nissan KKT ศรีจันทร์" },
-  { name: "แตงโม", phone: "088-826-4242", address: "หมู่บ้านศิริชลวิลเลจ 111/22 รั้วน้ำเงิน" },
-  { name: "จิ๋ว", phone: "081-661-7465", address: "ร.พ. ศูนย์ขอนแก่น (ส่งประชาสัมพันธ์)" },
-  { name: "หมิง", phone: "089-132-1214", address: "หมู่บ้านพิมานชล 2 เฟส 2" },
-  { name: "Jjoy", phone: "N/A", address: "ร้าน HappyYum" },
-  { name: "หมิว", phone: "092-373-8509", address: "นพวรรณเรสซิเดนท์ ซอยมิตรภาพ 13" },
-  { name: "จิ๊บ", phone: "089-719-9998", address: "โรงแรมเลอเลิศ" },
-  { name: "Kwan", phone: "095-659-1947", address: "ธนาคารกรุงไทยมะลิวัลย์ สามเหลี่ยม" },
-  { name: "ซื่อจิน", phone: "061-994-9998", address: "ร้านรุ่งโรจน์เซียงกง (ที่มีร้านมอไซต์)" },
-  { name: "มุก", phone: "082-314-6101", address: "สำนักงานอัยการภาค 4 ข้างการไฟฟ้า" },
-  { name: "ปิง", phone: "080-606-9891", address: "ร้านผลไม้สดปั่น Good day!" },
-  { name: "นิก", phone: "097-302-4455", address: "ร.พ. กรุงเทพ" },
-  { name: "Mattana", phone: "084-704-2493", address: "โรงแรม KOSA" },
-  { name: "มด", phone: "096-732-0502", address: "เจ.เจ. สนุกเกอร์" },
-  { name: "Metta", phone: "N/A", address: "โทเดะโฟน" },
-  { name: "ก้อย", phone: "063-161-5941", address: "หมู่บ้านเป็นสุขเลคไซด์ 555/34" },
-  { name: "Y", phone: "061-965-0011", address: "หมู่บ้านชลพฤกษ์วิลล่า ซอย 1 598/56" },
-  { name: "อีฟ", phone: "081-554-2272", address: "กองกำกับการสืบสวนตำรวจภูธร ขอนแก่น" },
-  { name: "หญิง", phone: "083-342-9090", address: "วินน์ซอฟ โซลูชั่น หนองไผ่ (หลังโตโยต้าชัวร์)" },
-  { name: "GIFT", phone: "091-801-7238", address: "ร.พ. กรุงเทพ" }
-];
-
 let menu = [];
 let active = "ทั้งหมด";
 let cart = [];
-let customersDB = [...INITIAL_CUSTOMERS];
+let customersDB = [];
 let pendingPOSItem = null;
 
-function initCustomersDB() {
-  try {
-    const saved = localStorage.getItem('pos_customers_v3');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) mergeCustomers(parsed);
-    }
-  } catch (e) {}
-  updateCustomerBadge();
-}
-
-function mergeCustomers(newList) {
-  const map = new Map();
-  customersDB.forEach(c => { if (c && c.name) map.set(c.name.trim().toLowerCase(), c); });
-  newList.forEach(raw => {
-    const norm = normalizeCustomerRecord(raw);
-    if (norm && norm.name) map.set(norm.name.trim().toLowerCase(), norm);
-  });
-  customersDB = Array.from(map.values());
-  try { localStorage.setItem('pos_customers_v3', JSON.stringify(customersDB)); } catch(e) {}
-  updateCustomerBadge();
-}
-
-function updateCustomerBadge() {
-  const badge = document.getElementById('custStatusBadge');
-  if (badge) badge.innerText = `+ เพิ่มลูกค้าใหม่ (${customersDB.length} รายชื่อ)`;
-}
-
-function normalizeCustomerRecord(raw) {
-  if (!raw) return null;
-  if (Array.isArray(raw)) {
-    const n = String(raw[0] || '').trim();
-    if (!n || n.toLowerCase() === 'name' || n === 'ชื่อ') return null;
-    return { name: n, phone: String(raw[1] || '').trim(), address: String(raw[2] || '').trim() };
-  }
-  if (typeof raw === 'object') {
-    const keys = Object.keys(raw);
-    let nameVal = raw.name || raw.Name || raw.NAME || raw['ชื่อ'] || '';
-    let phoneVal = raw.phone || raw.Phone || raw.PHONE || raw.tel || raw['เบอร์โทร'] || '';
-    let addrVal = raw.address || raw.Address || raw.ADDRESS || raw['ที่อยู่'] || '';
-    if (!nameVal && keys.length > 0) nameVal = raw[keys[0]];
-    if (!phoneVal && keys.length > 1) phoneVal = raw[keys[1]];
-    if (!addrVal && keys.length > 2) addrVal = raw[keys[2]];
-    const cleanName = String(nameVal || '').trim();
-    if (!cleanName || cleanName.toLowerCase() === 'name' || cleanName === 'ชื่อ') return null;
-    return { name: cleanName, phone: String(phoneVal || '').trim(), address: String(addrVal || '').trim() };
-  }
-  return null;
-}
-
-window.onCustomersLoaded = function(json) {
-  if (!json) return;
-  let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
-  if (Array.isArray(rawList) && rawList.length > 0) mergeCustomers(rawList);
-};
-
-function fetchRemoteCustomers() {
+// โหลดรายชื่อลูกค้าจากชีตโดยตรงแบบง่าย
+function loadCustomersFromSheet() {
   fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
     .then(r => r.text())
     .then(t => {
       let clean = t.trim();
       const m = clean.match(/^[\w$]+\(([\s\S]*)\);?$/);
       if (m) clean = m[1];
-      window.onCustomersLoaded(JSON.parse(clean));
+      const json = JSON.parse(clean);
+      let rawList = Array.isArray(json) ? json : (json.data || json.customers || json.result || json.values || []);
+      if (rawList.length > 0) {
+        customersDB = rawList.map(c => {
+          if (Array.isArray(c)) return { name: c[0] || '', phone: c[1] || '', address: c[2] || '' };
+          return { name: c.name || c.Name || '', phone: c.phone || c.Phone || '', address: c.address || c.Address || '' };
+        }).filter(c => c.name && c.name.toLowerCase() !== 'name');
+      }
     })
-    .catch(() => {
-      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(CUSTOMER_SCRIPT_URL)}`)
-        .then(r => r.json())
-        .then(j => window.onCustomersLoaded(j))
-        .catch(() => {});
-    });
-
-  const old = document.getElementById('custJsonpScript');
-  if (old) old.remove();
-  const s = document.createElement('script');
-  s.id = 'custJsonpScript';
-  s.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
-  document.body.appendChild(s);
+    .catch(() => {});
 }
 
-function importBulkCustomers() {
-  const raw = document.getElementById('bulkCustomerText').value;
-  if (!raw || !raw.trim()) return closeModal('importSheetModal');
-  const lines = raw.split(/\r?\n/);
-  const list = [];
-  lines.forEach(line => {
-    if (!line.trim()) return;
-    const cols = line.split('\t');
-    const name = (cols[0] || '').trim();
-    const phone = (cols[1] || '').trim();
-    const address = (cols[2] || '').trim();
-    if (name && name.toLowerCase() !== 'name') list.push({ name, phone, address });
-  });
-  if (list.length > 0) {
-    mergeCustomers(list);
-    document.getElementById('bulkCustomerText').value = '';
-    closeModal('importSheetModal');
-    customAlert(`ซิงค์รายชื่อสำเร็จ! มีทั้งหมด ${customersDB.length} รายชื่อ`);
-  }
-}
-
-/* ===== ดรอปดาวน์ลูกค้า: รองรับทั้งคลิกเมาส์และทัชสกรีนมือถือ/แท็บเล็ต ===== */
 function showCustomerDropdown(field) {
   const nameBox = document.getElementById('nameSuggestions');
   const phoneBox = document.getElementById('phoneSuggestions');
@@ -424,20 +262,14 @@ function showCustomerDropdown(field) {
   const suggestionsBox = document.getElementById(field + 'Suggestions');
   if (!inputEl || !suggestionsBox) return;
 
-  const rawVal = inputEl.value.trim();
-  const keyword = rawVal.replace(/^คุณ\s*/, '').toLowerCase();
+  const keyword = inputEl.value.trim().toLowerCase();
   let matched = [];
 
   if (!keyword) {
     matched = customersDB.map((c, idx) => ({ c, idx }));
   } else {
     customersDB.forEach((c, idx) => {
-      const cName = String(c.name || '').toLowerCase();
-      const cPhone = String(c.phone || '').toLowerCase();
-      const cAddr = String(c.address || '').toLowerCase();
-      const cleanK = keyword.replace(/\D/g, '');
-      const cleanP = cPhone.replace(/\D/g, '');
-      if (cName.includes(keyword) || cPhone.includes(keyword) || cAddr.includes(keyword) || (cleanK && cleanP.includes(cleanK))) {
+      if (String(c.name).toLowerCase().includes(keyword) || String(c.phone).includes(keyword) || String(c.address).toLowerCase().includes(keyword)) {
         matched.push({ c, idx });
       }
     });
@@ -448,21 +280,14 @@ function showCustomerDropdown(field) {
     const c = item.c;
     html += `
       <div class="suggestion-item" onclick="fillCustomer(${item.idx})">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <b>${c.name}</b>
-          <span style="color:#3F7D58; font-weight:500; font-size:12.5px;">📞 ${c.phone || '-'}</span>
-        </div>
-        <div style="font-size:11.5px; color:#64748b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:2px;">
-          📍 ${c.address || 'ไม่ระบุที่อยู่'}
-        </div>
+        <b>${c.name}</b> <span style="color:#64748b; font-size:12px;">(${c.phone || '-'})</span>
+        <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${c.address || 'ไม่มีที่อยู่'}</div>
       </div>`;
   });
 
-  const safeText = rawVal.replace(/'/g, "\\'");
-  html += `
-    <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${safeText}')">
-      + เพิ่มข้อมูลลูกค้าใหม่ ${rawVal ? `"${rawVal}"` : ''}
-    </div>`;
+  if (html === '') {
+    html = `<div style="padding:10px; text-align:center; color:#888; font-size:13px;">ไม่พบรายชื่อในระบบ</div>`;
+  }
 
   suggestionsBox.innerHTML = html;
   suggestionsBox.style.display = 'block';
@@ -478,45 +303,8 @@ function fillCustomer(index) {
   document.getElementById('phoneSuggestions').style.display = 'none';
 }
 
-function openAddCustomerModal(nameValue = '') {
-  document.getElementById('newCustName').value = nameValue || document.getElementById('name').value.trim();
-  document.getElementById('newCustPhone').value = document.getElementById('phone').value.trim();
-  document.getElementById('newCustAddress').value = document.getElementById('address').value.trim();
-  openModal('addCustomerModal');
-  document.getElementById('nameSuggestions').style.display = 'none';
-  document.getElementById('phoneSuggestions').style.display = 'none';
-}
-
-async function saveNewCustomer() {
-  const name = document.getElementById('newCustName').value.trim();
-  const phone = document.getElementById('newCustPhone').value.trim();
-  const address = document.getElementById('newCustAddress').value.trim();
-  if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
-
-  const newCust = { name, phone, address };
-  customersDB.unshift(newCust);
-  try { localStorage.setItem('pos_customers_v3', JSON.stringify(customersDB)); } catch(e) {}
-  updateCustomerBadge();
-
-  document.getElementById('name').value = name;
-  document.getElementById('phone').value = phone;
-  document.getElementById('address').value = address;
-  closeModal('addCustomerModal');
-  customAlert("เพิ่มข้อมูลลูกค้าเรียบร้อยแล้ว");
-
-  try {
-    await fetch(CUSTOMER_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'addCustomer', name, phone, address, Name: name, Phone: phone, Address: address })
-    });
-  } catch (e) {}
-}
-
 function loadMenuFromDB() {
-  initCustomersDB();
-  fetchRemoteCustomers();
+  loadCustomersFromSheet();
   const scriptMenu = document.createElement('script');
   scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
   document.body.appendChild(scriptMenu);
@@ -532,7 +320,6 @@ window.onPOSMenuLoaded = function(json) {
     renderCategory();
     renderMenu();
   }
-  if (json && Array.isArray(json.customers)) window.onCustomersLoaded(json.customers);
 };
 
 function parseCustomerOrder(rawText) {
@@ -806,7 +593,6 @@ function copyBillText() {
   setTimeout(() => { btn.innerText = 'คัดลอกข้อความ'; btn.style.background = '#EC5228'; }, 2000);
 }
 
-// ปิดดรอปดาวน์เมื่อแตะพื้นที่อื่นนอกกล่อง (รองรับทั้งคลิกและทัชสกรีน)
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) {
     document.getElementById('nameSuggestions').style.display = 'none';
