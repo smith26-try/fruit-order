@@ -221,8 +221,8 @@ body {
 .autocomplete-wrapper { position: relative; width: 100%; }
 .suggestions-box {
   position: absolute; top: calc(100% - 6px); left: 0; right: 0; background: #fff;
-  border: 1px solid #e2e8f0; border-radius: 8px; z-index: 99; display: none;
-  max-height: 200px; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+  border: 1px solid #cbd5e1; border-radius: 8px; z-index: 999; display: none;
+  max-height: 220px; overflow-y: auto; box-shadow: 0 10px 25px -3px rgba(0,0,0,0.18);
 }
 .suggestion-item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13.5px; }
 .suggestion-item:hover { background: #f0fdf4; color: #3F7D58; }
@@ -520,13 +520,19 @@ let cart = [];
 let customersDB = [];
 let pendingPOSItem = null;
 
-/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ===== */
+/* ===== ระบบเดาและค้นหาลูกค้าอัตโนมัติ (Autocomplete) ดักทางทุกเงื่อนไข ===== */
 function searchCustomer(field) {
   const inputEl = document.getElementById(field);
   const keyword = inputEl.value.trim().toLowerCase();
   const suggestionsBox = document.getElementById(field + 'Suggestions');
   
   if (!keyword) {
+    // ถ้ายังไม่พิมพ์อะไร แต่แตะช่อง ให้โชว์ลูกค้า 15 คนแรกขึ้นมาให้เลือกทันที
+    if (customersDB.length > 0) {
+      let previewList = customersDB.slice(0, 15);
+      renderSuggestions(previewList, field, suggestionsBox, '');
+      return;
+    }
     suggestionsBox.style.display = 'none';
     return;
   }
@@ -544,18 +550,26 @@ function searchCustomer(field) {
     if (match) matched.push({ c, idx });
   });
 
-  let html = matched.map(m => `
-    <div class="suggestion-item" onclick="fillCustomer(${m.idx})">
-      <b>${m.c.name}</b> - <span style="color:#64748b;">${m.c.phone || 'ไม่ระบุเบอร์'}</span>
-      <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${m.c.address || 'ไม่ระบุที่อยู่'}</div>
-    </div>
-  `).join('');
+  renderSuggestions(matched, field, suggestionsBox, inputEl.value.trim());
+}
 
-  // ปุ่มเพิ่มลูกค้าใหม่ หากค้นหาชื่อแล้วไม่เจอ
-  if (field === 'name') {
+function renderSuggestions(list, field, suggestionsBox, currentText) {
+  let html = '';
+  list.forEach(item => {
+    const c = item.c || item;
+    const idx = (item.idx !== undefined) ? item.idx : customersDB.indexOf(c);
     html += `
-      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${inputEl.value.trim()}')">
-        + เพิ่มข้อมูลลูกค้าใหม่ "${inputEl.value.trim()}"
+      <div class="suggestion-item" onclick="fillCustomer(${idx})">
+        <b>${c.name}</b> - <span style="color:#64748b;">${c.phone || 'ไม่ระบุเบอร์'}</span>
+        <div style="font-size:11.5px; color:#94a3b8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 ${c.address || 'ไม่ระบุที่อยู่'}</div>
+      </div>
+    `;
+  });
+
+  if (field === 'name' && currentText) {
+    html += `
+      <div class="suggestion-item add-new-btn" onclick="openAddCustomerModal('${currentText}')">
+        + เพิ่มข้อมูลลูกค้าใหม่ "${currentText}"
       </div>`;
   }
 
@@ -593,7 +607,7 @@ async function saveNewCustomer() {
   if (!name) return customAlert("กรุณากรอกชื่อลูกค้า");
 
   const newCust = { name, phone, address };
-  customersDB.push(newCust);
+  customersDB.unshift(newCust); // ใส่ไว้ลำดับแรกสุดทันที
 
   document.getElementById('name').value = name;
   document.getElementById('phone').value = phone;
@@ -611,6 +625,60 @@ async function saveNewCustomer() {
     });
   } catch (error) {}
 }
+
+/* ===== ดึงข้อมูลคู่ขนานทั้ง JSONP และ Fetch กันพลาด 100% ===== */
+function loadMenuFromDB() {
+  const menuList = document.getElementById('menuList');
+  if (menuList) {
+    menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดและฐานข้อมูลลูกค้า...</div>`;
+  }
+
+  // 1. โหลดเมนูผลไม้
+  const scriptMenu = document.createElement('script');
+  scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
+  document.body.appendChild(scriptMenu);
+
+  // 2. โหลดฐานข้อมูลลูกค้าทางที่ 1 (JSONP)
+  const scriptCust = document.createElement('script');
+  scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
+  document.body.appendChild(scriptCust);
+
+  // 3. โหลดฐานข้อมูลลูกค้าทางที่ 2 (Fetch เผื่อ JSONP โดนบล็อก)
+  fetch(`${CUSTOMER_SCRIPT_URL}?t=${Date.now()}`)
+    .then(res => res.json())
+    .then(json => {
+      onCustomersLoaded(json);
+    })
+    .catch(() => {});
+}
+
+window.onPOSMenuLoaded = function(json) {
+  if (json && Array.isArray(json.data) && json.data.length > 0) {
+    menu = json.data.map(item => ({
+      ...item,
+      price: Number(item.price) || 0,
+      normalizedCategory: normalizeCategory(item.category)
+    }));
+    renderCategory();
+    renderMenu();
+  }
+};
+
+window.onCustomersLoaded = function(json) {
+  if (!json) return;
+  let list = [];
+  if (Array.isArray(json)) list = json;
+  else if (Array.isArray(json.data)) list = json.data;
+  else if (Array.isArray(json.customers)) list = json.customers;
+
+  if (list.length > 0) {
+    customersDB = list.map(c => ({
+      name: String(c.name || '').trim(),
+      phone: String(c.phone || '').trim(),
+      address: String(c.address || '').trim()
+    }));
+  }
+};
 
 /* ===== ระบบแกะข้อความคำสั่งซื้ออัตโนมัติ ===== */
 function parseCustomerOrder(rawText) {
@@ -684,43 +752,6 @@ function normalizeCategory(raw) {
   if (text.includes('บริการการ์ด') || text.includes('ปิ่นโต') || text.includes('ริบบิ้น')) return 'บริการการ์ด ริบบิ้น และปิ่นโตผลไม้';
   return text;
 }
-
-function loadMenuFromDB() {
-  const menuList = document.getElementById('menuList');
-  menuList.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color:#64748b;">กำลังโหลดเมนูสดจากฐานข้อมูล...</div>`;
-
-  // 1. โหลดเมนูผลไม้
-  const scriptMenu = document.createElement('script');
-  scriptMenu.src = `${MENU_SCRIPT_URL}?callback=onPOSMenuLoaded&t=${Date.now()}`;
-  document.body.appendChild(scriptMenu);
-
-  // 2. โหลดฐานข้อมูลลูกค้า (ใช้ fetch ควบคู่ jsonp กันเหนียว)
-  fetch(CUSTOMER_SCRIPT_URL)
-    .then(res => res.json())
-    .then(json => {
-      onCustomersLoaded(json);
-    })
-    .catch(() => {
-      // ถ้า fetch ติด CORS ให้ fallback ใช้ JSONP
-      const scriptCust = document.createElement('script');
-      scriptCust.src = `${CUSTOMER_SCRIPT_URL}?callback=onCustomersLoaded&t=${Date.now()}`;
-      document.body.appendChild(scriptCust);
-    });
-}
-
-window.onCustomersLoaded = function(json) {
-  if (!json) return;
-  
-  // รองรับโครงสร้างข้อมูลทุกรูปแบบที่อาจส่งกลับมา
-  if (Array.isArray(json)) {
-    customersDB = json;
-  } else if (Array.isArray(json.data)) {
-    customersDB = json.data;
-  } else if (Array.isArray(json.customers)) {
-    customersDB = json.customers;
-  }
-  console.log("โหลดข้อมูลลูกค้าสำเร็จแล้ว จำนวน:", customersDB.length, "คน");
-};
 
 function renderCategory(){
   const categoryBar = document.getElementById('categoryBar');
@@ -1031,7 +1062,6 @@ function copyBillText() {
   }, 2000);
 }
 
-// ซ่อนกล่องตัวเลือกเมื่อแตะพื้นที่อื่น
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.autocomplete-wrapper')) {
     document.getElementById('nameSuggestions').style.display = 'none';
