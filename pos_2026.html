@@ -767,7 +767,7 @@ function parseCustomerOrder(rawText) {
 
   lines.forEach(line => {
     const trimmed = line.trim();
-    if (!trimmed || trimmed.includes('____') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
+    if (!trimmed || trimmed.includes('--------------------') || trimmed.includes('รายการคำสั่งซื้อ') || trimmed.includes('ยอดรวมสินค้า')) return;
 
     if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
       const optionText = trimmed.replace(/^[-•]\s*/, '').trim();
@@ -1048,7 +1048,7 @@ function checkout() {
   billText += `(${phone})\n\n`;
   
   billText += `รายการคำสั่งซื้อ\n`;
-  billText += `____________\n`;
+  billText += `--------------------\n`;
   
   cart.forEach((item, idx) => {
     const cleanItemName = item.name.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}]/gu, '').trim();
@@ -1074,7 +1074,7 @@ function checkout() {
     }
   });
   
-  billText += `____________\n\n`;
+  billText += `--------------------\n\n`;
   billText += `ค่าส่ง ${shipping.toLocaleString()}฿\n`;
   billText += `รวมทั้งหมด ${document.getElementById('totalEl').innerText}฿\n\n`;
   billText += `📍 ${address}`;
